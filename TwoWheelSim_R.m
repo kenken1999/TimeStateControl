@@ -6,11 +6,11 @@ dt = 0.05; %時間刻み
 Tfin = 10; %シミュレーション終了時間
 xi0 = zeros(3,1); %状態ξの初期値
 t1 = [0:dt:Tfin];
+u1 = 0.1*t1; %速度
+u2 = 0.1*t1; %角速度
 
-for k = 0:0.05:10
-    u1 = 0.1*k; %速度
-    u2 = 0.1*k; %角速度
-    [t,xi]= ode45(@(t,xi) TwoWheel(t,xi,t1,u1,u2),[k k+0.05],xi0,opts);
+for t1 = 0:dt:Tfin
+    [t,xi]= ode45(@(t,xi) TwoWheel(t,xi,t1,u1,u2),[t1 t1+dt],xi0,opts);
     drawnow
     %fig = figure(1);
     %plot(xi(:,1),xi(:,2))
