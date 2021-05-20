@@ -1,7 +1,7 @@
 clear;
 close all;
 
-dt = 0.05; %%時間刻み=離散時間Tsとして使用
+dt = 0.03; %%時間刻み=離散時間Tsとして使用
 Tfin = 15; %シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
@@ -14,13 +14,18 @@ zi(1,:) = [1 0 5]; %状態z = [z1, z2, z3]T の初期値を設定
 k2 = 4;
 k3 = 5;
 
-h = plot(zi(1,1),zi(1,3), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
+x = zi(1,1)+0.5*cos(zi(1,2));
+y = zi(1,3)+0.5*sin(zi(1,2));
 
-hold on;
+hold on
 axis equal;
 grid on;
 
 axis([-5 5 -3 7])
+
+h = plot(zi(1,1),zi(1,3), 'o', 'MarkerSize' ,15, 'MarkerFaceColor', 'b');
+
+h2 = plot(x,y,'o', 'MarkerSize' ,5, 'MarkerFaceColor', 'r');
 
 plot(1,5,'kx','MarkerSize', 10,'LineWidth',2)
 plot(0,0,'rx','MarkerSize', 10,'LineWidth',2)
@@ -28,6 +33,8 @@ plot(0,0,'rx','MarkerSize', 10,'LineWidth',2)
 for i = 1:length(t1)-1
 
     set(h, 'XData', zi(i,1),'YData', zi(i,3));
+
+    set(h2, 'XData', zi(i,1)+0.5*cos(zi(i,2)),'YData', zi(i,3)+0.5*sin(zi(i,2)));
 
     drawnow;
 
