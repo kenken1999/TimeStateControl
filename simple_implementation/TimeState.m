@@ -1,7 +1,7 @@
 clear;
 close all;
 
-dt = 0.03; %%時間刻み=離散時間Tsとして使用
+dt = 0.05; %%時間刻み=離散時間Tsとして使用
 Tfin = 10; %シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
@@ -14,8 +14,8 @@ zi(1,:) = [-4 0 5]; %状態z = [z1, z2, z3]T の初期値を設定
 v1 = u1 * cos(atan(zi(1,2)));
 v2 = u2 / (cos(atan(zi(1,2))) * cos(atan(zi(1,2))));
 
-k2 = 3;
-k3 = 4;
+k2 = 2;
+k3 = 3;
 
 x = zi(1,1) + 0.5 * cos(atan(zi(1,2)));
 y = zi(1,3) + 0.5 * sin(atan(zi(1,2)));
@@ -33,9 +33,11 @@ h2 = plot(x,y,'o', 'MarkerSize' ,5, 'MarkerFaceColor', 'r');
 plot(-4,5,'kx','MarkerSize', 10,'LineWidth',2)
 plot(0,0,'rx','MarkerSize', 10,'LineWidth',2)
 
-pause(3)
-
 for i = 1:length(t1)-1
+
+    if i == 1
+        pause(2)
+    end
 
     %入力v2はv1正負で場合分け
     if v1(i) > 0
@@ -69,14 +71,15 @@ for i = 1:length(t1)-1
     drawnow;
 
     F = getframe(gcf);
-      % RGBデータをインデックス付きデータに変更
-      [X,map] = rgb2ind(F.cdata,256);
-      if i==1
-          % GIFファイルに書き出し
-          imwrite(X,map,'TimeState.gif')
-      else
-          % 2回目以降は'append'でアニメーションを作成
-          imwrite(X,map,'TimeState.gif','WriteMode','append')
-      end
+    % RGBデータをインデックス付きデータに変更
+    [X,map] = rgb2ind(F.cdata,256);
+    if i==1
+        pause(2)
+        % GIFファイルに書き出し
+        imwrite(X,map,'TimeState.gif')
+    else
+        % 2回目以降は'append'でアニメーションを作成
+        imwrite(X,map,'TimeState.gif','WriteMode','append')
+    end
 
 end

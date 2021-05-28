@@ -1,8 +1,8 @@
 clear;
 close all;
 
-dt = 0.03; %%時間刻み=離散時間Tsとして使用
-Tfin = 5; %シミュレーション終了時間
+dt = 0.05; %%時間刻み=離散時間Tsとして使用
+Tfin = 6; %シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
 u1 = ones(1,length(t1)) * (-2);
@@ -33,8 +33,6 @@ h2 = plot(x,y,'o', 'MarkerSize' ,5, 'MarkerFaceColor', 'r');
 plot(1,5,'kx','MarkerSize', 10,'LineWidth',2)
 plot(0,0,'rx','MarkerSize', 10,'LineWidth',2)
 
-pause(3)
-
 for i = 1:length(t1)-1
 
     set(h, 'XData', zi(i,1),'YData', zi(i,3));
@@ -45,14 +43,15 @@ for i = 1:length(t1)-1
 
     F = getframe(gcf);
       % RGBデータをインデックス付きデータに変更
-      [X,map] = rgb2ind(F.cdata,256);
-      if i==1
-          % GIFファイルに書き出し
-          imwrite(X,map,'TimeState_b.gif')
-      else
-          % 2回目以降は'append'でアニメーションを作成
-          imwrite(X,map,'TimeState_b.gif','WriteMode','append')
-      end
+    [X,map] = rgb2ind(F.cdata,256);
+    if i==1
+        % GIFファイルに書き出し
+        imwrite(X,map,'TimeState_b.gif')
+        pause(2)
+    else
+        % 2回目以降は'append'でアニメーションを作成
+        imwrite(X,map,'TimeState_b.gif','WriteMode','append')
+    end
 
     zi(i+1,1) = zi(i,1) + v1(i) * dt; %dz1 = v1(i)dt
     zi(i+1,2) = zi(i,2) + v2(i) * dt; %v2(i)/vi(1)*v1(i)*dt
@@ -60,7 +59,7 @@ for i = 1:length(t1)-1
 
     %v1(i+1) = -0.1*zi(i+1,1); %入力v1(=u1cosθ), v1=-λz1で(λ>0の定数)z1を0に収束
 
-    if i > 50
+    if i > 35
         v1(i+1) = -1 * zi(i+1,1); %入力v1(=u1cosθ), v1=-λz1で(λ>0の定数)z1を0に収束
     end
 
