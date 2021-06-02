@@ -20,8 +20,8 @@ grid on;
 
 axis([-1.5 1.5 -0.5 2.5])
 
-h = plot(si(1,1),si(1,2), 'o', 'MarkerSize' ,15, 'MarkerFaceColor', 'b');
-h2 = plot(x,y,'o', 'MarkerSize' ,5, 'MarkerFaceColor', 'r');
+h = plot(si(1,1),si(1,2), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
+h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
 
 for i = 1:length(t1)-1
 

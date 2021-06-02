@@ -6,7 +6,7 @@ Kfin = 1.3; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1 = ones(1,length(k)) * 5;
-u2 = ones(1,length(k)) * 2;
+u2 = ones(1,length(k)) * 5;
 
 si = zeros(length(k),3); %観測するセンサ変数 , 答えは(s1, s2, s3)=(x ,y, θ)
 si(1,:) = [0 0 0]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
@@ -17,8 +17,8 @@ p_now = zeros(1,length(k));
 
 alpha = sym('alpha',[1 300]);
 
-sigma = 0.01; %スケーリング定数
-p = 0;
+sigma = 0.05; %スケーリング定数
+p = 1;
 E = 0;
 
 for j = 1:length(k)-1
@@ -53,7 +53,7 @@ for i = 2:p
 end
 
 eta = 0.05; %学習率
-iteration = 3; %繰り返し回数（最大）
+iteration = 100; %繰り返し回数（最大）
 
 param = zeros(iteration,p+1);
 
@@ -89,7 +89,7 @@ end
 
 %param(iteration,:);
 
-p = 0;
+p = 1;
 
 for j = 1:length(k) - 1
 

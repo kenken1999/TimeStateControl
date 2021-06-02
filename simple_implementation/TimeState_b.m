@@ -26,9 +26,9 @@ grid on;
 
 axis([-5 5 -3 7])
 
-h = plot(zi(1,1),zi(1,3), 'o', 'MarkerSize' ,15, 'MarkerFaceColor', 'b');
+h = plot(zi(1,1),zi(1,3), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
 
-h2 = plot(x,y,'o', 'MarkerSize' ,5, 'MarkerFaceColor', 'r');
+h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
 
 plot(1,5,'kx','MarkerSize', 10,'LineWidth',2)
 plot(0,0,'rx','MarkerSize', 10,'LineWidth',2)
