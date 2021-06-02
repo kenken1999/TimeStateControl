@@ -1,12 +1,12 @@
 clear;
 close all;
 
-dk = 0.1; %%時間刻み
-Kfin = 5; %シミュレーション終了時間
+dk = 0.03; %%時間刻み
+Kfin = 1.3; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1 = ones(1,length(k)) * 5;
-u2 = ones(1,length(k)) * 5;
+u2 = ones(1,length(k)) * 2;
 
 si = zeros(length(k),3); %観測するセンサ変数 , 答えは(s1, s2, s3)=(x ,y, θ)
 si(1,:) = [0 0 0]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
@@ -15,7 +15,7 @@ zi = zeros(length(k),3); %変換後の状態変数 (z1, z2, z3)=(x, tanθ, y)
 
 p_now = zeros(1,length(k));
 
-alpha = sym('alpha',[1 length(k)])
+alpha = sym('alpha',[1 300]);
 
 sigma = 0.01; %スケーリング定数
 p = 0;
@@ -39,13 +39,12 @@ for j = 1:length(k)-1
 
     %zi(j,2) = alpha(p) + u * (alpha(p+1) - alpha(p)); %z2=f(s3)
 
-    E = E + (alpha(p) + u * (alpha(p+1) - alpha(p)) - (zi(j+1,3)- zi(j,3)) / (zi(j+1,1)- zi(j,1))) ^ 2;
-
-    
+    E = E + (alpha(p) + u * (alpha(p+1) - alpha(p)) - (zi(j+1,3)- zi(j,3)) / (zi(j+1,1)- zi(j,1))) ^ 2;   
 
 end
 
-E
+length(k)
+p
 
 for i = 2:p
 
@@ -53,28 +52,65 @@ for i = 2:p
 
 end
 
-E
-
-eta = 0.01; %学習率
+eta = 0.05; %学習率
 iteration = 3; %繰り返し回数（最大）
 
-param = ones(iteration,p);
+param = zeros(iteration,p+1);
 
-for t=1:iteration-1
+E_value = zeros(1,iteration);
 
-    for m = 1:p-1
+syms 'alpha%d' [1 p+1]
 
-        syms E
 
-        Df = diff(E,alpha(m))
+for t = 1:iteration-1
 
-        Df2 = Df(param(t,m));
-        param(t+1,m) = param(t,m) - eta * double(Df2);
+    for m = 1:p+1
 
+        DE = diff(E,alpha(m));
+        
+        DE2 = subs(DE, alpha(1:p+1), param(t,:));     
+
+        param(t+1,m) = param(t,m) - eta * double(DE2);
+
+    end
+
+    E_value(t+1) = double(subs(E, alpha(1:p+1), param(t+1,:)));
+
+    disp('E = ')
+    disp(E_value(t+1))
+
+    if t > 1 && E_value(t+1) > E_value(t)
+        iteration = t;
+        disp('iterationを終了します')
+        break
     end
 
 end
 
-param(iteration,:)
+%param(iteration,:);
 
+p = 0;
+
+for j = 1:length(k) - 1
+
+    %p_now(j+1) = floor(si(j+1,3) / sigma); % p = 時刻kのi
+    %u = si(j+1,3) / sigma  - p_now(j+1);
+
+    if p_now(j+1) > p_now(j)
+        p = p + 1;
+    end
+
+    zi(j,2) = param(iteration,p) + u * (param(iteration,p+1) - param(iteration,p)); %z2=f(s3)
+
+end
+
+hold on;
+grid on;
+
+axis([-0.1 1.4 -3.0 3.0])
+
+plot(k, tan(si(:,3)), '--', k, zi(:,2),'LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
+xlabel('時刻 k')
+ylabel('z2 = f(s3)')
+legend('真値：tan(s3)','推定値：z2 = f(s3)')
 
