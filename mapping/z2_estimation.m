@@ -1,12 +1,12 @@
 clear;
 close all;
 
-dk = 0.03; %%時間刻み
-Kfin = 1.3; %シミュレーション終了時間
+dk = 1; %%時間刻み
+Kfin = 30; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
-u1 = ones(1,length(k)) * 5;
-u2 = ones(1,length(k)) * 5;
+u1 = ones(1,length(k)) * 0.1;
+u2 = ones(1,length(k)) * 0.1;
 
 si = zeros(length(k),3); %観測するセンサ変数 , 答えは(s1, s2, s3)=(x ,y, θ)
 si(1,:) = [0 0 0]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
@@ -46,14 +46,14 @@ end
 length(k)
 p
 
-for i = 2:p
+% for i = 2:p
 
-    E = E + (alpha(i+1) - 2 * alpha(i) + alpha(i-1)) ^ 2;
+%     E = E + (alpha(i+1) - 2 * alpha(i) + alpha(i-1)) ^ 2;
 
-end
+% end
 
 eta = 0.05; %学習率
-iteration = 100; %繰り返し回数（最大）
+iteration = 50; %繰り返し回数（最大）
 
 param = zeros(iteration,p+1);
 
@@ -62,7 +62,7 @@ E_value = zeros(1,iteration);
 syms 'alpha%d' [1 p+1]
 
 
-for t = 1:iteration-1
+for t = 1:iteration
 
     for m = 1:p+1
 
@@ -74,12 +74,12 @@ for t = 1:iteration-1
 
     end
 
-    E_value(t+1) = double(subs(E, alpha(1:p+1), param(t+1,:)));
+    E_value(t) = double(subs(E, alpha(1:p+1), param(t+1,:)));
 
     disp('E = ')
-    disp(E_value(t+1))
+    disp(E_value(t))
 
-    if t > 1 && E_value(t+1) > E_value(t)
+    if t > 1 && E_value(t) > E_value(t-1)
         iteration = t;
         disp('iterationを終了します')
         break
@@ -100,14 +100,14 @@ for j = 1:length(k) - 1
         p = p + 1;
     end
 
-    zi(j,2) = param(iteration,p) + u * (param(iteration,p+1) - param(iteration,p)); %z2=f(s3)
+    zi(j+1,2) = param(iteration,p) + u * (param(iteration,p+1) - param(iteration,p)); %z2=f(s3)
 
 end
 
 hold on;
 grid on;
 
-axis([-0.1 1.4 -3.0 3.0])
+axis([-1 31 -5.0 5.0])
 
 plot(k, tan(si(:,3)), '--', k, zi(:,2),'LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
 xlabel('時刻 k')
