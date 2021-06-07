@@ -1,12 +1,12 @@
 clear;
 close all;
 
-dk = 1; %%時間刻み
-Kfin = 30; %シミュレーション終了時間
+dk = 0.05; %%時間刻み
+Kfin = 1.2; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
-u1 = ones(1,length(k)) * 0.1;
-u2 = ones(1,length(k)) * 0.1;
+u1 = ones(1,length(k)) * 1;
+u2 = ones(1,length(k)) * 1;
 
 si = zeros(length(k),3); %観測するセンサ変数 , 答えは(s1, s2, s3)=(x ,y, θ)
 si(1,:) = [0 0 0]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
@@ -30,7 +30,7 @@ for j = 1:length(k)-1
     zi(j+1,1) = si(j+1,1); %z1=s1は既知
     zi(j+1,3) = si(j+1,2); %z3=s2は既知
 
-    p_now(j+1) = floor(si(j+1,3) / sigma); % p = 時刻kのi
+    p_now(j+1) = floor(si(j+1,3) / sigma) % p = 時刻kのi
     u = si(j+1,3) / sigma  - p_now(j+1);
 
     if p_now(j+1) > p_now(j)
@@ -46,6 +46,7 @@ end
 length(k)
 p
 
+%正則化項の追加
 % for i = 2:p
 
 %     E = E + (alpha(i+1) - 2 * alpha(i) + alpha(i-1)) ^ 2;
@@ -53,7 +54,7 @@ p
 % end
 
 eta = 0.05; %学習率
-iteration = 50; %繰り返し回数（最大）
+iteration = 3; %繰り返し回数（最大）
 
 param = zeros(iteration,p+1);
 
@@ -87,8 +88,6 @@ for t = 1:iteration
 
 end
 
-%param(iteration,:);
-
 p = 1;
 
 for j = 1:length(k) - 1
@@ -107,10 +106,10 @@ end
 hold on;
 grid on;
 
-axis([-1 31 -5.0 5.0])
+axis([-0.1 1.5 -10 10])
 
-plot(k, tan(si(:,3)), '--', k, zi(:,2),'LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
-xlabel('時刻 k')
+plot(si(:,3), tan(si(:,3)), '--', si(:,3), zi(:,2),'LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
+xlabel('s3 = θ')
 ylabel('z2 = f(s3)')
 legend('真値：tan(s3)','推定値：z2 = f(s3)')
 
