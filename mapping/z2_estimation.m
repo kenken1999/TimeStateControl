@@ -5,8 +5,8 @@ dk = 0.05; %%時間刻み
 Kfin = 1.2; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
-u1 = ones(1,length(k)) * 1;
-u2 = ones(1,length(k)) * 1;
+u1 = ones(1,length(k)) * 2;
+u2 = ones(1,length(k)) * 2;
 
 si = zeros(length(k),3); %観測するセンサ変数 , 答えは(s1, s2, s3)=(x ,y, θ)
 si(1,:) = [0 0 0]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
@@ -54,7 +54,7 @@ p
 % end
 
 eta = 0.05; %学習率
-iteration = 3; %繰り返し回数（最大）
+iteration = 10; %繰り返し回数（最大）
 
 param = zeros(iteration,p+1);
 
@@ -106,7 +106,7 @@ end
 hold on;
 grid on;
 
-axis([-0.1 1.5 -10 10])
+axis([-0.1 2.5 -10 10])
 
 plot(si(:,3), tan(si(:,3)), '--', si(:,3), zi(:,2),'LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
 xlabel('s3 = θ')

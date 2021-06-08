@@ -1,18 +1,17 @@
 clear;
 close all;
 
-dk = 0.2; %%時間刻み
-Kfin = 10; %シミュレーション終了時間
+dk = 0.02; %%時間刻み
+Kfin = 0.65; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
-u1 = ones(1,length(k));
-u2 = ones(1,length(k));
+u1 = ones(1,length(k)) * 5;
+u2 = ones(1,length(k)) * 5;
 
 si = zeros(length(k),3); %観測するセンサ変数 , 答えは(s1, s2, s3)=(x ,y, θ)
-zi = zeros(length(k),3); %変換後の状態変数 (z1, z2, z3)=(x, tanθ, y), z1=s1, z3=s2は既知, z2=tans3は未知 
+zi_b = zeros(length(k),3); %変換後の状態変数 (z1, z2, z3)=(x, tanθ, y), z1=s1, z3=s2は既知, z2=tans3は未知 
 
-si(1,:) = [-4 5 0]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
-zi(1,:) = [-4 0 5]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si(1,:) = [0 0 -pi/2]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 %z2_estimation----------------------------------------------------
 
@@ -24,25 +23,25 @@ sigma = 0.05; %スケーリング定数
 p = 1;
 E = 0;
 
-for j = 1:length(k)-1
+for j = 1:length(k) - 1
 
     si(j+1,3) = si(j,3) + u2(j) * dk;
     si(j+1,1) = si(j,1) + u1(j) * cos(si(j+1,3)) * dk;
     si(j+1,2) = si(j,2) + u1(j) * sin(si(j+1,3)) * dk;
 
-    zi(j+1,1) = si(j+1,1); %z1=s1は既知
-    zi(j+1,3) = si(j+1,2); %z3=s2は既知
+    zi_b(j+1,1) = si(j+1,1); %z1=s1は既知
+    zi_b(j+1,3) = si(j+1,2); %z3=s2は既知
 
-    p_now(j+1) = floor(si(j+1,3) / sigma);% p = 時刻kのi
+    p_now(j+1) = floor(si(j+1,3) / sigma);% p = 時刻kのi, 飛び飛びor被る可能性あり
     u = si(j+1,3) / sigma  - p_now(j+1);
 
     if p_now(j+1) > p_now(j)
-        p = p + 1;
+        p = p + 1; % 対応する格子点に番号をつけていく
     end
 
     %zi(j,2) = alpha(p) + u * (alpha(p+1) - alpha(p)); %z2=f(s3)
 
-    E = E + (alpha(p) + u * (alpha(p+1) - alpha(p)) - (zi(j+1,3)- zi(j,3)) / (zi(j+1,1)- zi(j,1))) ^ 2;   
+    E = E + (alpha(p) + u * (alpha(p+1) - alpha(p)) - (zi_b(j+1,3)- zi_b(j,3)) / (zi_b(j+1,1)- zi_b(j,1))) ^ 2;   
 
 end
 
@@ -57,7 +56,7 @@ p
 % end
 
 eta = 0.05; %学習率
-iteration = 30; %パラメータ更新回数（最大）
+iteration = 10; %パラメータ更新回数（最大）
 
 param = zeros(iteration,p+1);
 
@@ -92,7 +91,6 @@ for t = 1:iteration
 end
 
 p = 1;
-zi_b = zeros(300,1); %%s3kの値に対するz2kの値の対応をp_nowで管理
 
 for j = 1:length(k) - 1
 
@@ -101,7 +99,6 @@ for j = 1:length(k) - 1
     end
 
     zi(j+1,2) = param(iteration,p) + u * (param(iteration,p+1) - param(iteration,p)); %z2=f(s3)
-    zi_b(p_now(j+1)) = zi(j+1,2);
 
 end
 
@@ -118,6 +115,13 @@ end
 
 
 %feedback_simulation----------------------------------------
+
+zi = zeros(length(k),3);
+zi(1,:) = [-4 0 5]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+
+dt = 0.2; %%時間刻み=離散時間Tsとして使用
+Tfin = 50; %シミュレーション終了時間
+t1 = [0:dt:Tfin];
 
 v1 = u1 * cos(atan(zi(1,2)));
 v2 = u2 / (cos(atan(zi(1,2))) * cos(atan(zi(1,2))));
@@ -141,7 +145,7 @@ h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
 plot(-4,5,'kx','MarkerSize', 10,'LineWidth',2)
 plot(0,0,'rx','MarkerSize', 10,'LineWidth',2)
 
-for i = 1:length(k)-1
+for i = 1:length(t1)-1
 
     v1(i) = -0.1 * zi(i,1); %入力v1(=u1cosθ), v1=-λz1で(λ>0の定数)z1を0に収束
 
@@ -152,15 +156,18 @@ for i = 1:length(k)-1
         v2(i) = k2 * zi(i,2) * v1(i) - k3 * zi(i,3) * v1(i); 
     end
     
-    zi(i+1,1) = zi(i,1) + v1(i) * dk; %dz1 = v1(i)dt
+    zi(i+1,1) = zi(i,1) + v1(i) * dt; %dz1 = v1(i)dt
     %zi(i+1,2) = zi(i,2) + v2(i)*dk; %v2(i)/vi(1)*v1(i)*dt
-    zi(i+1,3) = zi(i,3) + zi(i,2) * v1(i) * dk;
+    zi(i+1,3) = zi(i,3) + zi(i,2) * v1(i) * dt;
 
-    si(i+1,3) = si(i,3) + v2(i) * (cos(atan(zi(i,2))) * cos(atan(zi(i,2)))) * dk;
+    si(i+1,3) = si(i,3) + v2(i) * (cos(atan(zi(i,2))) * cos(atan(zi(i,2)))) * dt;
 
-    p_now2(i+1) = floor(si(i+1,3) / sigma);% p = 時刻kのi
+    for j = 1:length(k) - 1
+        if  p_now(j+1) == floor(si(i+1,3) / sigma)
+            zi(i+1,2) = zi_b(j+1,2);
+        end
+    end
 
-    zi(i+1,2) = zi_b(p_now2(i+1));
 
     set(h, 'XData', zi(i,1),'YData', zi(i,3));
 
