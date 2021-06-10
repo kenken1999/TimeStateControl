@@ -5,13 +5,13 @@ dk = 0.02; %%時間刻み
 Kfin = 0.65; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
-u1 = ones(1,length(k)) * 5;
-u2 = ones(1,length(k)) * 5;
+u1_b = ones(1,length(k)) * 5;
+u2_b = ones(1,length(k)) * 5;
 
-si = zeros(length(k),3); %観測するセンサ変数 , 答えは(s1, s2, s3)=(x ,y, θ)
+si_b = zeros(length(k),3); %観測するセンサ変数 , 答えは(s1, s2, s3)=(x ,y, θ)
 zi_b = zeros(length(k),3); %変換後の状態変数 (z1, z2, z3)=(x, tanθ, y), z1=s1, z3=s2は既知, z2=tans3は未知 
 
-si(1,:) = [0 0 -pi/2]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si_b(1,:) = [0 0 -pi/2]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 %z2_estimation----------------------------------------------------
 
@@ -19,21 +19,21 @@ p_now = zeros(1,length(k));
 
 alpha = sym('alpha',[1 300]);
 
-sigma = 0.05; %スケーリング定数
+sigma = 0.1; %スケーリング定数
 p = 1;
 E = 0;
 
 for j = 1:length(k) - 1
 
-    si(j+1,3) = si(j,3) + u2(j) * dk;
-    si(j+1,1) = si(j,1) + u1(j) * cos(si(j+1,3)) * dk;
-    si(j+1,2) = si(j,2) + u1(j) * sin(si(j+1,3)) * dk;
+    si_b(j+1,3) = si_b(j,3) + u2_b(j) * dk;
+    si_b(j+1,1) = si_b(j,1) + u1_b(j) * cos(si_b(j+1,3)) * dk;
+    si_b(j+1,2) = si_b(j,2) + u1_b(j) * sin(si_b(j+1,3)) * dk;
 
-    zi_b(j+1,1) = si(j+1,1); %z1=s1は既知
-    zi_b(j+1,3) = si(j+1,2); %z3=s2は既知
+    zi_b(j+1,1) = si_b(j+1,1); %z1=s1は既知
+    zi_b(j+1,3) = si_b(j+1,2); %z3=s2は既知
 
-    p_now(j+1) = floor(si(j+1,3) / sigma);% p = 時刻kのi, 飛び飛びor被る可能性あり
-    u = si(j+1,3) / sigma  - p_now(j+1);
+    p_now(j+1) = floor(si_b(j+1,3) / sigma);% p = 時刻kのi, 飛び飛びor被る可能性あり
+    u = si_b(j+1,3) / sigma  - p_now(j+1);
 
     if p_now(j+1) > p_now(j)
         p = p + 1; % 対応する格子点に番号をつけていく
@@ -45,8 +45,7 @@ for j = 1:length(k) - 1
 
 end
 
-length(k)
-p
+p_now
 
 %正則化項の追加
 % for i = 2:p
@@ -98,7 +97,7 @@ for j = 1:length(k) - 1
         p = p + 1;
     end
 
-    zi(j+1,2) = param(iteration,p) + u * (param(iteration,p+1) - param(iteration,p)); %z2=f(s3)
+    zi_b(j+1,2) = param(iteration,p) + u * (param(iteration,p+1) - param(iteration,p)); %z2=f(s3)
 
 end
 
@@ -116,12 +115,18 @@ end
 
 %feedback_simulation----------------------------------------
 
-zi = zeros(length(k),3);
-zi(1,:) = [-4 0 5]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
-
-dt = 0.2; %%時間刻み=離散時間Tsとして使用
+dt = 0.1; %%時間刻み=離散時間Tsとして使用
 Tfin = 50; %シミュレーション終了時間
 t1 = [0:dt:Tfin];
+
+si = zeros(length(t1),3);
+si(1,:) = [-4 5 0]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+
+zi = zeros(length(t1),3);
+zi(1,:) = [-4 0 5]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+
+u1 = ones(1,length(t1)) * 5;
+u2 = ones(1,length(t1)) * 5;
 
 v1 = u1 * cos(atan(zi(1,2)));
 v2 = u2 / (cos(atan(zi(1,2))) * cos(atan(zi(1,2))));
@@ -160,14 +165,17 @@ for i = 1:length(t1)-1
     %zi(i+1,2) = zi(i,2) + v2(i)*dk; %v2(i)/vi(1)*v1(i)*dt
     zi(i+1,3) = zi(i,3) + zi(i,2) * v1(i) * dt;
 
-    si(i+1,3) = si(i,3) + v2(i) * (cos(atan(zi(i,2))) * cos(atan(zi(i,2)))) * dt;
+    si(i+1,3) = si(i,3) + v2(i) * cos(atan(zi(i,2))) * cos(atan(zi(i,2))) * dt;
 
-    for j = 1:length(k) - 1
-        if  p_now(j+1) == floor(si(i+1,3) / sigma)
-            zi(i+1,2) = zi_b(j+1,2);
+    floor(si(i+1,3) / sigma)
+
+    for j = 2:length(k)
+        if  p_now(j) == floor(si(i+1,3) / sigma)
+            zi(i+1,2) = zi_b(j,2);
+        % else
+        %     zi(i+2,2) = zi(i,2);
         end
     end
-
 
     set(h, 'XData', zi(i,1),'YData', zi(i,3));
 
@@ -180,10 +188,12 @@ for i = 1:length(t1)-1
       [X,map] = rgb2ind(F.cdata,256);
       if i==1
           % GIFファイルに書き出し
-          imwrite(X,map,'z2_estimation.gif')
+          imwrite(X,map,'estimation_z2_sim.gif')
       else
           % 2回目以降は'append'でアニメーションを作成
-          imwrite(X,map,'z2_estimation.gif','WriteMode','append')
+          imwrite(X,map,'estimation_z2_sim.gif','WriteMode','append')
       end
 
 end
+
+zi(:,2)
