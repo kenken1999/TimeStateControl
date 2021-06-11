@@ -2,7 +2,7 @@ clear;
 close all;
 
 dk = 0.02; %%時間刻み
-Kfin = 0.62; %シミュレーション終了時間
+Kfin = 0.65; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1_b = ones(1,length(k)) * 5;
@@ -13,15 +13,21 @@ zi_b = zeros(length(k),3); %変換後の状態変数 (z1, z2, z3)=(x, tanθ, y),
 
 si_b(1,:) = [0 0 -pi/2]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
-%z2_estimation----------------------------------------------------
+%all(f,g,h)_estimation----------------------------------------------------
 
-p_now = zeros(1,length(k));
+p_now = zeros(1,length(k)); % p_now = 時刻kのi, 飛び飛び
 
 alpha = sym('alpha',[1 300]);
+beta = sym('beta',[1 300]);
+gamma = sym('gamma',[1 300]);
 
 sigma = 0.1; %スケーリング定数
+
 p = 1;
-E = 0;
+
+Ef = 0;
+Eg = 0;
+Eh = 0;
 
 for j = 1:length(k) - 1
 
@@ -32,7 +38,7 @@ for j = 1:length(k) - 1
     zi_b(j+1,1) = si_b(j+1,1); %z1=s1は既知
     zi_b(j+1,3) = si_b(j+1,2); %z3=s2は既知
 
-    p_now(j+1) = floor(si_b(j+1,3) / sigma);% p = 時刻kのi, 飛び飛びor被る可能性あり
+    p_now(j+1) = floor(si_b(j+1,3) / sigma);% p_now = 時刻kのi, 飛び飛びor被る可能性あり
     u = si_b(j+1,3) / sigma  - p_now(j+1);
 
     if p_now(j+1) > p_now(j)
@@ -41,7 +47,9 @@ for j = 1:length(k) - 1
 
     %zi(j,2) = alpha(p) + u * (alpha(p+1) - alpha(p)); %z2=f(s3)
 
-    E = E + (alpha(p) + u * (alpha(p+1) - alpha(p)) - (zi_b(j+1,3)- zi_b(j,3)) / (zi_b(j+1,1)- zi_b(j,1))) ^ 2;   
+    Ef = Ef + ( alpha(p) + u * (alpha(p+1) - alpha(p)) - (zi_b(j+1,3)- zi_b(j,3)) / (zi_b(j+1,1)- zi_b(j,1)) ) ^ 2;
+
+    Eh = Eh + ( u1(j) * (gamma(p) + u * (gamma(p+1) - gamma(p))) - (zi_b(j+1,1)- zi_b(j,1)) )^ 2;
 
 end
 
@@ -68,20 +76,20 @@ for t = 1:iteration
 
     for m = 1:p+1
 
-        DE = diff(E,alpha(m));
+        DEf = diff(Ef,alpha(m));
         
-        DE2 = subs(DE, alpha(1:p+1), param(t,:));     
+        DEf2 = subs(DEf, alpha(1:p+1), param(t,:));     
 
-        param(t+1,m) = param(t,m) - eta * double(DE2);
+        param(t+1,m) = param(t,m) - eta * double(DEf2);
 
     end
 
-    E_value(t) = double(subs(E, alpha(1:p+1), param(t+1,:)));
+    Ef_value(t) = double(subs(Ef, alpha(1:p+1), param(t+1,:)));
 
-    disp('E = ')
-    disp(E_value(t))
+    disp('Ef = ')
+    disp(Ef_value(t))
 
-    if t > 1 && E_value(t) > E_value(t-1)
+    if t > 1 && Ef_value(t) > Ef_value(t-1)
         iteration = t;
         disp('iterationを終了します')
         break
@@ -98,6 +106,8 @@ for j = 1:length(k) - 1
     end
 
     zi_b(j+1,2) = param(iteration,p) + u * (param(iteration,p+1) - param(iteration,p)); %z2=f(s3)
+
+    Eg = Eg + ( u2(j) / u1(j) * (beta(p) + u * (beta(p+1) - beta(p))) - (zi_b(j+1,2)- zi_b(j,2)) / (zi_b(j+1,1)- zi_b(j,1))) ^ 2;
 
 end
 
@@ -128,8 +138,8 @@ zi(1,:) = [-4 0 5]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 u1 = ones(1,length(t1)) * 5;
 u2 = ones(1,length(t1)) * 5;
 
-v1 = u1 * cos(atan(zi(1,2)));
-v2 = u2 / (cos(atan(zi(1,2))) * cos(atan(zi(1,2))));
+% v1 = u1 * cos(atan(zi(1,2)));
+% v2 = u2 / (cos(atan(zi(1,2))) * cos(atan(zi(1,2))));
 
 k2 = 2;
 k3 = 3;
@@ -188,10 +198,10 @@ for i = 1:length(t1)-1
       [X,map] = rgb2ind(F.cdata,256);
       if i==1
           % GIFファイルに書き出し
-          imwrite(X,map,'estimation_z2_sim.gif')
+          imwrite(X,map,'estimation_all_sim.gif')
       else
           % 2回目以降は'append'でアニメーションを作成
-          imwrite(X,map,'estimation_z2_sim.gif','WriteMode','append')
+          imwrite(X,map,'estimation_all_sim.gif','WriteMode','append')
       end
 
 end

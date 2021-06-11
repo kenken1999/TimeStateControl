@@ -2,7 +2,7 @@ clear;
 close all;
 
 dt = 0.02;%%時間刻み=離散時間Tsとして使用
-Tfin = 0.65;%シミュレーション終了時間
+Tfin = 0.62;%シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
 u1 = ones(1,length(t1)) * 5;

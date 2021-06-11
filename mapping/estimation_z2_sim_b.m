@@ -2,7 +2,7 @@ clear;
 close all;
 
 dk = 0.02; %%時間刻み
-Kfin = 0.65; %シミュレーション終了時間
+Kfin = 0.62; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1_b = ones(1,length(k)) * 5;
