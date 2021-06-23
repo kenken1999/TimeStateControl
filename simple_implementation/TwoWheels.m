@@ -9,7 +9,7 @@ u1 = ones(1,length(t1)) * 5;
 u2 = ones(1,length(t1)) * 5;
 
 si = zeros(length(t1),3);
-si(1,:) = [0 0 0];%状態ξの初期値を設定
+si(1,:) = [0 0 -pi/2];%状態ξの初期値を設定
 
 x = si(1,1) + 0.15 * cos(si(1,3));
 y = si(1,2) + 0.15 * sin(si(1,3));
@@ -18,7 +18,7 @@ hold on;
 axis equal;
 grid on;
 
-axis([-1.5 1.5 -0.5 2.5])
+axis([-0.5 2.5 -1.5 1.5])
 
 h = plot(si(1,1),si(1,2), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
 h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
