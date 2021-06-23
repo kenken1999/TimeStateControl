@@ -121,8 +121,10 @@ end
 
 p = 1;
 
-zi_b(1,2) = param_alpha(iteration,1) + u * (param_alpha(iteration,2) - param_alpha(iteration,1)); %z2=f(s3)
-hmap_b(1) = param_gamma(iteration,1) + u * (param_gamma(iteration,2) - param_gamma(iteration,1)); %h(s3)
+zi_b(1,2) = param_alpha(iteration,1) - (1-u) * (param_alpha(iteration,2) - param_alpha(iteration,1));
+hmap_b(1) = param_gamma(iteration,1) - (1-u) * (param_gamma(iteration,2) - param_gamma(iteration,1));
+% zi_b(1,2) = param_alpha(iteration,1) + u * (param_alpha(iteration,2) - param_alpha(iteration,1)); %z2=f(s3)
+% hmap_b(1) = param_gamma(iteration,1) + u * (param_gamma(iteration,2) - param_gamma(iteration,1)); %h(s3)
 
 for j = 1:length(k) - 1
 
@@ -174,7 +176,8 @@ end
 
 p = 1;
 
-gmap_b(1) = param_beta(iteration,1) + u * (param_beta(iteration,2) - param_beta(iteration,1)); %h(s3)
+gmap_b(1) = param_beta(iteration,1) - (1-u) * (param_beta(iteration,2) - param_beta(iteration,1));
+% gmap_b(1) = param_beta(iteration,1) + u * (param_beta(iteration,2) - param_beta(iteration,1)); %h(s3)
 
 
 for j = 1:length(k) - 1

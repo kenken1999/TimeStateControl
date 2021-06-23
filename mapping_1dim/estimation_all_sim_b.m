@@ -69,7 +69,7 @@ eta_f = 0.05; %学習率
 eta_g = 0.5; %学習率
 eta_h = 0.01; %学習率
 
-iteration = 15; %パラメータ更新回数（最大）
+iteration = 30; %パラメータ更新回数（最大）
 
 param_alpha = zeros(iteration,p+1);
 param_beta = zeros(iteration,p+1);
@@ -121,8 +121,10 @@ end
 
 p = 1;
 
-zi_b(1,2) = param_alpha(iteration,1) + u * (param_alpha(iteration,2) - param_alpha(iteration,1)); %z2=f(s3)
-hmap_b(1) = param_gamma(iteration,1) + u * (param_gamma(iteration,2) - param_gamma(iteration,1)); %h(s3)
+zi_b(1,2) = param_alpha(iteration,1) - (1-u) * (param_alpha(iteration,2) - param_alpha(iteration,1));
+hmap_b(1) = param_gamma(iteration,1) - (1-u) * (param_gamma(iteration,2) - param_gamma(iteration,1));
+% zi_b(1,2) = param_alpha(iteration,1) + u * (param_alpha(iteration,2) - param_alpha(iteration,1)); %z2=f(s3)
+% hmap_b(1) = param_gamma(iteration,1) + u * (param_gamma(iteration,2) - param_gamma(iteration,1)); %h(s3)
 
 for j = 1:length(k) - 1
 
@@ -174,7 +176,8 @@ end
 
 p = 1;
 
-gmap_b(1) = param_beta(iteration,1) + u * (param_beta(iteration,2) - param_beta(iteration,1)); %h(s3)
+gmap_b(1) = param_beta(iteration,1) - (1-u) * (param_beta(iteration,2) - param_beta(iteration,1));
+% gmap_b(1) = param_beta(iteration,1) + u * (param_beta(iteration,2) - param_beta(iteration,1)); %h(s3)
 
 
 for j = 1:length(k) - 1
