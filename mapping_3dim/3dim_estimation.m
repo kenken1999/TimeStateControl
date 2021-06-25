@@ -23,19 +23,23 @@ l_now = zeros(1,length(k));  % l_now = 時刻kのl, 値が飛び飛び or 被る
 m_now = zeros(1,length(k));  % m_now = 時刻kのl, 値が飛び飛び or 被る可能性あり
 n_now = zeros(1,length(k));  % n_now = 時刻kのl, 値が飛び飛び or 被る可能性あり
 
-l = 1; %推定した格子点に前から順に番号をつけていく
-m = 1;
-n = 1;
+l_num = ones(1,length(k)); %推定した格子点に前から順に番号をつけていく
+m_num = ones(1,length(k));
+n_num = ones(1,length(k));
 
-alpha = sym('alpha',[1 300]);
-beta = sym('beta',[1 300]);
-gamma = sym('gamma',[1 300]);
-delta = sym('delta',[1 300]);
-epsilon = sym('epsilon',[1 300]);
+alpha = sym('alpha',[300 300 300]); %l,m,nの順
+beta = sym('beta',[300 300 300]);
+gamma = sym('gamma',[300 300 300]);
+delta = sym('delta',[300 300 300]);
+epsilon = sym('epsilon',[300 300 300]);
 
 sigma1 = 0.1; %s1のスケーリング定数
 sigma2 = 0.1; %s2のスケーリング定数
 sigma3 = 0.1; %s3のスケーリング定数
+
+zeta1 = 0.1; %E1の調整係数
+zeta2 = 0.1; %E2の調整係数
+zeta3 = 0.1; %E3の調整係数
 
 E = 0;
 
@@ -45,23 +49,69 @@ for j = 1:length(k) - 1
     si_b(j+1,1) = si_b(j,1) + u1_b(j) * cos(si_b(j+1,3)) * dk;
     si_b(j+1,2) = si_b(j,2) + u1_b(j) * sin(si_b(j+1,3)) * dk;
 
-    zi_b(j+1,1) = si_b(j+1,1); %z1=s1は既知
-    zi_b(j+1,3) = si_b(j+1,2); %z3=s2は既知
+    % zi_b(j+1,1) = si_b(j+1,1); %z1=s1は既知
+    % zi_b(j+1,3) = si_b(j+1,2); %z3=s2は既知
 
-    p_now(j+1) = floor(si_b(j+1,3) / sigma); % p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
-    u = si_b(j+1,3) / sigma  - p_now(j+1);
+    l_now(j+1) = floor(si_b(j+1,1) / sigma1);
+    rho1 = si_b(j+1,1) / sigma1  - l_now(j+1);
 
-    if p_now(j+1) > p_now(j)
-        p = p + 1; % 対応する格子点に番号をつけていく
+    m_now(j+1) = floor(si_b(j+1,2) / sigma2);
+    rho2 = si_b(j+1,2) / sigma2  - m_now(j+1);
+
+    n_now(j+1) = floor(si_b(j+1,3) / sigma3);
+    rho3 = si_b(j+1,3) / sigma3  - n_now(j+1);
+
+    if l_now(j+1) > l_now(j)
+        l_num(j+1) = l_num(j) + 1; % 対応する格子点に番号をつけていく
+    else
+        l_num(j+1) = l_num(j);
     end
 
-    Ef = Ef + ( alpha(p) + u * (alpha(p+1) - alpha(p)) - (zi_b(j+1,3) - zi_b(j,3)) / (zi_b(j+1,1) - zi_b(j,1)) ) ^ 2;
+    if m_now(j+1) > m_now(j)
+        m_num(j+1) = m_num(j) + 1; % 対応する格子点に番号をつけていく
+    else
+        m_num(j+1) = m_num(j);
+    end
 
-    Eh = Eh + ( u1_b(j) * (gamma(p) + u * (gamma(p+1) - gamma(p))) - (zi_b(j+1,1) - zi_b(j,1)) / dk )^ 2;
+    if n_now(j+1) > n_now(j)
+        n_num(j+1) = n_num(j) + 1; % 対応する格子点に番号をつけていく
+    else
+        n_num(j+1) = n_num(j);
+    end
+
+    l = l_num(j); %代入しやすくするため
+    m = m_num(j);
+    n = n_num(j);
+
+    l2 = l_num(j+1); %代入しやすくするため
+    m2 = m_num(j+1);
+    n2 = n_num(j+1);
+
+
+    E1 = 3 * beta(l,m,n) + rho1 * (beta(l+1,m,n) - beta(l,m,n)) + rho2 * (beta(l,m+1,n) - beta(l,m,n)) + rho3 * (beta(l,m,n+1) - beta(l,m,n))
+         - ( (3 * gamma(l2,m2,n2) + rho1 * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2 * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3 * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2)))
+             - (3 * gamma(l,m,n) + rho1 * (gamma(l+1,m,n) - gamma(l,m,n)) + rho2 * (gamma(l,m+1,n) - gamma(l,m,n)) + rho3 * (gamma(l,m,n+1) - gamma(l,m,n))) )
+         / ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))
+             - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) );
+
+    E2 = u2_b(j) / u1_b(j) * ( 3 * delta(l,m,n) + rho1 * (delta(l+1,m,n) - delta(l,m,n)) + rho2 * (delta(l,m+1,n) - delta(l,m,n)) + rho3 * (delta(l,m,n+1) - delta(l,m,n)) )
+    - ( (3 * beta(l2,m2,n2) + rho1 * (beta(l2+1,m2,n2) - beta(l2,m2,n2)) + rho2 * (beta(l2,m2+1,n2) - beta(l2,m2,n2)) + rho3 * (beta(l2,m2,n2+1) - beta(l2,m2,n2)))
+        - (3 * beta(l,m,n) + rho1 * (beta(l+1,m,n) - beta(l,m,n)) + rho2 * (beta(l,m+1,n) - beta(l,m,n)) + rho3 * (beta(l,m,n+1) - beta(l,m,n))) )
+    / ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))
+        - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) );
+    
+    E3 = u1_b(j) * ( 3 * epsilon(l,m,n) + rho1 * (epsilon(l+1,m,n) - epsilon(l,m,n)) + rho2 * (epsilon(l,m+1,n) - epsilon(l,m,n)) + rho3 * (epsilon(l,m,n+1) - epsilon(l,m,n)) )
+    - ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))
+        - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) ) / dk;
+
+
+    E = E + zeta1 * E1 ^ 2 + zeta2 * E2 ^ 2 + zeta3 * E3 ^ 2;
 
 end
 
-p_now
+l_now
+m_now
+n_now
 
 
 %---正則化項の追加---------------------------------
@@ -72,31 +122,34 @@ p_now
 % end
 
 
-%---写像 f, g, hの推定----------------------------
+%---写像 f1,f2,f3,g,h の推定----------------------------
 
-eta_f = 0.05; %学習率
-eta_g = 0.5; %学習率
-eta_h = 0.01; %学習率
-
-iteration = 30; %パラメータ更新回数（最大）
+eta_f1 = 0.05; %学習率
+eta_f2 = 0.05;
+eta_f3 = 0.05;
+eta_g = 0.5;
+eta_h = 0.01;
 
 param_alpha = zeros(iteration,p+1);
 param_beta = zeros(iteration,p+1);
 param_gamma = zeros(iteration,p+1);
+param_delta = zeros(iteration,p+1);
+param_epsilon = zeros(iteration,p+1);
 
-Ef_value = zeros(1,iteration);
-Eh_value = zeros(1,iteration);
+E_value = zeros(1,iteration);
 
-syms 'alpha%d' [1 p+1]
-syms 'beta%d' [1 p+1]
-syms 'gamma%d' [1 p+1]
+syms 'alpha%d' [l+1 m+1 n+1]
+syms 'beta%d' [l+1 m+1 n+1]
+syms 'gamma%d' [l+1 m+1 n+1]
+syms 'delta%d' [l+1 m+1 n+1]
+syms 'epsilon%d' [l+1 m+1 n+1]
 
 
 %---写像 f, hの推定-----------------
 
 for t = 1:iteration
 
-    for m = 1:p+1
+    for m = 1:l+1
 
         DEf = diff(Ef,alpha(m));
         DEh = diff(Eh,gamma(m));
