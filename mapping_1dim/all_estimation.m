@@ -78,9 +78,9 @@ param_gamma = zeros(iteration,p+1);
 Ef_value = zeros(1,iteration);
 Eh_value = zeros(1,iteration);
 
-syms 'alpha%d' [1 p+1]
-syms 'beta%d' [1 p+1]
-syms 'gamma%d' [1 p+1]
+% syms 'alpha%d' [1 p+1]
+% syms 'beta%d' [1 p+1]
+% syms 'gamma%d' [1 p+1]
 
 
 %---写像 f, hの推定-----------------
@@ -202,7 +202,7 @@ grid on;
 
 axis([-1.7 1.7 -10 10]) % π/2 ≒ 1.57
 
-plot(si_b(:,3), tan(si_b(:,3)), '--', si_b(:,3), zi_b(:,2),'-ro','MarkerEdgeColor','black','LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
+plot(si_b(:,3), tan(si_b(:,3)), '--m', si_b(:,3), zi_b(:,2),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
 xlabel('s3 = θ')
 ylabel('z2 = f(s3)')
 legend('真値：tan(s3)','推定値：z2 = f(s3)')
@@ -215,7 +215,7 @@ hold on;
 grid on;
 axis([-1.7 1.7 -0.2 1.2])
 
-plot(si_b(:,3), cos(si_b(:,3)), '--', si_b(:,3), hmap_b(:),'-ro','MarkerEdgeColor','black','LineWidth', 1.5)
+plot(si_b(:,3), cos(si_b(:,3)), '--m', si_b(:,3), hmap_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel('s3 = θ')
 ylabel('h(s3)')
 legend('真値：cos(s3)','推定値：h(s3)')
@@ -234,7 +234,7 @@ for i=1:length(k)
     g_ans(i) = 1 / (cos(si_b(i,3)) * cos(si_b(i,3)) * cos(si_b(i,3)));
 end
 
-plot(si_b(:,3), g_ans(:), '--', si_b(:,3), gmap_b(:),'-ro','MarkerEdgeColor','black','LineWidth', 1.5)
+plot(si_b(:,3), g_ans(:), '--m', si_b(:,3), gmap_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel('s3 = θ')
 ylabel('g(s3)')
 legend('真値：1/cos^3(s3)','推定値：g(s3)')
