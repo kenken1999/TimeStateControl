@@ -4,7 +4,7 @@ close all;
 %all(f,g,h)_estimation----------------------------------------------------
 
 dk = 0.02;   %時間刻み
-Kfin = 0.62; %シミュレーション終了時間
+Kfin = 0.06; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1_b = ones(1,length(k)) * 5;
@@ -20,9 +20,9 @@ hmap_b = zeros(1,length(k)); %dz2/dz1 = μ2 = u2/u1 * g(s3)の推定, g(s3) = 1/
 p_now = zeros(1,length(k));  % p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
 p = 1;
 
-alpha = sym('alpha',[1 300]);
-beta = sym('beta',[1 300]);
-gamma = sym('gamma',[1 300]);
+alpha = sym('alpha',[1 50]);
+beta = sym('beta',[1 50]);
+gamma = sym('gamma',[1 50]);
 
 sigma = 0.1; %スケーリング定数
 
@@ -69,11 +69,15 @@ eta_f = 0.05; %学習率
 eta_g = 0.5; %学習率
 eta_h = 0.01; %学習率
 
-iteration = 30; %パラメータ更新回数（最大）
+iteration = 15; %パラメータ更新回数（最大）
 
-param_alpha = zeros(iteration,p+1);
-param_beta = zeros(iteration,p+1);
-param_gamma = zeros(iteration,p+1);
+% param_alpha = zeros(iteration,p+1);
+% param_beta = zeros(iteration,p+1);
+% param_gamma = zeros(iteration,p+1);
+
+param_alpha = rand([iteration,p+1]);
+param_beta = rand([iteration,p+1]);
+param_gamma = rand([iteration,p+1]);
 
 Ef_value = zeros(1,iteration);
 Eh_value = zeros(1,iteration);
