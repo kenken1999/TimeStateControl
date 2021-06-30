@@ -37,8 +37,8 @@ sigma1 = 0.1; %s1のスケーリング定数
 sigma2 = 0.1; %s2のスケーリング定数
 sigma3 = 0.1; %s3のスケーリング定数
 
-zeta1 = 0.001; %E1の調整係数
-zeta2 = 0.001; %E2の調整係数
+zeta1 = 1; %E1の調整係数
+zeta2 = 0.1; %E2の調整係数
 zeta3 = 0.001; %E3の調整係数
 
 E = 0;
@@ -90,29 +90,28 @@ for j = 1:length(k) - 1
     m2 = m_num(j+1);
     n2 = n_num(j+1);
 
-    E1 = 3 * beta(l,m,n) + rho1 * (beta(l+1,m,n) - beta(l,m,n)) + rho2 * (beta(l,m+1,n) - beta(l,m,n)) + rho3 * (beta(l,m,n+1) - beta(l,m,n))...
+    E1 = E1 + ( 3 * beta(l,m,n) + rho1 * (beta(l+1,m,n) - beta(l,m,n)) + rho2 * (beta(l,m+1,n) - beta(l,m,n)) + rho3 * (beta(l,m,n+1) - beta(l,m,n))...
          - ( (3 * gamma(l2,m2,n2) + rho1 * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2 * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3 * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2)))...
          - (3 * gamma(l,m,n) + rho1 * (gamma(l+1,m,n) - gamma(l,m,n)) + rho2 * (gamma(l,m+1,n) - gamma(l,m,n)) + rho3 * (gamma(l,m,n+1) - gamma(l,m,n))) )...
          / ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
-         - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) );
+         - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) ) ) ^ 2;
 
-    E2 = u2_b(j) / u1_b(j) * ( 3 * delta(l,m,n) + rho1 * (delta(l+1,m,n) - delta(l,m,n)) + rho2 * (delta(l,m+1,n) - delta(l,m,n)) + rho3 * (delta(l,m,n+1) - delta(l,m,n)) )...
+    E2 = E2 + ( u2_b(j) / u1_b(j) * ( 3 * delta(l,m,n) + rho1 * (delta(l+1,m,n) - delta(l,m,n)) + rho2 * (delta(l,m+1,n) - delta(l,m,n)) + rho3 * (delta(l,m,n+1) - delta(l,m,n)) )...
          - ( (3 * beta(l2,m2,n2) + rho1 * (beta(l2+1,m2,n2) - beta(l2,m2,n2)) + rho2 * (beta(l2,m2+1,n2) - beta(l2,m2,n2)) + rho3 * (beta(l2,m2,n2+1) - beta(l2,m2,n2)))...
          - (3 * beta(l,m,n) + rho1 * (beta(l+1,m,n) - beta(l,m,n)) + rho2 * (beta(l,m+1,n) - beta(l,m,n)) + rho3 * (beta(l,m,n+1) - beta(l,m,n))) )...
          / ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
-         - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) );
+         - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) ) ) ^ 2;
     
-    E3 = u1_b(j) * ( 3 * epsilon(l,m,n) + rho1 * (epsilon(l+1,m,n) - epsilon(l,m,n)) + rho2 * (epsilon(l,m+1,n) - epsilon(l,m,n)) + rho3 * (epsilon(l,m,n+1) - epsilon(l,m,n)) )...
+    E3 = E3 + ( u1_b(j) * ( 3 * epsilon(l,m,n) + rho1 * (epsilon(l+1,m,n) - epsilon(l,m,n)) + rho2 * (epsilon(l,m+1,n) - epsilon(l,m,n)) + rho3 * (epsilon(l,m,n+1) - epsilon(l,m,n)) )...
          - ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
          - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) )...
-         / dk;
-
-    E = E + zeta1 * E1 * E1 + zeta2 * E2 * E2 + zeta3 * E3 * E3;
-
-    disp(E)
-
+         / dk ) ^ 2;
 
 end
+
+E = zeta1 * E1 + zeta2 * E2 + zeta3 * E3;
+
+disp(E)
 
 disp('l_now = ')
 disp(l_now)
@@ -146,23 +145,26 @@ disp(n)
 eta_f1 = 0.005; %学習率
 eta_f2 = 0.005;
 eta_f3 = 0.005;
-eta_g = 0.005;
-eta_h = 0.005;
+eta_g = 0.05;
+eta_h = 0.001;
 
 iteration = 15; %パラメータ更新回数（最大）
 
 param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]);
-param_beta = zeros([l2+1,m2+1,n2+1,iteration+1]);
-param_gamma = zeros([l2+1,m2+1,n2+1,iteration+1]);
-param_delta = zeros([l2+1,m2+1,n2+1,iteration+1]);
-param_epsilon = zeros([l2+1,m2+1,n2+1,iteration+1]);
+% param_beta = zeros(l2+1,m2+1,n2+1,iteration+1);
+% param_gamma = zeros(l2+1,m2+1,n2+1,iteration+1);
+% param_delta = zeros(l2+1,m2+1,n2+1,iteration+1);
+% param_epsilon = zeros(l2+1,m2+1,n2+1,iteration+1);
 
-% param_beta = rand([l2+1,m2+1,n2+1,iteration+1]);
-% param_gamma = rand([l2+1,m2+1,n2+1,iteration+1]);
-% param_delta = rand([l2+1,m2+1,n2+1,iteration+1]);
-% param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]);
+param_beta = rand([l2+1,m2+1,n2+1,iteration+1]);
+param_gamma = rand([l2+1,m2+1,n2+1,iteration+1]);
+param_delta = rand([l2+1,m2+1,n2+1,iteration+1]);
+param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]);
 
 E_value = zeros(1,iteration);
+E1_value = zeros(1,iteration);
+E2_value = zeros(1,iteration);
+E3_value = zeros(1,iteration);
 
 for t = 1:iteration
 
@@ -188,11 +190,11 @@ for t = 1:iteration
 
 
                 DEg_2 = subs(DEg, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-                                    [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
+                                  [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
 
 
                 DEh_2 = subs(DEh, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-                                    [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
+                                  [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
 
 
                 param_alpha(a,b,c,t+1) = param_alpha(a,b,c,t) - eta_f1 * double(DEf1_2);
@@ -209,18 +211,33 @@ for t = 1:iteration
         end
     end
 
+    E1_value(t) = double(subs(E1, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                                 [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1), param_delta(:,:,:,t+1), param_epsilon(:,:,:,t+1)]));
+
+    E2_value(t) = double(subs(E2, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                                 [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1), param_delta(:,:,:,t+1), param_epsilon(:,:,:,t+1)]));
+
+    E3_value(t) = double(subs(E3, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                                 [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1), param_delta(:,:,:,t+1), param_epsilon(:,:,:,t+1)]));
+
     E_value(t) = double(subs(E, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
                                 [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1), param_delta(:,:,:,t+1), param_epsilon(:,:,:,t+1)]));
 
 
     disp('t = ')
     disp(t)
+    disp('E1 = ')
+    disp(E1_value(t))
+    disp('E2 = ')
+    disp(E2_value(t))
+    disp('E3 = ')
+    disp(E3_value(t))
     disp('E = ')
     disp(E_value(t))
     disp('--------------------')
 
     if t > 1
-        if E_value(t) > E_value(t-1)
+        if (E1_value(t) > E1_value(t-1)) && (E2_value(t) > E2_value(t-1)) && (E2_value(t) > E2_value(t-1))
             iteration = t;
             disp('iterationを終了します')
             break
@@ -321,9 +338,9 @@ figure;
 hold on;
 grid on;
 
-axis([-1.7 1.7 -10 10]) % π/2 ≒ 1.57
+axis([-5 5 -5 5]) % π/2 ≒ 1.57
 
-plot(si_b(:,1), si_b(:,1), '--', si_b(:,1), f1_b(:),'LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
+plot(si_b(:,1), si_b(:,1), '--m', si_b(:,1), f1_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
 xlabel('s1 = x')
 ylabel('z1 = f1(s)')
 legend('真値：s1','推定値：z1 = f1(s)')
@@ -337,7 +354,7 @@ grid on;
 
 axis([-1.7 1.7 -10 10]) % π/2 ≒ 1.57
 
-plot(si_b(:,3), si_b(:,3), '--', si_b(:,3), f2_b(:),'LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
+plot(si_b(:,3), si_b(:,3), '--m', si_b(:,3), f2_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
 xlabel('s3 = θ')
 ylabel('z2 = f2(s)')
 legend('真値：tan(s3)','推定値：z2 = f2(s)')
@@ -349,9 +366,9 @@ figure;
 hold on;
 grid on;
 
-axis([-1.7 1.7 -10 10]) % π/2 ≒ 1.57
+axis([-5 5 -5 5]) % π/2 ≒ 1.57
 
-plot(si_b(:,2), si_b(:,2), '--', si_b(:,2), f3_b(:),'LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
+plot(si_b(:,2), si_b(:,2), '--m', si_b(:,2), f3_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z2 = f(s3) = tan(s3) の答え合わせ
 xlabel('s2 = y')
 ylabel('z3 = f3(s)')
 legend('真値：s2','推定値：z3 = f3(s)')
@@ -370,7 +387,7 @@ for i=1:length(k)
     g_ans(i) = 1 / (cos(si_b(i,3)) * cos(si_b(i,3)) * cos(si_b(i,3)));
 end
 
-plot(si_b(:,3), g_ans(:), '--', si_b(:,3), gmap_b(:),'LineWidth', 1.5)
+plot(si_b(:,3), g_ans(:), '--m', si_b(:,3), gmap_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel('s3 = θ')
 ylabel('g(s)')
 legend('真値：1/cos^3(s3)','推定値：g(s)')
@@ -383,7 +400,7 @@ hold on;
 grid on;
 axis([-1.7 1.7 -0.2 1.2])
 
-plot(si_b(:,3), cos(si_b(:,3)), '--', si_b(:,3), hmap_b(:),'LineWidth', 1.5)
+plot(si_b(:,3), cos(si_b(:,3)), '--m', si_b(:,3), hmap_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel('s3 = θ')
 ylabel('h(s)')
 legend('真値：cos(s3)','推定値：h(s)')
