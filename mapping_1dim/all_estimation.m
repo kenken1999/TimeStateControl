@@ -4,20 +4,20 @@ close all;
 %all(f,g,h)_estimation----------------------------------------------------
 
 dk = 0.02;   %時間刻み
-Kfin = 0.06; %シミュレーション終了時間
+Kfin = 0.62; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
-u1_b = ones(1,length(k)) * 5;
-u2_b = ones(1,length(k)) * 5;
+u1_b = ones(length(k),1) * 5;
+u2_b = ones(length(k),1) * 5;
 
 si_b = zeros(length(k),3); %観測するセンサ変数 , (s1, s2, s3)=(x ,y, θ)
 si_b(1,:) = [0 0 -pi/2];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 zi_b = zeros(length(k),3);   %変換後の状態変数 (z1, z2, z3)=(x, tanθ, y), z2=f(s3)の推定
-gmap_b = zeros(1,length(k)); %dz1/dt = μ1 = u1h(s3)の推定, h(s3) = cos(s3)
-hmap_b = zeros(1,length(k)); %dz2/dz1 = μ2 = u2/u1 * g(s3)の推定, g(s3) = 1/cos(s3)^3
+gmap_b = zeros(length(k),1); %dz1/dt = μ1 = u1h(s3)の推定, h(s3) = cos(s3)
+hmap_b = zeros(length(k),1); %dz2/dz1 = μ2 = u2/u1 * g(s3)の推定, g(s3) = 1/cos(s3)^3
 
-p_now = zeros(1,length(k));  % p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
+p_now = zeros(length(k),1);  % p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
 p = 1;
 
 alpha = sym('alpha',[1 50]);
@@ -52,8 +52,7 @@ for j = 1:length(k) - 1
 
 end
 
-p_now
-
+disp(p_now)
 
 %---正則化項の追加---------------------------------
 % for i = 2:p
@@ -61,7 +60,6 @@ p_now
 %     Ef = Ef + (alpha(i+1) - 2 * alpha(i) + alpha(i-1)) ^ 2;
 
 % end
-
 
 %---写像 f, g, hの推定----------------------------
 
@@ -79,8 +77,8 @@ param_alpha = rand([iteration,p+1]);
 param_beta = rand([iteration,p+1]);
 param_gamma = rand([iteration,p+1]);
 
-Ef_value = zeros(1,iteration);
-Eh_value = zeros(1,iteration);
+Ef_value = zeros(iteration,1);
+Eh_value = zeros(iteration,1);
 
 % syms 'alpha%d' [1 p+1]
 % syms 'beta%d' [1 p+1]
@@ -231,8 +229,6 @@ figure;
 hold on;
 grid on;
 axis([-1.7 1.7 0.5 10])
-
-cos_3 = zeros(1,length(k));
 
 for i=1:length(k)
     g_ans(i) = 1 / (cos(si_b(i,3)) * cos(si_b(i,3)) * cos(si_b(i,3)));
