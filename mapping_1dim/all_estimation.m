@@ -4,7 +4,7 @@ close all;
 %all(f,g,h)_estimation----------------------------------------------------
 
 dk = 0.02;   %時間刻み
-Kfin = 0.62; %シミュレーション終了時間
+Kfin = 0.06; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1_b = ones(1,length(k)) * 5;
@@ -17,12 +17,10 @@ zi_b = zeros(length(k),3);   %変換後の状態変数 (z1, z2, z3)=(x, tanθ, y
 gmap_b = zeros(1,length(k)); %dz1/dt = μ1 = u1h(s3)の推定, h(s3) = cos(s3)
 hmap_b = zeros(1,length(k)); %dz2/dz1 = μ2 = u2/u1 * g(s3)の推定, g(s3) = 1/cos(s3)^3
 
-p_now = zeros(1,length(k)-1);  % p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
+p_now = zeros(1,length(k));  % p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
 p = 1;
 
-rho = zeros(1,length(k)-1);
-
-alpha = sym('alpha',[1 50]); %格子点， シンボリック変数
+alpha = sym('alpha',[1 50]);
 beta = sym('beta',[1 50]);
 gamma = sym('gamma',[1 50]);
 
@@ -34,15 +32,6 @@ Eh = 0;
 
 for j = 1:length(k) - 1
 
-    p_now(j) = floor(si_b(j,3) / sigma); % p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
-    rho(j) = si_b(j,3) / sigma  - p_now(j);
-
-    if j > 1
-        if p_now(j) > p_now(j-1)
-            p = p + 1; % 対応する格子点に番号をつけていく
-        end
-    end
-
     si_b(j+1,3) = si_b(j,3) + u2_b(j) * dk;
     si_b(j+1,1) = si_b(j,1) + u1_b(j) * cos(si_b(j+1,3)) * dk;
     si_b(j+1,2) = si_b(j,2) + u1_b(j) * sin(si_b(j+1,3)) * dk;
@@ -50,15 +39,20 @@ for j = 1:length(k) - 1
     zi_b(j+1,1) = si_b(j+1,1); %z1=s1は既知
     zi_b(j+1,3) = si_b(j+1,2); %z3=s2は既知
 
-    Ef = Ef + ( alpha(p) + rho(j) * (alpha(p+1) - alpha(p)) - (zi_b(j+1,3) - zi_b(j,3)) / (zi_b(j+1,1) - zi_b(j,1)) ) ^ 2;
+    p_now(j+1) = floor(si_b(j+1,3) / sigma); % p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
+    u = si_b(j+1,3) / sigma  - p_now(j+1);
 
-    Eh = Eh + ( u1_b(j) * (gamma(p) + rho(j) * (gamma(p+1) - gamma(p))) - (zi_b(j+1,1) - zi_b(j,1)) / dk )^ 2;
+    if p_now(j+1) > p_now(j)
+        p = p + 1; % 対応する格子点に番号をつけていく
+    end
+
+    Ef = Ef + ( alpha(p) + u * (alpha(p+1) - alpha(p)) - (zi_b(j+1,3) - zi_b(j,3)) / (zi_b(j+1,1) - zi_b(j,1)) ) ^ 2;
+
+    Eh = Eh + ( u1_b(j) * (gamma(p) + u * (gamma(p+1) - gamma(p))) - (zi_b(j+1,1) - zi_b(j,1)) / dk )^ 2;
 
 end
 
-
-disp('p_now =')
-disp(p_now)
+p_now
 
 
 %---正則化項の追加---------------------------------
@@ -87,6 +81,10 @@ param_gamma = rand([iteration,p+1]);
 
 Ef_value = zeros(1,iteration);
 Eh_value = zeros(1,iteration);
+
+% syms 'alpha%d' [1 p+1]
+% syms 'beta%d' [1 p+1]
+% syms 'gamma%d' [1 p+1]
 
 
 %---写像 f, hの推定-----------------
@@ -127,26 +125,25 @@ end
 
 p = 1;
 
-% zi_b(1,2) = param_alpha(iteration,1) - (1-u) * (param_alpha(iteration,2) - param_alpha(iteration,1));
-% hmap_b(1) = param_gamma(iteration,1) - (1-u) * (param_gamma(iteration,2) - param_gamma(iteration,1));
+zi_b(1,2) = param_alpha(iteration,1) - (1-u) * (param_alpha(iteration,2) - param_alpha(iteration,1));
+hmap_b(1) = param_gamma(iteration,1) - (1-u) * (param_gamma(iteration,2) - param_gamma(iteration,1));
 % zi_b(1,2) = param_alpha(iteration,1) + u * (param_alpha(iteration,2) - param_alpha(iteration,1)); %z2=f(s3)
 % hmap_b(1) = param_gamma(iteration,1) + u * (param_gamma(iteration,2) - param_gamma(iteration,1)); %h(s3)
 
-for j = 1:length(k)-1
+for j = 1:length(k) - 1
 
-    if j > 1
-        if p_now(j) > p_now(j-1)
-            p = p + 1; % 対応する格子点に番号をつけていく
-        end
+    p_now(j+1) = floor(si_b(j+1,3) / sigma);% p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
+    u = si_b(j+1,3) / sigma  - p_now(j+1);
+
+    if p_now(j+1) > p_now(j)
+        p = p + 1; 
     end
 
-    zi_b(j,2) = param_alpha(iteration,p) + rho(j) * (param_alpha(iteration,p+1) - param_alpha(iteration,p)); %z2=f(s3)
-    hmap_b(j) = param_gamma(iteration,p) + rho(j) * (param_gamma(iteration,p+1) - param_gamma(iteration,p)); %h(s3)
+    zi_b(j+1,2) = param_alpha(iteration,p) + u * (param_alpha(iteration,p+1) - param_alpha(iteration,p)); %z2=f(s3)
+    hmap_b(j+1) = param_gamma(iteration,p) + u * (param_gamma(iteration,p+1) - param_gamma(iteration,p)); %h(s3)
 
-    if j > 1
-        %推定したz2_bを利用して， Egを生成
-        Eg = Eg + ( u2_b(j) / u1_b(j) * (beta(p) + rho(j) * (beta(p+1) - beta(p))) - (zi_b(j,2)- zi_b(j-1,2)) / (zi_b(j,1)- zi_b(j-1,1)) ) ^ 2;
-    end
+    %推定したz2_bを利用して， Egを生成
+    Eg = Eg + ( u2_b(j) / u1_b(j) * (beta(p) + u * (beta(p+1) - beta(p))) - (zi_b(j+1,2)- zi_b(j,2)) / (zi_b(j+1,1)- zi_b(j,1)) ) ^ 2;
 
 end
 
@@ -183,19 +180,20 @@ end
 
 p = 1;
 
-% gmap_b(1) = param_beta(iteration,1) - (1-u) * (param_beta(iteration,2) - param_beta(iteration,1));
+gmap_b(1) = param_beta(iteration,1) - (1-u) * (param_beta(iteration,2) - param_beta(iteration,1));
 % gmap_b(1) = param_beta(iteration,1) + u * (param_beta(iteration,2) - param_beta(iteration,1)); %h(s3)
 
 
-for j = 1:length(k)-1
+for j = 1:length(k) - 1
 
-    if j > 1
-        if p_now(j) > p_now(j-1)
-            p = p + 1; % 対応する格子点に番号をつけていく
-        end
+    p_now(j+1) = floor(si_b(j+1,3) / sigma);% p_now = 時刻kのi, 値が飛び飛び or 被る可能性あり
+    u = si_b(j+1,3) / sigma  - p_now(j+1);
+
+    if p_now(j+1) > p_now(j)
+        p = p + 1; 
     end
 
-    gmap_b(j) = param_beta(iteration,p) + rho(j) * (param_beta(iteration,p+1) - param_beta(iteration,p)); %g(s3)
+    gmap_b(j+1) = param_beta(iteration,p) + u * (param_beta(iteration,p+1) - param_beta(iteration,p)); %g(s3)
 
 end
 
@@ -234,11 +232,13 @@ hold on;
 grid on;
 axis([-1.7 1.7 0.5 10])
 
+cos_3 = zeros(1,length(k));
+
 for i=1:length(k)
     g_ans(i) = 1 / (cos(si_b(i,3)) * cos(si_b(i,3)) * cos(si_b(i,3)));
 end
 
-plot(si_b(:,3), g_ans(:), '--m', si_b(1:length(k)-1,3), gmap_b(1:length(k)-1),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+plot(si_b(:,3), g_ans(:), '--m', si_b(:,3), gmap_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel('s3 = θ')
 ylabel('g(s3)')
 legend('真値：1/cos^3(s3)','推定値：g(s3)')
