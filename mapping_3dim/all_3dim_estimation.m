@@ -168,11 +168,10 @@ for a = 1:l2-1
 
             E4 = E4 + xi_1 * E4_1 + xi_2 * E4_2 + xi_3 * E4_3 + xi_4 * E4_4 + xi_5 * E4_5;
 
+
         end
     end
 end
-
-disp(E4)
 
 
 %---写像 f1,f2,f3,g,h の推定----------------------------
@@ -200,16 +199,16 @@ param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.01;
 
 %---Eの設定-----------------------------
 
-zeta1 = 1; %E1の調整係数
-zeta2 = 0.1; %E2の調整係数
-zeta3 = 1; %E3の調整係数
+% zeta1 = 1; %E1の調整係数
+% zeta2 = 0.1; %E2の調整係数
+% zeta3 = 1; %E3の調整係数
 
-% zeta1 = 1 / (10 * floor(E1_initial / 10)); %E1の調整係数
-% zeta2 = 1 / (10 * floor(E2_initial / 10)); %E2の調整係数
-% zeta3 = 1 / (10 * floor(E3_initial / 10)); %E3の調整係数
+zeta1 = 1 / (E1_initial + 1); %E1の調整係数
+zeta2 = 1 / (E2_initial + 1); %E2の調整係数
+zeta3 = 1 / (E3_initial + 1); %E3の調整係数
 
 
-xi_all = 0.001;
+xi_all =  1 / (E3_initial + 1);
 
 
 E1_initial = double(subs(E1, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
@@ -244,6 +243,8 @@ disp('E4 = ')
 disp(E4_initial)
 disp('xi_all = ')
 disp(xi_all)
+disp('E = ')
+disp(E)
 disp('--------------------')
 
 
