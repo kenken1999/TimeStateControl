@@ -69,7 +69,7 @@ eta_f = 0.05; %学習率
 eta_g = 0.5; %学習率
 eta_h = 0.01; %学習率
 
-iteration = 3; %パラメータ更新回数（最大）
+iteration = 30; %パラメータ更新回数（最大）
 
 param_alpha = zeros(iteration,p+1);
 param_beta = zeros(iteration,p+1);

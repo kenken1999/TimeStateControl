@@ -150,9 +150,9 @@ xi_4 = 1;
 xi_5 = 1;
 
 
-for a = 1:l2-1
-    for b = 1:m2-1
-        for c = 1:n2-1
+for a = 1 : l2 - 1
+    for b = 1 : m2 - 1
+        for c = 1 : n2 - 1
 
             E4_1 = (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
             E4_2 = (beta(a+2,b,c) - 2 * beta(a+1,b,c) + beta(a,b,c)) ^ 2 + (beta(a,b+2,c) - 2 * beta(a,b+1,c) + beta(a,b,c)) ^ 2 + (beta(a,b,c+2) - 2 * beta(a,b,c+1) + beta(a,b,c)) ^ 2;
@@ -179,10 +179,10 @@ end
 eta_f1 = 0.00001; %学習率
 eta_f2 = 0.00001;
 eta_f3 = 0.00001;
-eta_g = 0.00001;
+eta_g = 0.01;
 eta_h = 0.00001;
 
-iteration = 5; %パラメータ更新回数（最大）
+iteration = 10; %パラメータ更新回数（最大）
 
 % param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]);
 % param_beta = rand([l2+1,m2+1,n2+1,iteration+1]);
@@ -199,18 +199,6 @@ param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.01;
 
 %---Eの設定-----------------------------
 
-% zeta1 = 1; %E1の調整係数
-% zeta2 = 0.1; %E2の調整係数
-% zeta3 = 1; %E3の調整係数
-
-zeta1 = 1 / (E1_initial + 1); %E1の調整係数
-zeta2 = 1 / (E2_initial + 1); %E2の調整係数
-zeta3 = 1 / (E3_initial + 1); %E3の調整係数
-
-
-xi_all =  1 / (E3_initial + 1);
-
-
 E1_initial = double(subs(E1, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
                              [param_alpha(:,:,:,1), param_beta(:,:,:,1), param_gamma(:,:,:,1), param_delta(:,:,:,1), param_epsilon(:,:,:,1)]));
 
@@ -224,7 +212,20 @@ E4_initial = double(subs(E4, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n
                              [param_alpha(:,:,:,1), param_beta(:,:,:,1), param_gamma(:,:,:,1), param_delta(:,:,:,1), param_epsilon(:,:,:,1)]));
                              
 
+% zeta1 = 1; %E1の調整係数
+% zeta2 = 0.1; %E2の調整係数
+% zeta3 = 1; %E3の調整係数
+
+zeta1 = 1 / (E1_initial + 1); %E1の調整係数
+zeta2 = 1 / (E2_initial + 1); %E2の調整係数
+zeta3 = 1 / (E3_initial + 1); %E3の調整係数
+
+xi_all =  1 / (E3_initial + 1);
+
 E = zeta1 * E1 + zeta2 * E2 + zeta3 * E3 + xi_all * E4;
+
+E_initial = double(subs(E, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                             [param_alpha(:,:,:,1), param_beta(:,:,:,1), param_gamma(:,:,:,1), param_delta(:,:,:,1), param_epsilon(:,:,:,1)]));
 
 
 disp('E1 = ')
@@ -244,7 +245,7 @@ disp(E4_initial)
 disp('xi_all = ')
 disp(xi_all)
 disp('E = ')
-disp(E)
+disp(E_initial)
 disp('--------------------')
 
 
@@ -353,15 +354,31 @@ for t = 1:iteration
     disp(E4_value(t))
     disp('E = ')
     disp(E_value(t))
-    disp('--------------------')
 
     if t > 1
-        if (E1_value(t) > E1_value(t-1)) && (E2_value(t) > E2_value(t-1)) && (E2_value(t) > E2_value(t-1))
+        if (E1_value(t) > E1_value(t-1))
+            disp('E1が増加しました')
+        end
+        if (E2_value(t) > E2_value(t-1))
+            disp('E2が増加しました')
+        end
+        if (E3_value(t) > E3_value(t-1))
+            disp('E3が増加しました')
+        end
+        if (E4_value(t) > E4_value(t-1))
+            disp('E1が増加しました')
+        end
+        if (E_value(t) > E_value(t-1))
+            disp('Eが増加しました')
+        end
+        if (E1_value(t) > E1_value(t-1)) && (E2_value(t) > E2_value(t-1)) && (E3_value(t) > E3_value(t-1))
             iteration = t;
             disp('iterationを終了します')
             break
         end
     end
+
+    disp('--------------------')
 
     if t == iteration
             iteration = t+1;
