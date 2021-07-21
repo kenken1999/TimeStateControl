@@ -1,15 +1,15 @@
 clear;
 close all;
 
-dt = 0.04;%%時間刻み=離散時間Tsとして使用
-Tfin = 0.62;%シミュレーション終了時間
+dt = 0.02;%%時間刻み=離散時間Tsとして使用
+Tfin = 0.30;%シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
 u1 = ones(1,length(t1)) * 5;
 u2 = ones(1,length(t1)) * 5;
 
 si = zeros(length(t1),3);
-si(1,:) = [0 0 -pi/2];%状態ξの初期値を設定
+si(1,:) = [0 0 -pi/4];%状態ξの初期値を設定
 
 x = si(1,1) + 0.15 * cos(si(1,3));
 y = si(1,2) + 0.15 * sin(si(1,3));
@@ -18,7 +18,7 @@ hold on;
 axis equal;
 grid on;
 
-axis([-0.5 2.5 -1.5 1.5])
+axis([-0.5 2.5 -0.5 2.5])
 
 h = plot(si(1,1),si(1,2), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
 h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');

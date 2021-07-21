@@ -6,14 +6,14 @@ tic
 %all(f1,f2,f3,g,h)_estimation----------------------------------------------------
 
 dk = 0.02;   %時間刻み
-Kfin = 0.08; %シミュレーション終了時間
+Kfin = 0.14; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1_b = ones(length(k),1) * 5;
 u2_b = ones(length(k),1) * 5;
 
 si_b = zeros(length(k),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b(1,:) = [0 0 -pi/2];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si_b(1,:) = [0 0 -pi/4];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 f1_b = zeros(length(k),1);   %写像f1:s→z1の推定
 f2_b = zeros(length(k),1);   %写像f2:s→z2の推定
@@ -43,10 +43,10 @@ sigma3 = 0.15; %s3のスケーリング定数
 E1 = 0;
 % E2 = 0;
 % E3 = 0;
-% E4 = 0;
-% E4_1 = 0;
-% E4_2 = 0;
-% E4_3 = 0;
+E4 = 0;
+E4_1 = 0;
+E4_2 = 0;
+E4_3 = 0;
 % E4_4 = 0;
 % E4_5 = 0;
 
@@ -143,46 +143,46 @@ disp(n2)
 
 %---正則化項の追加---------------
 
-% xi_1 = 1;
-% xi_2 = 1;
-% xi_3 = 1;
+xi_1 = 1;
+xi_2 = 1;
+xi_3 = 1;
 % xi_4 = 1;
 % xi_5 = 1;
 
 
-% for a = 1 : l2 - 1
-%     for b = 1 : m2 - 1
-%         for c = 1 : n2 - 1
+for a = 1 : l2 - 1
+    for b = 1 : m2 - 1
+        for c = 1 : n2 - 1
 
-%             E4_1 = (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
-%             E4_2 = (beta(a+2,b,c) - 2 * beta(a+1,b,c) + beta(a,b,c)) ^ 2 + (beta(a,b+2,c) - 2 * beta(a,b+1,c) + beta(a,b,c)) ^ 2 + (beta(a,b,c+2) - 2 * beta(a,b,c+1) + beta(a,b,c)) ^ 2;
-%             E4_3 = (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
-%             E4_4 = (delta(a+2,b,c) - 2 * delta(a+1,b,c) + delta(a,b,c)) ^ 2 + (delta(a,b+2,c) - 2 * delta(a,b+1,c) + delta(a,b,c)) ^ 2 + (delta(a,b,c+2) - 2 * delta(a,b,c+1) + delta(a,b,c)) ^ 2;
-%             E4_5 = (epsilon(a+2,b,c) - 2 * epsilon(a+1,b,c) + epsilon(a,b,c)) ^ 2 + (epsilon(a,b+2,c) - 2 * epsilon(a,b+1,c) + epsilon(a,b,c)) ^ 2 + (epsilon(a,b,c+2) - 2 * epsilon(a,b,c+1) + epsilon(a,b,c)) ^ 2;
+            E4_1 = (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
+            E4_2 = (beta(a+2,b,c) - 2 * beta(a+1,b,c) + beta(a,b,c)) ^ 2 + (beta(a,b+2,c) - 2 * beta(a,b+1,c) + beta(a,b,c)) ^ 2 + (beta(a,b,c+2) - 2 * beta(a,b,c+1) + beta(a,b,c)) ^ 2;
+            E4_3 = (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
+            % E4_4 = (delta(a+2,b,c) - 2 * delta(a+1,b,c) + delta(a,b,c)) ^ 2 + (delta(a,b+2,c) - 2 * delta(a,b+1,c) + delta(a,b,c)) ^ 2 + (delta(a,b,c+2) - 2 * delta(a,b,c+1) + delta(a,b,c)) ^ 2;
+            % E4_5 = (epsilon(a+2,b,c) - 2 * epsilon(a+1,b,c) + epsilon(a,b,c)) ^ 2 + (epsilon(a,b+2,c) - 2 * epsilon(a,b+1,c) + epsilon(a,b,c)) ^ 2 + (epsilon(a,b,c+2) - 2 * epsilon(a,b,c+1) + epsilon(a,b,c)) ^ 2;
 
-%             % E4_1 = (alpha(a+1,b,c) - 2 * alpha(a,b,c) + alpha(a-1,b,c)) ^ 2 + (alpha(a,b+1,c) - 2 * alpha(a,b,c) + alpha(a,b-1,c)) ^ 2 + (alpha(a,b,c+1) - 2 * alpha(a,b,c) + alpha(a,b,c-1)) ^ 2;
-%             % E4_2 = (beta(a+1,b,c) - 2 * beta(a,b,c) + beta(a-1,b,c)) ^ 2 + (beta(a,b+1,c) - 2 * beta(a,b,c) + beta(a,b-1,c)) ^ 2 + (beta(a,b,c+1) - 2 * beta(a,b,c) + beta(a,b,c-1)) ^ 2;
-%             % E4_3 = (gamma(a+1,b,c) - 2 * gamma(a,b,c) + gamma(a-1,b,c)) ^ 2 + (gamma(a,b+1,c) - 2 * gamma(a,b,c) + gamma(a,b-1,c)) ^ 2 + (gamma(a,b,c+1) - 2 * gamma(a,b,c) + gamma(a,b,c-1)) ^ 2;
-%             % E4_4 = (delta(a+1,b,c) - 2 * delta(a,b,c) + delta(a-1,b,c)) ^ 2 + (delta(a,b+1,c) - 2 * delta(a,b,c) + delta(a,b-1,c)) ^ 2 + (delta(a,b,c+1) - 2 * delta(a,b,c) + delta(a,b,c-1)) ^ 2;
-%             % E4_5 = (epsilon(a+1,b,c) - 2 * epsilon(a,b,c) + epsilon(a-1,b,c)) ^ 2 + (epsilon(a,b+1,c) - 2 * epsilon(a,b,c) + epsilon(a,b-1,c)) ^ 2 + (epsilon(a,b,c+1) - 2 * epsilon(a,b,c) + epsilon(a,b,c-1)) ^ 2;
+            % E4_1 = (alpha(a+1,b,c) - 2 * alpha(a,b,c) + alpha(a-1,b,c)) ^ 2 + (alpha(a,b+1,c) - 2 * alpha(a,b,c) + alpha(a,b-1,c)) ^ 2 + (alpha(a,b,c+1) - 2 * alpha(a,b,c) + alpha(a,b,c-1)) ^ 2;
+            % E4_2 = (beta(a+1,b,c) - 2 * beta(a,b,c) + beta(a-1,b,c)) ^ 2 + (beta(a,b+1,c) - 2 * beta(a,b,c) + beta(a,b-1,c)) ^ 2 + (beta(a,b,c+1) - 2 * beta(a,b,c) + beta(a,b,c-1)) ^ 2;
+            % E4_3 = (gamma(a+1,b,c) - 2 * gamma(a,b,c) + gamma(a-1,b,c)) ^ 2 + (gamma(a,b+1,c) - 2 * gamma(a,b,c) + gamma(a,b-1,c)) ^ 2 + (gamma(a,b,c+1) - 2 * gamma(a,b,c) + gamma(a,b,c-1)) ^ 2;
+            % E4_4 = (delta(a+1,b,c) - 2 * delta(a,b,c) + delta(a-1,b,c)) ^ 2 + (delta(a,b+1,c) - 2 * delta(a,b,c) + delta(a,b-1,c)) ^ 2 + (delta(a,b,c+1) - 2 * delta(a,b,c) + delta(a,b,c-1)) ^ 2;
+            % E4_5 = (epsilon(a+1,b,c) - 2 * epsilon(a,b,c) + epsilon(a-1,b,c)) ^ 2 + (epsilon(a,b+1,c) - 2 * epsilon(a,b,c) + epsilon(a,b-1,c)) ^ 2 + (epsilon(a,b,c+1) - 2 * epsilon(a,b,c) + epsilon(a,b,c-1)) ^ 2;
 
-%             E4 = E4 + xi_1 * E4_1 + xi_2 * E4_2 + xi_3 * E4_3 + xi_4 * E4_4 + xi_5 * E4_5;
+            E4 = E4 + xi_1 * E4_1 + xi_2 * E4_2 + xi_3 * E4_3;
 
 
-%         end
-%     end
-% end
+        end
+    end
+end
 
 
 %---写像 f1,f2,f3,g,h の推定----------------------------
 
-eta_f1 = 2.0 * 10 ^ (-7); %学習率
+eta_f1 = 1.75 * 10 ^ (-7); %学習率
 eta_f2 = 1.5 * 10 ^ (-1);
-eta_f3 = 2.0 * 10 ^ (-7);
+eta_f3 = 1.0 * 10 ^ (-7);
 % eta_g = 0.01;
 % eta_h = 0.00001;
 
-iteration = 10; %パラメータ更新回数（最大）
+iteration = 50; %パラメータ更新回数（最大）
 
 % param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]);
 % param_beta = rand([l2+1,m2+1,n2+1,iteration+1]);
@@ -208,30 +208,30 @@ E1_initial = double(subs(E1, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n
 % E3_initial = double(subs(E3, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
 %                              [param_alpha(:,:,:,1), param_beta(:,:,:,1), param_gamma(:,:,:,1), param_delta(:,:,:,1), param_epsilon(:,:,:,1)]));
 
-% E4_initial = double(subs(E4, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-%                              [param_alpha(:,:,:,1), param_beta(:,:,:,1), param_gamma(:,:,:,1), param_delta(:,:,:,1), param_epsilon(:,:,:,1)]));
+E4_initial = double(subs(E4, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
+                             [param_alpha(:,:,:,1), param_beta(:,:,:,1), param_gamma(:,:,:,1)]));
                              
 
 % zeta1 = 1; %E1の調整係数
 % zeta2 = 0.1; %E2の調整係数
 % zeta3 = 1; %E3の調整係数
 
-% zeta1 = 1 / (E1_initial + 1); %E1の調整係数
+zeta1 = 1 / (E1_initial + 1); %E1の調整係数
 % zeta2 = 1 / (E2_initial + 1); %E2の調整係数
 % zeta3 = 1 / (E3_initial + 1); %E3の調整係数
 
-% xi_all =  1 / (E3_initial + 1);
+xi_all =  1 / (E4_initial + 1);
 
-% E = zeta1 * E1 + zeta2 * E2 + zeta3 * E3 + xi_all * E4;
+E = zeta1 * E1 + xi_all * E4;
 
-% E_initial = double(subs(E, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-%                              [param_alpha(:,:,:,1), param_beta(:,:,:,1), param_gamma(:,:,:,1), param_delta(:,:,:,1), param_epsilon(:,:,:,1)]));
+E_initial = double(subs(E, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
+                             [param_alpha(:,:,:,1), param_beta(:,:,:,1), param_gamma(:,:,:,1)]));
 
 
 disp('E1 = ')
 disp(E1_initial)
-% disp('zeta1 = ')
-% disp(zeta1)
+disp('zeta1 = ')
+disp(zeta1)
 % disp('E2 = ')
 % disp(E2_initial)
 % disp('zeta2 = ')
@@ -240,24 +240,25 @@ disp(E1_initial)
 % disp(E3_initial)
 % disp('zeta3 = ')
 % disp(zeta3)
-% disp('E4 = ')
-% disp(E4_initial)
-% disp('xi_all = ')
-% disp(xi_all)
-% disp('E = ')
-% disp(E_initial)
+disp('E4 = ')
+disp(E4_initial)
+disp('xi_all = ')
+disp(xi_all)
+disp('E = ')
+disp(E_initial)
 disp('--------------------')
 
 
 
-% E_value = zeros(1,iteration);
+E_value = zeros(1,iteration);
 E1_value = zeros(1,iteration);
 % E2_value = zeros(1,iteration);
 % E3_value = zeros(1,iteration);
+E4_value = zeros(1,iteration);
 
 DEf1 = sym('DEf1',[l+1 m+1 n+1]);
-% DEf2 = sym('DEf2',[l+1 m+1 n+1]);
-% DEf3 = sym('DEf3',[l+1 m+1 n+1]);
+DEf2 = sym('DEf2',[l+1 m+1 n+1]);
+DEf3 = sym('DEf3',[l+1 m+1 n+1]);
 % DEg = sym('DEg',[l+1 m+1 n+1]);
 % DEh = sym('DEh',[l+1 m+1 n+1]);
 
@@ -266,17 +267,21 @@ for a = 1:l2+1
     for b = 1:m2+1
         for c = 1:n2+1
 
-                DEf1(a,b,c) = diff(E1,alpha(a,b,c));
-                DEf2(a,b,c) = diff(E1,beta(a,b,c));
-                DEf3(a,b,c) = diff(E1,gamma(a,b,c));
+                DEf1(a,b,c) = diff(E,alpha(a,b,c));
+                DEf2(a,b,c) = diff(E,beta(a,b,c));
+                DEf3(a,b,c) = diff(E,gamma(a,b,c));
                 % DEg(a,b,c) = diff(E,delta(a,b,c));
                 % DEh(a,b,c) = diff(E,epsilon(a,b,c));
 
-                % DEf1_1{a,b,c} = matlabFunction(DEf1(a,b,c));
-                % DEf2_1{a,b,c} = matlabFunction(DEf2(a,b,c));
-                % DEf3_1{a,b,c} = matlabFunction(DEf3(a,b,c));
-                % DEg_1{a,b,c} = matlabFunction(DEg(a,b,c));
-                % DEh_1{a,b,c}= matlabFunction(DEh(a,b,c));
+                DEf1_1{a,b,c} = matlabFunction(DEf1(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)});
+                DEf2_1{a,b,c} = matlabFunction(DEf2(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)});
+                DEf3_1{a,b,c} = matlabFunction(DEf3(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)});
+                % % DEg_1{a,b,c} = matlabFunction(DEg(a,b,c));
+                % % DEh_1{a,b,c}= matlabFunction(DEh(a,b,c));
+
+                A = [a b c];
+                disp(A)
+                disp('------------')
 
         end
     end
@@ -290,20 +295,20 @@ for t = 1:iteration
         for b = 1:m2+1
             for c = 1:n2+1
 
-                % DEf1_2 = DEf1_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
-                % DEf2_2 = DEf2_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
-                % DEf3_2 = DEf3_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
+                DEf1_2 = DEf1_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t));
+                DEf2_2 = DEf2_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t));
+                DEf3_2 = DEf3_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t));
                 % DEg_2 = DEg_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
                 % DEh_2 = DEh_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
 
-                DEf1_2 = subs(DEf1(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
-                                           [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t)]);
+                % DEf1_2 = subs(DEf1(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
+                %                            [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t)]);
 
-                DEf2_2 = subs(DEf2(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
-                                           [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t)]);
+                % DEf2_2 = subs(DEf2(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
+                %                            [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t)]);
 
-                DEf3_2 = subs(DEf3(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
-                                           [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t)]);
+                % DEf3_2 = subs(DEf3(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
+                %                            [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t)]);
 
                 % DEg_2 = subs(DEg(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
                 %                          [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
@@ -317,9 +322,9 @@ for t = 1:iteration
                 % param_delta(a,b,c,t+1) = param_delta(a,b,c,t) - eta_g * double(DEg_2);
                 % param_epsilon(a,b,c,t+1) = param_epsilon(a,b,c,t) - eta_h * double(DEh_2);
 
-                A = [a b c t];
-                disp(A)
-                disp('------------')
+                % A = [a b c t];
+                % disp(A)
+                % disp('------------')
 
             end
         end
@@ -335,11 +340,11 @@ for t = 1:iteration
     % E3_value(t) = double(subs(E3, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
     %                              [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1), param_delta(:,:,:,t+1), param_epsilon(:,:,:,t+1)]));
     
-    % E4_value(t) = double(subs(E4, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-    %                              [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1), param_delta(:,:,:,t+1), param_epsilon(:,:,:,t+1)]));
+    E4_value(t) = double(subs(E4, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
+                                 [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1)]));
 
-    % E_value(t) = double(subs(E, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-    %                             [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1), param_delta(:,:,:,t+1), param_epsilon(:,:,:,t+1)]));
+    E_value(t) = double(subs(E, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1)],...
+                                [param_alpha(:,:,:,t+1), param_beta(:,:,:,t+1), param_gamma(:,:,:,t+1)]));
 
 
     disp('t = ')
@@ -350,19 +355,15 @@ for t = 1:iteration
     % disp(E2_value(t))
     % disp('E3 = ')
     % disp(E3_value(t))
-    % disp('E4 = ')
-    % disp(E4_value(t))
-    % disp('E = ')
-    % disp(E_value(t))
+    disp('E4 = ')
+    disp(E4_value(t))
+    disp('E = ')
+    disp(E_value(t))
 
     if t > 1
         if (E1_value(t) > E1_value(t-1))
             iteration = t;
             disp('E1が増加しました')
-            disp('iterationを終了します')
-            break
-        else
-            disp('継続します')
         end
         % if (E2_value(t) > E2_value(t-1))
         %     disp('E2が増加しました')
@@ -370,17 +371,17 @@ for t = 1:iteration
         % if (E3_value(t) > E3_value(t-1))
         %     disp('E3が増加しました')
         % end
-        % if (E4_value(t) > E4_value(t-1))
-        %     disp('E1が増加しました')
-        % end
-        % if (E_value(t) > E_value(t-1))
-        %     disp('Eが増加しました')
-        % end
-        % if (E1_value(t) > E1_value(t-1)) && (E2_value(t) > E2_value(t-1)) && (E3_value(t) > E3_value(t-1))
-        %     iteration = t;
-        %     disp('iterationを終了します')
-        %     break
-        % end
+        if (E4_value(t) > E4_value(t-1))
+            disp('E1が増加しました')
+        end
+        if (E_value(t) > E_value(t-1))
+            disp('Eが増加しました')
+        end
+        if (E1_value(t) > E1_value(t-1)) && (E4_value(t) > E4_value(t-1))
+            iteration = t;
+            disp('iterationを終了します')
+            break
+        end
     end
 
     disp('--------------------')
