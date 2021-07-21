@@ -29,13 +29,18 @@ l_num = ones(length(k),1); %推定した格子点に前から順に番号をつ�
 m_num = ones(length(k),1);
 n_num = ones(length(k),1);
 
+rho1 = zeros(length(k),1);
+rho2 = zeros(length(k),1);
+rho3 = zeros(length(k),1);
+
+
 alpha = sym('alpha',[50 50 50]); %l,m,nの順
 beta = sym('beta',[50 50 50]);
 gamma = sym('gamma',[50 50 50]);
 delta = sym('delta',[50 50 50]);
 epsilon = sym('epsilon',[50 50 50]);
 
-sigma1 = 0.05; %s1のスケーリング定数
+sigma1 = 0.15; %s1のスケーリング定数
 sigma2 = 0.15; %s2のスケーリング定数
 sigma3 = 0.15; %s3のスケーリング定数
 
@@ -50,6 +55,15 @@ E4_3 = 0;
 E4_4 = 0;
 E4_5 = 0;
 
+l_now(1) = floor(si_b(1,1) / sigma1);
+rho1(1) = si_b(1,1) / sigma1  - l_now(1);
+
+m_now(1) = floor(si_b(1,2) / sigma2);
+rho2(1) = si_b(1,2) / sigma2  - m_now(1);
+
+n_now(1) = floor(si_b(1,3) / sigma3);
+rho3(1) = si_b(1,3) / sigma3  - n_now(1);
+
 
 for j = 1:length(k) - 1
 
@@ -58,13 +72,13 @@ for j = 1:length(k) - 1
     si_b(j+1,2) = si_b(j,2) + u1_b(j) * sin(si_b(j+1,3)) * dk;
 
     l_now(j+1) = floor(si_b(j+1,1) / sigma1);
-    rho1 = si_b(j+1,1) / sigma1  - l_now(j+1);
+    rho1(j+1) = si_b(j+1,1) / sigma1  - l_now(j+1);
 
     m_now(j+1) = floor(si_b(j+1,2) / sigma2);
-    rho2 = si_b(j+1,2) / sigma2  - m_now(j+1);
+    rho2(j+1) = si_b(j+1,2) / sigma2  - m_now(j+1);
 
     n_now(j+1) = floor(si_b(j+1,3) / sigma3);
-    rho3 = si_b(j+1,3) / sigma3  - n_now(j+1);
+    rho3(j+1) = si_b(j+1,3) / sigma3  - n_now(j+1);
 
     if l_now(j+1) == l_now(j)
         l_num(j+1) = l_num(j);
@@ -92,21 +106,21 @@ for j = 1:length(k) - 1
     m2 = m_num(j+1);
     n2 = n_num(j+1);
 
-    E1 = E1 + ( 3 * beta(l,m,n) + rho1 * (beta(l+1,m,n) - beta(l,m,n)) + rho2 * (beta(l,m+1,n) - beta(l,m,n)) + rho3 * (beta(l,m,n+1) - beta(l,m,n))...
-                 - ( (3 * gamma(l2,m2,n2) + rho1 * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2 * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3 * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2)))...
-                 - (3 * gamma(l,m,n) + rho1 * (gamma(l+1,m,n) - gamma(l,m,n)) + rho2 * (gamma(l,m+1,n) - gamma(l,m,n)) + rho3 * (gamma(l,m,n+1) - gamma(l,m,n))) )...
-                 / ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
-                 - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) ) ) ^ 2;
+    E1 = E1 + ( 3 * beta(l,m,n) + rho1(j) * (beta(l+1,m,n) - beta(l,m,n)) + rho2(j) * (beta(l,m+1,n) - beta(l,m,n)) + rho3(j) * (beta(l,m,n+1) - beta(l,m,n))...
+                 - ( (3 * gamma(l2,m2,n2) + rho1(j+1) * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2(j+1) * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3(j+1) * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2)))...
+                 - (3 * gamma(l,m,n) + rho1(j) * (gamma(l+1,m,n) - gamma(l,m,n)) + rho2(j) * (gamma(l,m+1,n) - gamma(l,m,n)) + rho3(j) * (gamma(l,m,n+1) - gamma(l,m,n))) )...
+                 / ( (3 * alpha(l2,m2,n2) + rho1(j+1) * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2(j+1) * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3(j+1) * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
+                 - (3 * alpha(l,m,n) + rho1(j) * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2(j) * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3(j) * (alpha(l,m,n+1) - alpha(l,m,n))) ) ) ^ 2;
 
-    E2 = E2 + ( u2_b(j) / u1_b(j) * ( 3 * delta(l,m,n) + rho1 * (delta(l+1,m,n) - delta(l,m,n)) + rho2 * (delta(l,m+1,n) - delta(l,m,n)) + rho3 * (delta(l,m,n+1) - delta(l,m,n)) )...
-                 - ( (3 * beta(l2,m2,n2) + rho1 * (beta(l2+1,m2,n2) - beta(l2,m2,n2)) + rho2 * (beta(l2,m2+1,n2) - beta(l2,m2,n2)) + rho3 * (beta(l2,m2,n2+1) - beta(l2,m2,n2)))...
-                 - (3 * beta(l,m,n) + rho1 * (beta(l+1,m,n) - beta(l,m,n)) + rho2 * (beta(l,m+1,n) - beta(l,m,n)) + rho3 * (beta(l,m,n+1) - beta(l,m,n))) )...
-                 / ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
-                 - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) ) ) ^ 2;
+    E2 = E2 + ( u2_b(j) / u1_b(j) * ( 3 * delta(l,m,n) + rho1(j) * (delta(l+1,m,n) - delta(l,m,n)) + rho2(j) * (delta(l,m+1,n) - delta(l,m,n)) + rho3(j) * (delta(l,m,n+1) - delta(l,m,n)) )...
+                 - ( (3 * beta(l2,m2,n2) + rho1(j+1) * (beta(l2+1,m2,n2) - beta(l2,m2,n2)) + rho2(j+1) * (beta(l2,m2+1,n2) - beta(l2,m2,n2)) + rho3(j+1) * (beta(l2,m2,n2+1) - beta(l2,m2,n2)))...
+                 - (3 * beta(l,m,n) + rho1(j) * (beta(l+1,m,n) - beta(l,m,n)) + rho2(j) * (beta(l,m+1,n) - beta(l,m,n)) + rho3(j) * (beta(l,m,n+1) - beta(l,m,n))) )...
+                 / ( (3 * alpha(l2,m2,n2) + rho1(j+1) * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2(j+1) * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3(j+1) * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
+                 - (3 * alpha(l,m,n) + rho1(j) * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2(j) * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3(j) * (alpha(l,m,n+1) - alpha(l,m,n))) ) ) ^ 2;
     
-    E3 = E3 + ( u1_b(j) * ( 3 * epsilon(l,m,n) + rho1 * (epsilon(l+1,m,n) - epsilon(l,m,n)) + rho2 * (epsilon(l,m+1,n) - epsilon(l,m,n)) + rho3 * (epsilon(l,m,n+1) - epsilon(l,m,n)) )...
-                 - ( (3 * alpha(l2,m2,n2) + rho1 * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2 * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3 * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
-                 - (3 * alpha(l,m,n) + rho1 * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2 * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3 * (alpha(l,m,n+1) - alpha(l,m,n))) )...
+    E3 = E3 + ( u1_b(j) * ( 3 * epsilon(l,m,n) + rho1(j) * (epsilon(l+1,m,n) - epsilon(l,m,n)) + rho2(j) * (epsilon(l,m+1,n) - epsilon(l,m,n)) + rho3(j) * (epsilon(l,m,n+1) - epsilon(l,m,n)) )...
+                 - ( (3 * alpha(l2,m2,n2) + rho1(j+1) * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2(j+1) * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3(j+1) * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
+                 - (3 * alpha(l,m,n) + rho1(j) * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2(j) * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3(j) * (alpha(l,m,n+1) - alpha(l,m,n))) )...
                  / dk ) ^ 2;
 
 end
@@ -176,13 +190,13 @@ end
 
 %---写像 f1,f2,f3,g,h の推定----------------------------
 
-eta_f1 = 0.00001; %学習率
-eta_f2 = 0.00001;
-eta_f3 = 0.00001;
-eta_g = 0.01;
-eta_h = 0.00001;
+eta_f1 = 1.0 * 10 ^ (-5); %学習率
+eta_f2 = 2.5 * 10 ^ (-2);
+eta_f3 = 2.5 * 10 ^ (-5);
+eta_g = 2.5 * 10 ^ (-1);
+eta_h = 1.0 * 10 ^ (-3);
 
-iteration = 10; %パラメータ更新回数（最大）
+iteration = 20; %パラメータ更新回数（最大）
 
 % param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]);
 % param_beta = rand([l2+1,m2+1,n2+1,iteration+1]);
@@ -190,11 +204,11 @@ iteration = 10; %パラメータ更新回数（最大）
 % param_delta = rand([l2+1,m2+1,n2+1,iteration+1]);
 % param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]);
 
-param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.01;
-param_beta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.01;
-param_gamma = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.01;
-param_delta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.01;
-param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.01;
+param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
+param_beta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
+param_gamma = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
+param_delta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
+param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
 
 
 %---Eの設定-----------------------------
@@ -220,7 +234,7 @@ zeta1 = 1 / (E1_initial + 1); %E1の調整係数
 zeta2 = 1 / (E2_initial + 1); %E2の調整係数
 zeta3 = 1 / (E3_initial + 1); %E3の調整係数
 
-xi_all =  1 / (E3_initial + 1);
+xi_all =  1 / (E4_initial + 1);
 
 E = zeta1 * E1 + zeta2 * E2 + zeta3 * E3 + xi_all * E4;
 
@@ -254,6 +268,7 @@ E_value = zeros(1,iteration);
 E1_value = zeros(1,iteration);
 E2_value = zeros(1,iteration);
 E3_value = zeros(1,iteration);
+E4_value = zeros(1,iteration);
 
 DEf1 = sym('DEf1',[l+1 m+1 n+1]);
 DEf2 = sym('DEf2',[l+1 m+1 n+1]);
@@ -272,11 +287,15 @@ for a = 1:l2+1
                 DEg(a,b,c) = diff(E,delta(a,b,c));
                 DEh(a,b,c) = diff(E,epsilon(a,b,c));
 
-                DEf1_1{a,b,c} = matlabFunction(DEf1(a,b,c));
-                DEf2_1{a,b,c} = matlabFunction(DEf2(a,b,c));
-                DEf3_1{a,b,c} = matlabFunction(DEf3(a,b,c));
-                DEg_1{a,b,c} = matlabFunction(DEg(a,b,c));
-                DEh_1{a,b,c}= matlabFunction(DEh(a,b,c));
+                DEf1_1{a,b,c} = matlabFunction(DEf1(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)});
+                DEf2_1{a,b,c} = matlabFunction(DEf2(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)});
+                DEf3_1{a,b,c} = matlabFunction(DEf3(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)});
+                DEg_1{a,b,c} = matlabFunction(DEg(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)});
+                DEh_1{a,b,c} = matlabFunction(DEh(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)});
+
+                A = [a b c];
+                disp(A)
+                disp('------------')
 
         end
     end
@@ -290,26 +309,26 @@ for t = 1:iteration
         for b = 1:m2+1
             for c = 1:n2+1
 
-                % DEf1_2 = DEf1_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
-                % DEf2_2 = DEf2_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
-                % DEf3_2 = DEf3_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
-                % DEg_2 = DEg_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
-                % DEh_2 = DEh_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
+                DEf1_2 = DEf1_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
+                DEf2_2 = DEf2_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
+                DEf3_2 = DEf3_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
+                DEg_2 = DEg_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
+                DEh_2 = DEh_1{a,b,c}(param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t));
 
-                DEf1_2 = subs(DEf1(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-                                           [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
+                % DEf1_2 = subs(DEf1(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                %                            [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
 
-                DEf2_2 = subs(DEf2(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-                                           [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
+                % DEf2_2 = subs(DEf2(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                %                            [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
 
-                DEf3_2 = subs(DEf3(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-                                           [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
+                % DEf3_2 = subs(DEf3(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                %                            [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
 
-                DEg_2 = subs(DEg(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-                                         [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
+                % DEg_2 = subs(DEg(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                %                          [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
 
-                DEh_2 = subs(DEh(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
-                                         [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
+                % DEh_2 = subs(DEh(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
+                %                          [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
 
                 param_alpha(a,b,c,t+1) = param_alpha(a,b,c,t) - eta_f1 * double(DEf1_2);
                 param_beta(a,b,c,t+1) = param_beta(a,b,c,t) - eta_f2 * double(DEf2_2);
@@ -317,10 +336,7 @@ for t = 1:iteration
                 param_delta(a,b,c,t+1) = param_delta(a,b,c,t) - eta_g * double(DEg_2);
                 param_epsilon(a,b,c,t+1) = param_epsilon(a,b,c,t) - eta_h * double(DEh_2);
 
-                A = [a b c t];
-                disp(A)
-                disp('------------')
-
+               
             end
         end
     end
@@ -371,98 +387,68 @@ for t = 1:iteration
         if (E_value(t) > E_value(t-1))
             disp('Eが増加しました')
         end
-        if (E1_value(t) > E1_value(t-1)) && (E2_value(t) > E2_value(t-1)) && (E3_value(t) > E3_value(t-1))
+        if (E1_value(t) > E1_value(t-1)) && (E2_value(t) > E2_value(t-1)) && (E3_value(t) > E3_value(t-1)) && (E4_value(t) > E4_value(t-1))
             iteration = t;
-            disp('iterationを終了します')
+            disp('iterationを強制終了します')
+            break
+        end
+        if t == iteration
+            iteration = t+1;
+            disp('iterationを正常に終了することができました！')
             break
         end
     end
 
     disp('--------------------')
 
-    if t == iteration
-            iteration = t+1;
-    end
-
+    
 end
 
-l = 1;
-m = 1;
-n = 1;
 
-f1_b(1) = 3 * param_alpha(1,1,1,iteration) - (1-rho1) * (param_alpha(2,1,1,iteration) - param_alpha(1,1,1,iteration))...
-                                           - (1-rho2) * (param_alpha(1,2,1,iteration) - param_alpha(1,1,1,iteration))...
-                                           - (1-rho3) * (param_alpha(1,1,2,iteration) - param_alpha(1,1,1,iteration));
 
-f2_b(1) = 3 * param_beta(1,1,1,iteration) - (1-rho1) * (param_beta(2,1,1,iteration) - param_beta(1,1,1,iteration))...
-                                          - (1-rho2) * (param_beta(1,2,1,iteration) - param_beta(1,1,1,iteration))...
-                                          - (1-rho3) * (param_beta(1,1,2,iteration) - param_beta(1,1,1,iteration));  
+f1_b(1) = 3 * param_alpha(1,1,1,iteration) - (1-rho1(1)) * (param_alpha(2,1,1,iteration) - param_alpha(1,1,1,iteration))...
+                                           - (1-rho2(1)) * (param_alpha(1,2,1,iteration) - param_alpha(1,1,1,iteration))...
+                                           - (1-rho3(1)) * (param_alpha(1,1,2,iteration) - param_alpha(1,1,1,iteration));
 
-f3_b(1) = 3 * param_gamma(1,1,1,iteration) - (1-rho1) * (param_gamma(2,1,1,iteration) - param_gamma(1,1,1,iteration))...
-                                           - (1-rho2) * (param_gamma(1,2,1,iteration) - param_gamma(1,1,1,iteration))...
-                                           - (1-rho3) * (param_gamma(1,1,2,iteration) - param_gamma(1,1,1,iteration));
+f2_b(1) = 3 * param_beta(1,1,1,iteration) - (1-rho1(1)) * (param_beta(2,1,1,iteration) - param_beta(1,1,1,iteration))...
+                                          - (1-rho2(1)) * (param_beta(1,2,1,iteration) - param_beta(1,1,1,iteration))...
+                                          - (1-rho3(1)) * (param_beta(1,1,2,iteration) - param_beta(1,1,1,iteration));  
 
-gmap_b(1) = 3 * param_delta(1,1,1,iteration) - (1-rho1) * (param_delta(2,1,1,iteration) - param_delta(1,1,1,iteration))...
-                                             - (1-rho2) * (param_delta(1,2,1,iteration) - param_delta(1,1,1,iteration))...
-                                             - (1-rho3) * (param_delta(1,1,2,iteration) - param_delta(1,1,1,iteration));  
+f3_b(1) = 3 * param_gamma(1,1,1,iteration) - (1-rho1(1)) * (param_gamma(2,1,1,iteration) - param_gamma(1,1,1,iteration))...
+                                           - (1-rho2(1)) * (param_gamma(1,2,1,iteration) - param_gamma(1,1,1,iteration))...
+                                           - (1-rho3(1)) * (param_gamma(1,1,2,iteration) - param_gamma(1,1,1,iteration));
 
-hmap_b(1) = 3 * param_epsilon(1,1,1,iteration) - (1-rho1) * (param_epsilon(2,1,1,iteration) - param_epsilon(1,1,1,iteration))...
-                                               - (1-rho2) * (param_epsilon(1,2,1,iteration) - param_epsilon(1,1,1,iteration))...
-                                               - (1-rho3) * (param_epsilon(1,1,2,iteration) - param_epsilon(1,1,1,iteration));  
+gmap_b(1) = 3 * param_delta(1,1,1,iteration) - (1-rho1(1)) * (param_delta(2,1,1,iteration) - param_delta(1,1,1,iteration))...
+                                             - (1-rho2(1)) * (param_delta(1,2,1,iteration) - param_delta(1,1,1,iteration))...
+                                             - (1-rho3(1)) * (param_delta(1,1,2,iteration) - param_delta(1,1,1,iteration));  
+
+hmap_b(1) = 3 * param_epsilon(1,1,1,iteration) - (1-rho1(1)) * (param_epsilon(2,1,1,iteration) - param_epsilon(1,1,1,iteration))...
+                                               - (1-rho2(1)) * (param_epsilon(1,2,1,iteration) - param_epsilon(1,1,1,iteration))...
+                                               - (1-rho3(1)) * (param_epsilon(1,1,2,iteration) - param_epsilon(1,1,1,iteration));  
 
 
 for j = 1:length(k) - 1
 
-    l_now(j+1) = floor(si_b(j+1,1) / sigma1);
-    rho1 = si_b(j+1,1) / sigma1  - l_now(j+1);
 
-    m_now(j+1) = floor(si_b(j+1,2) / sigma2);
-    rho2 = si_b(j+1,2) / sigma2  - m_now(j+1);
+    f1_b(j+1) = 3 * param_alpha(l,m,n,iteration) + rho1(j+1) * (param_alpha(l+1,m,n,iteration) - param_alpha(l,m,n,iteration))...
+                                                 + rho2(j+1) * (param_alpha(l,m+1,n,iteration) - param_alpha(l,m,n,iteration))...
+                                                 + rho3(j+1) * (param_alpha(l,m,n+1,iteration) - param_alpha(l,m,n,iteration));
 
-    n_now(j+1) = floor(si_b(j+1,3) / sigma3);
-    rho3 = si_b(j+1,3) / sigma3  - n_now(j+1);
+    f2_b(j+1) = 3 * param_beta(l,m,n,iteration) + rho1(j+1) * (param_beta(l+1,m,n,iteration) - param_beta(l,m,n,iteration))...
+                                                + rho2(j+1) * (param_beta(l,m+1,n,iteration) - param_beta(l,m,n,iteration))...
+                                                + rho3(j+1) * (param_beta(l,m,n+1,iteration) - param_beta(l,m,n,iteration));  
 
-    if l_now(j+1) == l_now(j)
-        l_num(j+1) = l_num(j);
-    else
-        l_num(j+1) = l_num(j) + 1; % 対応する格子点に番号をつけていく
-    end
+    f3_b(j+1) = 3 * param_gamma(l,m,n,iteration) + rho1(j+1) * (param_gamma(l+1,m,n,iteration) - param_gamma(l,m,n,iteration))...
+                                                 + rho2(j+1) * (param_gamma(l,m+1,n,iteration) - param_gamma(l,m,n,iteration))...
+                                                 + rho3(j+1) * (param_gamma(l,m,n+1,iteration) - param_gamma(l,m,n,iteration));
 
-    if m_now(j+1) == m_now(j) 
-        m_num(j+1) = m_num(j);
-    else
-        m_num(j+1) = m_num(j) + 1; % 対応する格子点に番号をつけていく
-    end
+    gmap_b(j+1) = 3 * param_delta(l,m,n,iteration) + rho1(j+1) * (param_delta(l+1,m,n,iteration) - param_delta(l,m,n,iteration))...
+                                                   + rho2(j+1) * (param_delta(l,m+1,n,iteration) - param_delta(l,m,n,iteration))...
+                                                   + rho3(j+1) * (param_delta(l,m,n+1,iteration) - param_delta(l,m,n,iteration));  
 
-    if n_now(j+1) == n_now(j)
-        n_num(j+1) = n_num(j);
-    else
-        n_num(j+1) = n_num(j) + 1; % 対応する格子点に番号をつけていく
-    end
-
-    l = l_num(j); %代入しやすくするため
-    m = m_num(j);
-    n = n_num(j);
-
-    f1_b(j+1) = 3 * param_alpha(l,m,n,iteration) + rho1 * (param_alpha(l+1,m,n,iteration) - param_alpha(l,m,n,iteration))...
-                                                 + rho2 * (param_alpha(l,m+1,n,iteration) - param_alpha(l,m,n,iteration))...
-                                                 + rho3 * (param_alpha(l,m,n+1,iteration) - param_alpha(l,m,n,iteration));
-
-    f2_b(j+1) = 3 * param_beta(l,m,n,iteration) + rho1 * (param_beta(l+1,m,n,iteration) - param_beta(l,m,n,iteration))...
-                                                + rho2 * (param_beta(l,m+1,n,iteration) - param_beta(l,m,n,iteration))...
-                                                + rho3 * (param_beta(l,m,n+1,iteration) - param_beta(l,m,n,iteration));  
-
-    f3_b(j+1) = 3 * param_gamma(l,m,n,iteration) + rho1 * (param_gamma(l+1,m,n,iteration) - param_gamma(l,m,n,iteration))...
-                                                 + rho2 * (param_gamma(l,m+1,n,iteration) - param_gamma(l,m,n,iteration))...
-                                                 + rho3 * (param_gamma(l,m,n+1,iteration) - param_gamma(l,m,n,iteration));
-
-    gmap_b(j+1) = 3 * param_delta(l,m,n,iteration) + rho1 * (param_delta(l+1,m,n,iteration) - param_delta(l,m,n,iteration))...
-                                                   + rho2 * (param_delta(l,m+1,n,iteration) - param_delta(l,m,n,iteration))...
-                                                   + rho3 * (param_delta(l,m,n+1,iteration) - param_delta(l,m,n,iteration));  
-
-    hmap_b(j+1) = 3 * param_epsilon(l,m,n,iteration) + rho1 * (param_epsilon(l+1,m,n,iteration) - param_epsilon(l,m,n,iteration))...
-                                                     + rho2 * (param_epsilon(l,m+1,n,iteration) - param_epsilon(l,m,n,iteration))...
-                                                     + rho3 * (param_epsilon(l,m,n+1,iteration) - param_epsilon(l,m,n,iteration)); 
+    hmap_b(j+1) = 3 * param_epsilon(l,m,n,iteration) + rho1(j+1) * (param_epsilon(l+1,m,n,iteration) - param_epsilon(l,m,n,iteration))...
+                                                     + rho2(j+1) * (param_epsilon(l,m+1,n,iteration) - param_epsilon(l,m,n,iteration))...
+                                                     + rho3(j+1) * (param_epsilon(l,m,n+1,iteration) - param_epsilon(l,m,n,iteration)); 
 
 
 end
