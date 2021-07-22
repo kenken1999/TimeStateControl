@@ -13,7 +13,7 @@ u1_b = ones(length(k),1) * 5;
 u2_b = ones(length(k),1) * 5;
 
 si_b = zeros(length(k),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b(1,:) = [0 0 -pi/2];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si_b(1,:) = [0 0 -pi/4];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 f1_b = zeros(length(k),1);   %写像f1:s→z1の推定
 f2_b = zeros(length(k),1);   %写像f2:s→z2の推定
@@ -190,11 +190,11 @@ end
 
 %---写像 f1,f2,f3,g,h の推定----------------------------
 
-eta_f1 = 1.0 * 10 ^ (-5); %学習率
-eta_f2 = 2.5 * 10 ^ (-2);
-eta_f3 = 2.5 * 10 ^ (-5);
-eta_g = 2.5 * 10 ^ (-1);
-eta_h = 1.0 * 10 ^ (-3);
+eta_f1 = 1.0 * 10 ^ (-4); %学習率 5
+eta_f2 = 1.0 * 10 ^ (-4);
+eta_f3 = 1.0 * 10 ^ (-4); %学習率 5
+eta_g = 1.0 * 10 ^ (-4);
+eta_h = 1.0 * 10 ^ (-4); %学習率 4
 
 iteration = 20; %パラメータ更新回数（最大）
 
@@ -204,11 +204,11 @@ iteration = 20; %パラメータ更新回数（最大）
 % param_delta = rand([l2+1,m2+1,n2+1,iteration+1]);
 % param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]);
 
-param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
-param_beta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
-param_gamma = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
-param_delta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
-param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.5 - 0.25;
+param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
+param_beta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
+param_gamma = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
+param_delta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
+param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
 
 
 %---Eの設定-----------------------------
@@ -330,11 +330,13 @@ for t = 1:iteration
                 % DEh_2 = subs(DEh(a,b,c), [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
                 %                          [param_alpha(:,:,:,t), param_beta(:,:,:,t), param_gamma(:,:,:,t), param_delta(:,:,:,t), param_epsilon(:,:,:,t)]);
 
-                param_alpha(a,b,c,t+1) = param_alpha(a,b,c,t) - eta_f1 * double(DEf1_2);
-                param_beta(a,b,c,t+1) = param_beta(a,b,c,t) - eta_f2 * double(DEf2_2);
-                param_gamma(a,b,c,t+1) = param_gamma(a,b,c,t) - eta_f3 * double(DEf3_2);
-                param_delta(a,b,c,t+1) = param_delta(a,b,c,t) - eta_g * double(DEg_2);
-                param_epsilon(a,b,c,t+1) = param_epsilon(a,b,c,t) - eta_h * double(DEh_2);
+                DEf1_2
+
+                param_alpha(a,b,c,t+1) = param_alpha(a,b,c,t) - eta_f1 * DEf1_2;
+                param_beta(a,b,c,t+1) = param_beta(a,b,c,t) - eta_f2 * DEf2_2;
+                param_gamma(a,b,c,t+1) = param_gamma(a,b,c,t) - eta_f3 * DEf3_2;
+                param_delta(a,b,c,t+1) = param_delta(a,b,c,t) - eta_g * DEg_2;
+                param_epsilon(a,b,c,t+1) = param_epsilon(a,b,c,t) - eta_h * DEh_2;
 
                
             end
