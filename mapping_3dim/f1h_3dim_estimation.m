@@ -6,14 +6,14 @@ tic
 %all(f1,f2,f3,g,h)_estimation----------------------------------------------------
 
 dk = 0.02;   %時間刻み
-Kfin = 0.14; %シミュレーション終了時間
+Kfin = 0.30; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1_b = ones(length(k),1) * 5;
 u2_b = ones(length(k),1) * 5;
 
 si_b = zeros(length(k),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b(1,:) = [0 0 0];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si_b(1,:) = [0 0 -pi/2];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 f1_b = zeros(length(k),1);   %写像f1:s→z1の推定
 % f2_b = zeros(length(k),1);   %写像f2:s→z2の推定
@@ -193,7 +193,7 @@ end
 
 %---写像 f1,f2,f3,g,h の推定----------------------------
 
-eta_f1 = 2.0 * 10 ^ (-3); %学習率 3
+eta_f1 = 1.0 * 10 ^ (-3); %学習率 3
 % eta_f2 = 1.0 * 10 ^ (-4);
 % eta_f3 = 1.0 * 10 ^ (-4);
 % eta_g = 1.0 * 10 ^ (-4);
@@ -322,7 +322,7 @@ for t = 1:iteration
     end
 
     param_alpha(1,1,1,t+1) = 0;
-    param_epsilon(1,1,1,t+1) = 1;
+    param_epsilon(1,1,1,t+1) = 0;
 
 
     % E1_value(t) = double(subs(E1, [alpha(1:l2+1,1:m2+1,1:n2+1),beta(1:l2+1,1:m2+1,1:n2+1),gamma(1:l2+1,1:m2+1,1:n2+1),delta(1:l2+1,1:m2+1,1:n2+1),epsilon(1:l2+1,1:m2+1,1:n2+1)],...
