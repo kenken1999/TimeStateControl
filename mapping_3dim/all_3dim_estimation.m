@@ -33,7 +33,6 @@ rho1 = zeros(length(k),1);
 rho2 = zeros(length(k),1);
 rho3 = zeros(length(k),1);
 
-
 alpha = sym('alpha',[50 50 50]); %l,m,nの順
 beta = sym('beta',[50 50 50]);
 gamma = sym('gamma',[50 50 50]);
