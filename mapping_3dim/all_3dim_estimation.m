@@ -196,7 +196,7 @@ eta_f3 = 1.0 * 10 ^ (-5); %学習率 5
 eta_g = 1.0 * 10 ^ (-5); %学習率 5
 eta_h = 1.0 * 10 ^ (-4); %学習率 4
 
-iteration = 20; %パラメータ更新回数（最大）
+iteration = 50; %パラメータ更新回数（最大）
 
 % param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]);
 % param_beta = rand([l2+1,m2+1,n2+1,iteration+1]);
