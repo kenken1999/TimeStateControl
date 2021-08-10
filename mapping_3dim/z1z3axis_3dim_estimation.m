@@ -6,7 +6,7 @@ tic
 %all(f1,f2,f3,g,h)_estimation----------------------------------------------------
 
 dk = 1;   %時間刻み
-Kfin = 9; %シミュレーション終了時間
+Kfin = 7; %シミュレーション終了時間, length(k) = Kfin + 1
 k = [0:dk:Kfin];
 
 
@@ -47,7 +47,14 @@ delta = sym('delta',[50 50 50]);
 epsilon = sym('epsilon',[50 50 50]);
 
 
-sigma1 = 1; %s1のスケーリング定数)
+sigma1 = 1; %s1のスケーリング定数
+sigma2 = 1; %s1のスケーリング定数
+sigma3 = pi/4; %s1のスケーリング定数
+
+Ef1 = 0;
+Ef3 = 0;
+E4_f1 = 0;
+E4_f3 = 0;
 
 l_now(1) = floor(si_b(1,1) / sigma1);
 rho1(1) = si_b(1,1) / sigma1  - l_now(1);
@@ -68,15 +75,12 @@ for j = 1:length(k) - 1
     if mod(j,5) == 0
         u1_b(j+1) = 1;
         u2_b(j+1) = 0;
-        y(j+1) = y(j) + 1;
     elseif j < 5
         u1_b(j+1) = 0;
         u2_b(j+1) = pi/4;
-        y(j+1) = y(j);
     else
         u1_b(j+1) = 0;
         u2_b(j+1) = -pi/4;
-        y(j+1) = y(j);
     end
 
    
@@ -126,11 +130,11 @@ for j = 1:length(k) - 1
     n2 = n_num(j+1);
 
 
-    Ef1 = Ef1 + ( x(j) - ( (alpha(l2,m2,n2) + rho1(j+1) * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2(j+1) * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3(j+1) * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
+    Ef1 = Ef1 + ( 0 - ( (alpha(l2,m2,n2) + rho1(j+1) * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2(j+1) * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3(j+1) * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
                         - (alpha(l,m,n) + rho1(j) * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2(j) * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3(j) * (alpha(l,m,n+1) - alpha(l,m,n))) )...
                         / dk ) ^ 2;
 
-    Ef3 = Ef3 + ( y(j) - ( (gamma(l2,m2,n2) + rho1(j+1) * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2(j+1) * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3(j+1) * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2)))...
+    Ef3 = Ef3 + ( u1_b(j+1) - ( (gamma(l2,m2,n2) + rho1(j+1) * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2(j+1) * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3(j+1) * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2)))...
                         - ( gamma(l,m,n) + rho1(j) * (gamma(l+1,m,n) - gamma(l,m,n)) + rho2(j) * (gamma(l,m+1,n) - gamma(l,m,n)) + rho3(j) * (gamma(l,m,n+1) - gamma(l,m,n))) )...
                         / dk ) ^ 2;
 
@@ -177,37 +181,34 @@ disp(n2)
 % % xi_5 = 1;
 
 
-for a = 1 : l2 - 1
-    for b = 1 : m2 - 1
-        for c = 1 : n2 - 1
+% for a = 1 : l2 - 1
+%     for b = 1 : m2 - 1
+%         for c = 1 : n2 - 1
 
-            E4_f1 = E4_f1 + (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
-            E4_f3 = E4_f3 + (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
+%             E4_f1 = E4_f1 + (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
+%             E4_f3 = E4_f3 + (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
 
-        end
-    end
-end
+%         end
+%     end
+% end
 
-Ef1 = Ef1 + E4_f1;
-Ef3 = Ef3 + E4_f3;
+% Ef1 = Ef1 + E4_f1;
+% Ef3 = Ef3 + E4_f3;
 
 
 %---写像 f1,f2,f3,g,h の推定----------------------------
 
 eta_f1 = 1.0 * 10 ^ (-1); %学習率
-eta_f3 = 2.0 * 10 ^ (-1);
+eta_f3 = 2.5 * 10 ^ (-1);
 
 
-iteration = 100; %パラメータ更新回数（最大）
+iteration = 200; %パラメータ更新回数（最大）
 
 param_alpha = zeros(l2+1,m2+1,n2+1,iteration+1);
 param_gamma = zeros(l2+1,m2+1,n2+1,iteration+1);
 
-% param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]) * 2.5;
-% param_beta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
+% param_alpha = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
 % param_gamma = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
-% param_delta = rand([l2+1,m2+1,n2+1,iteration+1]) * 0.1 - 0.05;
-% param_epsilon = rand([l2+1,m2+1,n2+1,iteration+1]);
 
 
 %---Eの設定-----------------------------
