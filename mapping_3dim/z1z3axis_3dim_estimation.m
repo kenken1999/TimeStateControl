@@ -6,7 +6,7 @@ tic
 %z1&z3axis_estimation----------------------------------------------------
 
 dk = 1;   %時間刻み
-Kfin = 9; %シミュレーション終了時間, length(k) = Kfin + 1
+Kfin = 20; %シミュレーション終了時間, length(k) = Kfin + 1
 k = [0:dk:Kfin];
 
 
@@ -66,16 +66,12 @@ n_now(1) = floor(si_b(1,3) / sigma3);
 rho3(1) = si_b(1,3) / sigma3  - n_now(1);
 
 
-x = zeros(length(k),1);
-y = zeros(length(k),1);
-
-
 %---第1軸上の推定----------------------------------------------------
 
-k_middle = 10;
+k_middle = 11;
 
 
-for j = 1 : k_middle - 1
+for j = 1 : k_middle - 2
 
     if mod(j,5) == 0
         u1_b(j+1) = 1;
@@ -147,139 +143,6 @@ for j = 1 : k_middle - 1
 end
 
 
-%---正則化項の追加---------------
-
-% xi_1 = 1;
-% % xi_2 = 1;
-% % xi_3 = 1;
-% % xi_4 = 1;
-% % xi_5 = 1;
-
-
-% for a = 1 : l2 - 1
-%     for b = 1 : m2 - 1
-%         for c = 1 : n2 - 1
-
-%             E4_f1 = E4_f1 + (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
-%             E4_f3 = E4_f3 + (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
-
-%         end
-%     end
-% end
-
-% Ef1 = Ef1 + E4_f1;
-% Ef3 = Ef3 + E4_f3;
-
-
-%---写像 f1,f2,f3,g,h の推定----------------------------
-
-eta_f1 = 1.0 * 10 ^ (-1); %学習率
-eta_f3 = 2.5 * 10 ^ (-1);
-
-
-iteration = 300; %パラメータ更新回数（最大）
-
-param_alpha = zeros(l2+1,m2+1,n2+1,iteration+1);
-param_gamma = zeros(l2+1,m2+1,n2+1,iteration+1);
-
-
-%---Eの設定-----------------------------
-
-Ef1_initial = double(subs(Ef1, [alpha(1:l2+1,1:m2+1,1:n2+1)],[param_alpha(:,:,:,1)]));
-
-Ef3_initial = double(subs(Ef3, [gamma(1:l2+1,1:m2+1,1:n2+1)],[param_gamma(:,:,:,1)]));
-                             
-
-disp('Ef1 = ')
-disp(Ef1_initial)
-disp('Ef3 = ')
-disp(Ef3_initial)
-disp('--------------------')
-
-
-Ef1_value = zeros(1,iteration);
-Ef3_value = zeros(1,iteration);
-
-
-
-for a = 1:l2+1
-    for b = 1:m2+1
-        for c = 1:n2+1
-
-            DEf1(a,b,c) = diff(Ef1,alpha(a,b,c));
-            DEf3(a,b,c) = diff(Ef3,gamma(a,b,c));
-
-            DEf1_1{a,b,c} = matlabFunction(DEf1(a,b,c), 'vars', {alpha(1:l2+1,1:m2+1,1:n2+1)});
-            DEf3_1{a,b,c} = matlabFunction(DEf3(a,b,c), 'vars', {gamma(1:l2+1,1:m2+1,1:n2+1)});
-
-            A = [a b c];
-            disp(A)
-            disp('------------')
-
-        end
-    end
-end
-
-
-
-for t = 1:iteration
-
-    for a = 1:l2+1
-        for b = 1:m2+1
-            for c = 1:n2+1
-
-            DEf1_2 = DEf1_1{a,b,c}(param_alpha(:,:,:,t));
-            DEf3_2 = DEf3_1{a,b,c}(param_gamma(:,:,:,t));
-
-            param_alpha(a,b,c,t+1) = param_alpha(a,b,c,t) - eta_f1 * DEf1_2;
-            param_gamma(a,b,c,t+1) = param_gamma(a,b,c,t) - eta_f3 * DEf3_2;
-
-            end
-        end
-    end
-
-    param_alpha(1,1,1,t+1) = 0;
-    param_gamma(1,1,1,t+1) = 0;
-
-    Ef1_value(t) = double(subs(Ef1, [alpha(1:l2+1,1:m2+1,1:n2+1)],[param_alpha(:,:,:,t+1)]));
-    
-    Ef3_value(t) = double(subs(Ef3, [gamma(1:l2+1,1:m2+1,1:n2+1)],[param_gamma(:,:,:,t+1)]));
-
-
-    disp('t = ')
-    disp(t)
-    disp('Ef1 = ')
-    disp(Ef1_value(t))
-    disp('Ef3 = ')
-    disp(Ef3_value(t))
- 
-
-    if t > 1
-
-        if (Ef1_value(t) > Ef1_value(t-1))
-            disp('Ef1が増加しました')
-        end
-        if (Ef3_value(t) > Ef3_value(t-1))
-            disp('Ef3が増加しました')
-        end
-        if (Ef1_value(t) > Ef1_value(t-1)) || (Ef3_value(t) > Ef3_value(t-1))
-            iteration = t;
-            disp('iterationを強制終了します')
-            break
-        end
-        if t == iteration
-            iteration = t+1;
-            disp('iterationを正常に終了することができました！')
-            break
-        end
-
-    end
-
-    disp('--------------------')
-
-    
-end
-
 
 
 %---第2軸上の推定----------------------------------------------------
@@ -292,6 +155,19 @@ si_b(k_middle,:) = [1 1+sqrt(2) 5*pi/4];    %(s1, s2, s3)の初期値を設定
 si_c(k_middle,:) = [1 1 pi/2];    %(s1, s2, s3)の初期値を設定
 
 
+l_now(k_middle) = floor(si_b(k_middle,1) / sigma1);
+rho1(k_middle) = si_b(k_middle,1) / sigma1  - l_now(k_middle);
+l_num(k_middle) = l_num(k_middle-1) + 1;
+
+m_now(k_middle) = floor(si_b(k_middle,2) / sigma2);
+rho2(k_middle) = si_b(k_middle,2) / sigma2  - m_now(k_middle);
+m_num(k_middle) = m_num(k_middle-1) + 1;
+
+n_now(k_middle) = floor(si_b(k_middle,3) / sigma3);
+rho3(k_middle) = si_b(k_middle,3) / sigma3  - n_now(k_middle);
+n_num(k_middle) = n_num(k_middle-1) + 1;
+
+
 
 for j = k_middle : length(k) - 1
 
@@ -300,10 +176,10 @@ for j = k_middle : length(k) - 1
         u2_b(j+1) = 0;
     elseif j < 15
         u1_b(j+1) = 0;
-        u2_b(j+1) = pi/4;
+        u2_b(j+1) = -pi/4;
     else
         u1_b(j+1) = 0;
-        u2_b(j+1) = -pi/4;
+        u2_b(j+1) = pi/4;
     end
 
    
@@ -389,12 +265,12 @@ end
 % Ef3 = Ef3 + E4_f3;
 
 
-%---写像 f1,f2,f3,g,h の推定----------------------------
+%---最急降下法によるパラメータの決定----------------------------
 
 eta_f1 = 1.0 * 10 ^ (-1); %学習率
 eta_f3 = 2.5 * 10 ^ (-1);
 
-iteration = 300; %パラメータ更新回数（最大）
+iteration = 100; %パラメータ更新回数（最大）
 
 param_alpha = zeros(l2+1,m2+1,n2+1,iteration+1);
 param_gamma = zeros(l2+1,m2+1,n2+1,iteration+1);
@@ -457,6 +333,21 @@ for t = 1:iteration
 
     param_alpha(1,1,1,t+1) = 0;
     param_gamma(1,1,1,t+1) = 0;
+
+    param_alpha(l_num(k_middle),m_num(k_middle),n_num(k_middle),t+1) = 1;
+    param_gamma(l_num(k_middle),m_num(k_middle),n_num(k_middle),t+1) = 1;
+
+    param_alpha(l_num(k_middle),m_num(k_middle)+1,n_num(k_middle),t+1) = 0;
+    param_gamma(l_num(k_middle),m_num(k_middle)+1,n_num(k_middle),t+1) = 0;
+
+    % param_alpha(l_num(k_middle),m_num(k_middle),n_num(k_middle),t+1) + rho2(k_middle) * (param_alpha(l_num(k_middle),m_num(k_middle)+1,n_num(k_middle),t+1) - param_alpha(l_num(k_middle),m_num(k_middle),n_num(k_middle),t+1)) = 1;
+    
+    % param_gamma(l_num(k_middle),m_num(k_middle),n_num(k_middle),t+1)...
+    %      + rho1(k_middle) * (param_gamma(l_num(k_middle)+1,m_num(k_middle),n_num(k_middle),t+1) - param_gamma(l_num(k_middle),m_num(k_middle),n_num(k_middle),t+1))...
+    %      + rho2(k_middle) * (param_gamma(l_num(k_middle),m_num(k_middle)+1,n_num(k_middle),t+1) - param_gamma(l_num(k_middle),m_num(k_middle),n_num(k_middle),t+1))...
+    %      + rho3(k_middle) * (param_gamma(l_num(k_middle),m_num(k_middle),n_num(k_middle)+1,t+1) - param_gamma(l_num(k_middle),m_num(k_middle),n_num(k_middle),t+1))...
+    % = 1;
+
 
     Ef1_value(t) = double(subs(Ef1, [alpha(1:l2+1,1:m2+1,1:n2+1)],[param_alpha(:,:,:,t+1)]));
     
