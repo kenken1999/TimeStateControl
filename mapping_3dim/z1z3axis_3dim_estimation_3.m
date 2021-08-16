@@ -15,8 +15,8 @@ u2_b1 = zeros(length(k1),1); %回転角速度
 si_b1 = zeros(length(k1),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
 si_b1(1,:) = [1 1 -pi/4];    %(s1, s2, s3)の初期値を設定
 
-si_c1 = zeros(length(k1),3); %補正後のセンサ変数 , s' = (s1', s2', s3') = (s1　-　s1_initial,s2 - s2_initial,s3 - s3_initial)
-si_c1(1,:) = [0 -1 -pi/2];    %(s1, s2, s3)の初期値を設定
+si_c1 = zeros(length(k1),3); %補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
+si_c1(1,:) = [0 -1 -pi/2];
 
 
 f1_b1 = zeros(length(k1),1);   %写像f1:s→z1の推定
@@ -190,10 +190,10 @@ u2_b2 = zeros(length(k2),1); %回転角速度
 
 
 si_b2 = zeros(length(k2),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b2(1,:) = [1 1+sqrt(2) 3*pi/4];    %(s1, s2, s3)の初期値を設定
+si_b2(1,:) = [1-1/sqrt(2) 3/sqrt(2) 3*pi/4];    %(s1, s2, s3)の初期値を設定
 
-si_c2 = zeros(length(k2),3); %補正後のセンサ変数 , s' = (s1', s2', s3') = (s1　-　s1_initial,s2 - s2_initial,s3 - s3_initial)
-si_c2(1,:) = [1 1 pi/2];    %(s1, s2, s3)の初期値を設定
+si_c2 = zeros(length(k2),3); %補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
+si_c2(1,:) = [1 1 pi/2];
 
 
 f1_b2 = zeros(length(k2),1);   %写像f1:s→z1の推定

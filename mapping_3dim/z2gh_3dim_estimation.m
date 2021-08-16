@@ -15,8 +15,8 @@ u2_b1 = zeros(length(k1),1); %回転角速度
 si_b1 = zeros(length(k1),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
 si_b1(1,:) = [1 1 -pi/4];    %(s1, s2, s3)の初期値を設定
 
-si_c1 = zeros(length(k1),3); %補正後のセンサ変数 , s' = (s1', s2', s3') = (s1　-　s1_initial,s2 - s2_initial,s3 - s3_initial)
-si_c1(1,:) = [0 -1 -pi/2];    %(s1, s2, s3)の初期値を設定
+si_c1 = zeros(length(k1),3); %補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
+si_c1(1,:) = [0 -1 -pi/2];
 
 
 f1_b1 = zeros(length(k1),1);   %写像f1:s→z1の推定
@@ -186,10 +186,10 @@ u2_b2 = zeros(length(k2),1); %回転角速度
 
 
 si_b2 = zeros(length(k2),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b2(1,:) = [1 1+sqrt(2) 3*pi/4];    %(s1, s2, s3)の初期値を設定
+si_b2(1,:) = [1-1/sqrt(2) 3/sqrt(2) 3*pi/4];    %(s1, s2, s3)の初期値を設定
 
-si_c2 = zeros(length(k2),3); %補正後のセンサ変数 , s' = (s1', s2', s3') = (s1　-　s1_initial,s2 - s2_initial,s3 - s3_initial)
-si_c2(1,:) = [1 1 pi/2];    %(s1, s2, s3)の初期値を設定
+si_c2 = zeros(length(k2),3); %補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
+si_c2(1,:) = [1 1 pi/2];
 
 
 f1_b2 = zeros(length(k2),1);   %写像f1:s→z1の推定
@@ -495,29 +495,30 @@ for t = 1:iteration
 end
 
 
-%f2,g,hの推定----------------------------------------------------
+%---f2,g,hの推定----------------------------------------------------
 
 dk = 1;   %時間刻み
-Kfin = 20; %シミュレーション終了時間
+Kfin = 15; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
-u1_b = ones(length(k),1);
-u2_b = ones(length(k),1);
+u1_b = ones(length(k),1) * 0.09;
+u2_b = ones(length(k),1) * (-pi/16);
 
 si_b = zeros(length(k),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b(1,:) = [0 0 0];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si_b(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) 3*pi/4];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
-f1_b = zeros(length(k),1);   %写像f1:s→z1の推定
+si_c = zeros(length(k),3); %補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
+si_c(1,:) = [0 0 pi/2];
+
 f2_b = zeros(length(k),1);   %写像f2:s→z2の推定
-f3_b = zeros(length(k),1);   %写像f3:s→z3の推定
-gmap_b = zeros(length(k),1); %dz2/dz1 = μ2 = u2/u1 * g(s)の推定, g(s) = 1/cos(s3)^3
-hmap_b = zeros(length(k),1); %dz1/dt = μ1 = u1*h(s)の推定, h(s) = cos(s3)
+gmap_b = zeros(length(k),1);
+hmap_b = zeros(length(k),1);
 
-l_now = zeros(length(k),1);  % l_now = 時刻kのl, 値が飛び飛び or 被る可能性あり
-m_now = zeros(length(k),1);  % m_now = 時刻kのl, 値が飛び飛び or 被る可能性あり
-n_now = zeros(length(k),1);  % n_now = 時刻kのl, 値が飛び飛び or 被る可能性あり
+l_now = zeros(length(k),1);
+m_now = zeros(length(k),1);
+n_now = zeros(length(k),1);
 
-l_num = ones(length(k),1); %推定した格子点に前から順に番号をつけていく
+l_num = ones(length(k),1);
 m_num = ones(length(k),1);
 n_num = ones(length(k),1);
 
@@ -525,24 +526,13 @@ rho1 = zeros(length(k),1);
 rho2 = zeros(length(k),1);
 rho3 = zeros(length(k),1);
 
-beta = sym('beta',[50 50 50]);
-delta = sym('delta',[50 50 50]);
-epsilon = sym('epsilon',[50 50 50]);
+beta = sym('beta',[10 10 10]);
+delta = sym('delta',[10 10 10]);
+epsilon = sym('epsilon',[10 10 10]);
 
-sigma1 = 0.15; %s1のスケーリング定数
-sigma2 = 0.15; %s2のスケーリング定数
-sigma3 = 0.15; %s3のスケーリング定数
-
-E = 0;
-E1 = 0;
-E2 = 0;
-E3 = 0;
-E4 = 0;
-E4_1 = 0;
-E4_2 = 0;
-E4_3 = 0;
-E4_4 = 0;
-E4_5 = 0;
+Ef2 = 0;
+Eg = 0;
+Eh = 0;
 
 l_now(1) = floor(si_b(1,1) / sigma1);
 rho1(1) = si_b(1,1) / sigma1  - l_now(1);
@@ -552,3 +542,285 @@ rho2(1) = si_b(1,2) / sigma2  - m_now(1);
 
 n_now(1) = floor(si_b(1,3) / sigma3);
 rho3(1) = si_b(1,3) / sigma3  - n_now(1);
+
+
+for i = 1 : length(k1) - 1 %k1=k2より
+        
+    if l_now(1) == l1_now(i)
+        l_num(1) = l1_num(i);
+        break;
+    end
+
+    if l_now(1) == l2_now(i)
+        l_num(1) = l2_num(i);
+        break;
+    end
+
+    if i == length(k1) - 1
+       break; %何かしら設定必要
+    end
+
+end
+
+for i = 1 : length(k1) - 1
+        
+    if m_now(1) == m1_now(i)
+        m_num(1) = m1_num(i);
+        break;
+    end
+
+    if m_now(1) == m2_now(i)
+        m_num(1) = m2_num(i);
+        break;
+    end
+
+    if i == length(k1) - 1
+       break; %何かしら設定必要
+    end
+
+end
+
+for i = 1 : length(k1) - 1
+        
+    if n_now(1) == n1_now(i)
+        n_num(1) = n1_num(i);
+        break;
+    end
+
+    if n_now(1) == n2_now(i)
+        n_num(1) = n2_num(i);
+        break;
+    end
+
+    if i == length(k1) - 1
+       break; %何かしら設定必要
+    end
+
+end
+
+
+%---誤差関数の定義(f2, h)----------------------------------------------------
+
+for j = 1:length(k) - 1
+
+    si_b(j+1,3) = si_b(j,3) + u2_b(j) * dk;
+    si_b(j+1,1) = si_b(j,1) + u1_b(j) * cos(si_b(j+1,3)) * dk;
+    si_b(j+1,2) = si_b(j,2) + u1_b(j) * sin(si_b(j+1,3)) * dk;
+
+    si_c(j+1,3) = si_c(j,3) + u2_b(j+1) * dk;
+    si_c(j+1,1) = si_c(j,1) + u1_b(j+1) * cos(si_c(j+1,3)) * dk;
+    si_c(j+1,2) = si_c(j,2) + u1_b(j+1) * sin(si_c(j+1,3)) * dk;
+
+
+    l_now(j+1) = floor(si_b(j+1,1) / sigma1);
+    rho1(j+1) = si_b(j+1,1) / sigma1  - l_now(j+1);
+
+    m_now(j+1) = floor(si_b(j+1,2) / sigma2);
+    rho2(j+1) = si_b(j+1,2) / sigma2  - m_now(j+1);
+
+    n_now(j+1) = floor(si_b(j+1,3) / sigma3);
+    rho3(j+1) = si_b(j+1,3) / sigma3  - n_now(j+1);
+
+
+    for i = 1 : length(k) - 1
+
+        if i <= j && l_now(j+1) == l_now(i)
+            l_num(j+1) = l_num(i);
+            break;
+        end
+            
+        if i <= length(k1) && l_now(j+1) == l1_now(i)
+            l_num(j+1) = l1_num(i);
+            break;
+        end
+
+        if i <= length(k2) && l_now(j+1) == l2_now(i)
+            l_num(j+1) = l2_num(i);
+            break;
+        end
+
+        if i == length(k) - 1
+            break; %何かしら設定必要
+        end
+    
+    end
+
+    for i = 1 : length(k) - 1
+
+        if i <= j && m_now(j+1) == m_now(i)
+            m_num(j+1) = m_num(i);
+            break;
+        end
+            
+        if i <= length(k1) && m_now(j+1) == m1_now(i)
+            m_num(j+1) = m1_num(i);
+            break;
+        end
+
+        if i <= length(k2) && m_now(j+1) == m2_now(i)
+            m_num(j+1) = m2_num(i);
+            break;
+        end
+
+        if i == length(k) - 1
+            break; %何かしら設定必要
+        end
+    
+    end
+
+    for i = 1 : length(k) - 1
+
+        if i <= j && n_now(j+1) == n_now(i)
+            n_num(j+1) = n_num(i);
+            break;
+        end
+            
+        if i <= length(k1) && n_now(j+1) == n1_now(i)
+            n_num(j+1) = n1_num(i);
+            break;
+        end
+
+        if i <= length(k2) && n_now(j+1) == n2_now(i)
+            n_num(j+1) = n2_num(i);
+            break;
+        end
+
+        if i == length(k) - 1
+            break; %何かしら設定必要
+        end
+    
+    end
+
+
+    l = l_num(j); %代入しやすくするため
+    m = m_num(j);
+    n = n_num(j);
+
+    l2 = l_num(j+1); %代入しやすくするため
+    m2 = m_num(j+1);
+    n2 = n_num(j+1);
+
+    Ef2 = Ef2 + ( beta(l,m,n) + rho1(j) * (beta(l+1,m,n) - beta(l,m,n)) + rho2(j) * (beta(l,m+1,n) - beta(l,m,n)) + rho3(j) * (beta(l,m,n+1) - beta(l,m,n))...
+                 - ( (param_gamma(l2,m2,n2,iteration) + rho1(j+1) * (param_gamma(l2+1,m2,n2,iteration) - param_gamma(l2,m2,n2,iteration)) + rho2(j+1) * (param_gamma(l2,m2+1,n2,iteration) - param_gamma(l2,m2,n2,iteration)) + rho3(j+1) * (param_gamma(l2,m2,n2+1,iteration) - param_gamma(l2,m2,n2,iteration)))...
+                 - (param_gamma(l,m,n,iteration) + rho1(j) * (param_gamma(l+1,m,n,iteration) - param_gamma(l,m,n,iteration)) + rho2(j) * (param_gamma(l,m+1,n,iteration) - param_gamma(l,m,n,iteration)) + rho3(j) * (param_gamma(l,m,n+1,iteration) - param_gamma(l,m,n,iteration))) )...
+                 / ( (param_alpha(l2,m2,n2,iteration) + rho1(j+1) * (param_alpha(l2+1,m2,n2,iteration) - param_alpha(l2,m2,n2,iteration)) + rho2(j+1) * (param_alpha(l2,m2+1,n2,iteration) - param_alpha(l2,m2,n2,iteration)) + rho3(j+1) * (param_alpha(l2,m2,n2+1,iteration) - param_alpha(l2,m2,n2,iteration)))...
+                 - (param_alpha(l,m,n,iteration) + rho1(j) * (param_alpha(l+1,m,n,iteration) - param_alpha(l,m,n,iteration)) + rho2(j) * (param_alpha(l,m+1,n,iteration) - param_alpha(l,m,n,iteration)) + rho3(j) * (param_alpha(l,m,n+1,iteration) - param_alpha(l,m,n,iteration))) ) ) ^ 2;
+
+    % E2 = E2 + ( u2_b(j) / u1_b(j) * ( delta(l,m,n) + rho1(j) * (delta(l+1,m,n) - delta(l,m,n)) + rho2(j) * (delta(l,m+1,n) - delta(l,m,n)) + rho3(j) * (delta(l,m,n+1) - delta(l,m,n)) )...
+    %              - ( (beta(l2,m2,n2) + rho1(j+1) * (beta(l2+1,m2,n2) - beta(l2,m2,n2)) + rho2(j+1) * (beta(l2,m2+1,n2) - beta(l2,m2,n2)) + rho3(j+1) * (beta(l2,m2,n2+1) - beta(l2,m2,n2)))...
+    %              - (beta(l,m,n) + rho1(j) * (beta(l+1,m,n) - beta(l,m,n)) + rho2(j) * (beta(l,m+1,n) - beta(l,m,n)) + rho3(j) * (beta(l,m,n+1) - beta(l,m,n))) )...
+    %              / ( (alpha(l2,m2,n2) + rho1(j+1) * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2(j+1) * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3(j+1) * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
+    %              - (alpha(l,m,n) + rho1(j) * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2(j) * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3(j) * (alpha(l,m,n+1) - alpha(l,m,n))) ) ) ^ 2;
+    
+    Eh = Eh + ( u1_b(j) * ( epsilon(l,m,n) + rho1(j) * (epsilon(l+1,m,n) - epsilon(l,m,n)) + rho2(j) * (epsilon(l,m+1,n) - epsilon(l,m,n)) + rho3(j) * (epsilon(l,m,n+1) - epsilon(l,m,n)) )...
+                 - ( (param_alpha(l2,m2,n2,iteration) + rho1(j+1) * (param_alpha(l2+1,m2,n2,iteration) - param_alpha(l2,m2,n2,iteration)) + rho2(j+1) * (param_alpha(l2,m2+1,n2,iteration) - param_alpha(l2,m2,n2,iteration)) + rho3(j+1) * (param_alpha(l2,m2,n2+1,iteration) - param_alpha(l2,m2,n2,iteration)))...
+                 - (param_alpha(l,m,n,iteration) + rho1(j) * (param_alpha(l+1,m,n,iteration) - param_alpha(l,m,n,iteration)) + rho2(j) * (param_alpha(l,m+1,n,iteration) - param_alpha(l,m,n,iteration)) + rho3(j) * (param_alpha(l,m,n+1,iteration) - param_alpha(l,m,n,iteration))) )...
+                 / dk ) ^ 2;
+
+end
+
+
+%---最急降下法によるパラメータの決定----------------------------
+
+eta_f2 = 2.5 * 10 ^ (-1); %学習率
+eta_h = 2.5 * 10 ^ (-1);
+
+iteration = 50; %パラメータ更新回数（最大）
+
+param_beta = zeros(10,10,10,iteration+1);
+param_epsilon = zeros(10,10,10,iteration+1);
+
+
+
+%---Eの設定---------------------------
+
+Ef2_initial = double(subs(Ef2, [beta(1:l_max+1,1:m_max+1,1:n_max+1)],[param_beta(1:l_max+1,1:m_max+1,1:n_max+1,1)]));
+
+Eh_initial = double(subs(Eh, [epsilon(1:l_max+1,1:m_max+1,1:n_max+1)],[param_epsilon(1:l_max+1,1:m_max+1,1:n_max+1,1)]));
+                             
+
+disp('Ef2 = ')
+disp(Ef2_initial)
+disp('Eh = ')
+disp(Eh_initial)
+disp('--------------------')
+
+
+Ef2_value = zeros(1,iteration);
+Eh_value = zeros(1,iteration);
+
+
+for a = 1:l_max+1
+    for b = 1:m_max+1
+        for c = 1:n_max+1
+
+            DEf2(a,b,c) = diff(Ef2,alpha(a,b,c));
+            DEh(a,b,c) = diff(Eh,gamma(a,b,c));
+
+            DEf2_1{a,b,c} = matlabFunction(DEf2(a,b,c), 'vars', {alpha(1:l_max+1,1:m_max+1,1:n_max+1)});
+            DEh_1{a,b,c} = matlabFunction(DEh(a,b,c), 'vars', {gamma(1:l_max+1,1:m_max+1,1:n_max+1)});
+
+            A = [a b c];
+            disp(A)
+            disp('------------')
+
+        end
+    end
+end
+
+
+
+for t = 1:iteration
+
+    for a = 1:l_max+1
+        for b = 1:m_max+1
+            for c = 1:n_max+1
+
+            DEf1_2 = DEf1_1{a,b,c}(param_alpha(1:l_max+1,1:m_max+1,1:n_max+1,t));
+            DEf3_2 = DEf3_1{a,b,c}(param_gamma(1:l_max+1,1:m_max+1,1:n_max+1,t));
+
+            param_alpha(a,b,c,t+1) = param_alpha(a,b,c,t) - eta_f1 * DEf1_2;
+            param_gamma(a,b,c,t+1) = param_gamma(a,b,c,t) - eta_f3 * DEf3_2;
+
+            end
+        end
+    end
+
+
+    Ef1_value(t) = double(subs(Ef1, [alpha(1:l_max+1,1:m_max+1,1:n_max+1)],[param_alpha(1:l_max+1,1:m_max+1,1:n_max+1,t+1)]));
+    
+    Ef3_value(t) = double(subs(Ef3, [gamma(1:l_max+1,1:m_max+1,1:n_max+1)],[param_gamma(1:l_max+1,1:m_max+1,1:n_max+1,t+1)]));
+
+
+    disp('t = ')
+    disp(t)
+    disp('Ef1 = ')
+    disp(Ef1_value(t))
+    disp('Ef3 = ')
+    disp(Ef3_value(t))
+ 
+
+    if t > 1
+
+        if (Ef1_value(t) > Ef1_value(t-1))
+            disp('Ef1_2が増加しました')
+        end
+        if (Ef3_value(t) > Ef3_value(t-1))
+            disp('Ef3_2が増加しました')
+        end
+        if (Ef1_value(t) > Ef1_value(t-1)) || (Ef3_value(t) > Ef3_value(t-1))
+            iteration = t;
+            disp('iterationを強制終了します')
+            break
+        end
+        if t == iteration
+            iteration = t+1;
+            disp('iterationを正常に終了することができました！')
+            break
+        end
+
+    end
+
+    disp('--------------------')
+
+end
