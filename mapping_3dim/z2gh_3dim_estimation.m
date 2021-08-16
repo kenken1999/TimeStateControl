@@ -754,11 +754,11 @@ for a = 1:l_max+1
     for b = 1:m_max+1
         for c = 1:n_max+1
 
-            DEf2(a,b,c) = diff(Ef2,alpha(a,b,c));
-            DEh(a,b,c) = diff(Eh,gamma(a,b,c));
+            DEf2(a,b,c) = diff(Ef2,beta(a,b,c));
+            DEh(a,b,c) = diff(Eh,epsilon(a,b,c));
 
-            DEf2_1{a,b,c} = matlabFunction(DEf2(a,b,c), 'vars', {alpha(1:l_max+1,1:m_max+1,1:n_max+1)});
-            DEh_1{a,b,c} = matlabFunction(DEh(a,b,c), 'vars', {gamma(1:l_max+1,1:m_max+1,1:n_max+1)});
+            DEf2_1{a,b,c} = matlabFunction(DEf2(a,b,c), 'vars', {beta(1:l_max+1,1:m_max+1,1:n_max+1)});
+            DEh_1{a,b,c} = matlabFunction(DEh(a,b,c), 'vars', {epsilon(1:l_max+1,1:m_max+1,1:n_max+1)});
 
             A = [a b c];
             disp(A)
@@ -776,39 +776,39 @@ for t = 1:iteration
         for b = 1:m_max+1
             for c = 1:n_max+1
 
-            DEf1_2 = DEf1_1{a,b,c}(param_alpha(1:l_max+1,1:m_max+1,1:n_max+1,t));
-            DEf3_2 = DEf3_1{a,b,c}(param_gamma(1:l_max+1,1:m_max+1,1:n_max+1,t));
+            DEf2_2 = DEf2_1{a,b,c}(param_beta(1:l_max+1,1:m_max+1,1:n_max+1,t));
+            DEh_2 = DEh_1{a,b,c}(param_epsilon(1:l_max+1,1:m_max+1,1:n_max+1,t));
 
-            param_alpha(a,b,c,t+1) = param_alpha(a,b,c,t) - eta_f1 * DEf1_2;
-            param_gamma(a,b,c,t+1) = param_gamma(a,b,c,t) - eta_f3 * DEf3_2;
+            param_beta(a,b,c,t+1) = param_beta(a,b,c,t) - eta_f2 * DEf2_2;
+            param_epsilon(a,b,c,t+1) = param_epsilon(a,b,c,t) - eta_h * DEh_2;
 
             end
         end
     end
 
 
-    Ef1_value(t) = double(subs(Ef1, [alpha(1:l_max+1,1:m_max+1,1:n_max+1)],[param_alpha(1:l_max+1,1:m_max+1,1:n_max+1,t+1)]));
+    Ef2_value(t) = double(subs(Ef2, [beta(1:l_max+1,1:m_max+1,1:n_max+1)],[param_beta(1:l_max+1,1:m_max+1,1:n_max+1,t+1)]));
     
-    Ef3_value(t) = double(subs(Ef3, [gamma(1:l_max+1,1:m_max+1,1:n_max+1)],[param_gamma(1:l_max+1,1:m_max+1,1:n_max+1,t+1)]));
+    Eh_value(t) = double(subs(Eh, [epsilon(1:l_max+1,1:m_max+1,1:n_max+1)],[param_epsilon(1:l_max+1,1:m_max+1,1:n_max+1,t+1)]));
 
 
     disp('t = ')
     disp(t)
-    disp('Ef1 = ')
-    disp(Ef1_value(t))
-    disp('Ef3 = ')
-    disp(Ef3_value(t))
+    disp('Ef2 = ')
+    disp(Ef2_value(t))
+    disp('Eh = ')
+    disp(Eh_value(t))
  
 
     if t > 1
 
-        if (Ef1_value(t) > Ef1_value(t-1))
-            disp('Ef1_2が増加しました')
+        if (Ef2_value(t) > Ef2_value(t-1))
+            disp('Ef2が増加しました')
         end
-        if (Ef3_value(t) > Ef3_value(t-1))
-            disp('Ef3_2が増加しました')
+        if (Eh_value(t) > Eh_value(t-1))
+            disp('Ehが増加しました')
         end
-        if (Ef1_value(t) > Ef1_value(t-1)) || (Ef3_value(t) > Ef3_value(t-1))
+        if (Ef2_value(t) > Ef2_value(t-1)) || (Eh_value(t) > Eh_value(t-1))
             iteration = t;
             disp('iterationを強制終了します')
             break
