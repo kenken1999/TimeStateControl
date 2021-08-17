@@ -38,8 +38,8 @@ rho3_1 = zeros(length(k1),1);
 alpha = sym('alpha',[10 10 10]); %l,m,nの順
 gamma = sym('gamma',[10 10 10]);
 
-sigma1 = 1; %s1のスケーリング定数
-sigma2 = 1; %s1のスケーリング定数
+sigma1 = 0.5; %s1のスケーリング定数
+sigma2 = 0.5; %s1のスケーリング定数
 sigma3 = pi/4; %s1のスケーリング定数
 
 Ef1 = 0;
@@ -394,7 +394,7 @@ Ef3 = Ef3 + ( y2(j+1) - (gamma(l2,m2,n2) + rho1_2(j+1) * (gamma(l2+1,m2,n2) - ga
 eta_f1 = 2.5 * 10 ^ (-1); %学習率
 eta_f3 = 2.5 * 10 ^ (-1);
 
-iteration = 50; %パラメータ更新回数（最大）
+iteration =100; %パラメータ更新回数（最大）
 
 param_alpha = zeros(10,10,10,iteration+1);
 param_gamma = zeros(10,10,10,iteration+1);
@@ -722,14 +722,13 @@ end
 
 %---最急降下法によるパラメータの決定----------------------------
 
-eta_f2 = 2.5 * 10 ^ (-1); %学習率
-eta_h = 2.5 * 10 ^ (-1);
+eta_f2 = 1.0 * 10 ^ (-1); %学習率
+eta_h = 10 * 10 ^ (0);
 
-iteration = 50; %パラメータ更新回数（最大）
+iteration = 100; %パラメータ更新回数（最大）
 
 param_beta = zeros(10,10,10,iteration+1);
 param_epsilon = zeros(10,10,10,iteration+1);
-
 
 
 %---Eの設定---------------------------
@@ -824,3 +823,94 @@ for t = 1:iteration
     disp('--------------------')
 
 end
+
+
+% 推定結果の取得--------------------------------------
+
+for j = 1:length(k)
+
+    l = l_num(j);
+    m = m_num(j);
+    n = n_num(j);
+
+    f1_b(j) = param_alpha(l,m,n,iteration) + rho1(j) * (param_alpha(l+1,m,n,iteration) - param_alpha(l,m,n,iteration))...
+                                           + rho2(j) * (param_alpha(l,m+1,n,iteration) - param_alpha(l,m,n,iteration))...
+                                           + rho3(j) * (param_alpha(l,m,n+1,iteration) - param_alpha(l,m,n,iteration));
+
+    f3_b(j) = param_beta(l,m,n,iteration) + rho1(j) * (param_gamma(l+1,m,n,iteration) - param_gamma(l,m,n,iteration))...
+                                          + rho2(j) * (param_gamma(l,m+1,n,iteration) - param_gamma(l,m,n,iteration))...
+                                          + rho3(j) * (param_gamma(l,m,n+1,iteration) - param_gamma(l,m,n,iteration));
+
+
+    f2_b(j) = param_beta(l,m,n,iteration) + rho1(j) * (param_beta(l+1,m,n,iteration) - param_beta(l,m,n,iteration))...
+                                          + rho2(j) * (param_beta(l,m+1,n,iteration) - param_beta(l,m,n,iteration))...
+                                          + rho3(j) * (param_beta(l,m,n+1,iteration) - param_beta(l,m,n,iteration));
+
+
+    hmap_b(j) = param_epsilon(l,m,n,iteration) + rho1(j) * (param_epsilon(l+1,m,n,iteration) - param_epsilon(l,m,n,iteration))...
+                                            + rho2(j) * (param_epsilon(l,m+1,n,iteration) - param_epsilon(l,m,n,iteration))...
+                                            + rho3(j) * (param_epsilon(l,m,n+1,iteration) - param_epsilon(l,m,n,iteration));
+
+end
+
+
+% 推定結果のplot--------------------------------------
+
+figure;
+hold on;
+grid on;
+
+axis([-5 5 -5 5]) % π/2 ≒ 1.57
+
+plot(si_c(:,3), si_c(:,1), '--m', si_c(:,3), f1_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
+xlabel("s3' = θ")
+ylabel('z1 = f1(s)')
+legend('真値：s1','推定値：z1 = f1(s)')
+
+hold off;
+
+
+figure;
+hold on;
+grid on;
+
+axis([-5 5 -5 5]) % π/2 ≒ 1.57
+
+plot(si_c(:,3), si_c(:,2), '--m', si_c(:,3), f3_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z3 = f3(s) = s2 の答え合わせ
+xlabel("s3' = θ")
+ylabel('z3 = f3(s)')
+legend('真値：s2','推定値：z3 = f3(s)')
+
+hold off;
+
+
+
+
+% 推定結果のplot--------------------------------------
+
+figure;
+hold on;
+grid on;
+
+axis([-5 5 -5 5]) % π/2 ≒ 1.57
+
+plot(si_c(:,3), tan(si_c(:,3)), '--m', si_c(:,3), f2_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
+xlabel("s3' = θ")
+ylabel('z2 = f2(s)')
+legend('真値：tan(s2)','推定値：z2 = f2(s)')
+
+hold off;
+
+
+figure;
+hold on;
+grid on;
+
+axis([-5 5 -5 5]) % π/2 ≒ 1.57
+
+plot(si_c(:,3), cos(si_c(:,3)), '--m', si_c(:,3), hmap_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z3 = f3(s) = s2 の答え合わせ
+xlabel("s3' = θ")
+ylabel('h(s)')
+legend('真値：cos(s3)','推定値：h(s)')
+
+hold off;
