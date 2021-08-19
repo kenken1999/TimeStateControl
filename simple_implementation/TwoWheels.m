@@ -5,11 +5,11 @@ dt = 1;%%時間刻み=離散時間Tsとして使用
 Tfin = 15;%シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
-u1 = ones(1,length(t1)) * 0.09;
-u2 = ones(1,length(t1)) * (-pi/16);
+u1 = ones(1,length(t1)) * 0.049;
+u2 = ones(1,length(t1)) * (-pi/32);
 
 si = zeros(length(t1),3);
-si(1,:) = [0 0 pi/2];%状態ξの初期値を設定
+si(1,:) = [0 0 pi/3];%状態ξの初期値を設定
 
 x = si(1,1) + 0.2 * cos(si(1,3));
 y = si(1,2) + 0.2 * sin(si(1,3));
