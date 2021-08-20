@@ -388,13 +388,32 @@ Ef1 = Ef1 + ( 1 - ( alpha(l2,m2,n2) + rho1_2(j+1) * (alpha(l2+1,m2,n2) - alpha(l
 Ef3 = Ef3 + ( y2(j+1) - (gamma(l2,m2,n2) + rho1_2(j+1) * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2_2(j+1) * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3_2(j+1) * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2))) ) ^ 2;
 
 
+%---正則化項の追加---------------
+
+E4_f1 = 0;
+E4_f3 = 0;
+
+for a = 1 : l_max - 1
+    for b = 1 : m_max - 1
+        for c = 1 : n_max - 1
+
+            E4_f1 = E4_f1 + (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
+            E4_f3 = E4_f3 + (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
+
+        end
+    end
+end
+
+Ef1 = Ef1 + 0.2 * E4_f1;
+Ef3 = Ef3 + 0.2 * E4_f3;
+
 
 %---最急降下法によるパラメータの決定----------------------------
 
-eta_f1 = 2.5 * 10 ^ (-1); %学習率
-eta_f3 = 2.5 * 10 ^ (-1);
+eta_f1 = 1.0 * 10 ^ (-1); %学習率
+eta_f3 = 1.0 * 10 ^ (-1);
 
-iteration =200; %パラメータ更新回数（最大）
+iteration = 150; %パラメータ更新回数（最大）
 
 param_alpha = zeros(10,10,10,iteration+1);
 param_gamma = zeros(10,10,10,iteration+1);
@@ -827,7 +846,7 @@ end
 eta_f2 = 1.0 * 10 ^ (-1); %学習率
 eta_h = 10 * 10 ^ (0);
 
-iteration = 100; %パラメータ更新回数（最大）
+iteration = 150; %パラメータ更新回数（最大）
 
 param_beta = zeros(10,10,10,iteration+1);
 param_epsilon = zeros(10,10,10,iteration+1);
