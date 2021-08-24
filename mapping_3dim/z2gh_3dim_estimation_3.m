@@ -46,8 +46,8 @@ rho3_1 = zeros(length(k1),1);
 alpha = sym('alpha',[10 10 10]); %l,m,nの順
 gamma = sym('gamma',[10 10 10]);
 
-sigma1 = 0.5; %s1のスケーリング定数
-sigma2 = 0.5; %s1のスケーリング定数
+sigma1 = 1.0; %s1のスケーリング定数
+sigma2 = 1.0; %s1のスケーリング定数
 sigma3 = pi/4; %s1のスケーリング定数
 
 Ef1 = 0;
@@ -55,9 +55,9 @@ Ef3 = 0;
 E4_f1 = 0;
 E4_f3 = 0;
 
-l_max = 1; %現在の番号付けの最大値を保存， 全軸共通
-m_max = 1;
-n_max = 1;
+l_max = 2; %現在の番号付けの最大値を保存， 全軸共通
+m_max = 2;
+n_max = 2;
 
 
 l1_now(1) = floor(si_b1(1,1) / sigma1);
@@ -72,6 +72,7 @@ rho3_1(1) = si_b1(1,3) / sigma3  - n1_now(1);
 
 y1 = zeros(length(k1),1);
 y1(1) = -1;
+
 
 
 %---誤差関数の定義（k1軸上）----------------------------------------------------
@@ -374,7 +375,7 @@ for i = 1 : length(k2) - 1
 
 end
 
-%next決め
+% next決め
 for i = 1 : length(k2) - 1
 
     if l2_now(1) + 1 == l1_now(i)
@@ -434,7 +435,6 @@ end
 
 
 %---誤差関数の定義（k1軸上）----------------------------------------------------
-
 
 for j = 1 : length(k2) - 1
 
@@ -683,10 +683,11 @@ Ef1 = Ef1 + ( 1 - ( alpha(l2,m2,n2) + rho1_2(j+1) * (alpha(l2_plus,m2,n2) - alph
 Ef3 = Ef3 + ( y2(j+1) - (gamma(l2,m2,n2) + rho1_2(j+1) * (gamma(l2_plus,m2,n2) - gamma(l2,m2,n2)) + rho2_2(j+1) * (gamma(l2,m2_plus,n2) - gamma(l2,m2,n2)) + rho3_2(j+1) * (gamma(l2,m2,n2_plus) - gamma(l2,m2,n2))) ) ^ 2;
 
 
-% %---正則化項の追加(l_plusを考慮しなければならない)---------------
 
-% E4_f1 = 0;
-% E4_f3 = 0;
+%---正則化項の追加(l1_now,l2_nowの値をもとに再整理する必要あり)---------------
+
+E4_f1 = 0;
+E4_f3 = 0;
 
 % for a = 1 : l_max - 2
 %     for b = 1 : m_max - 2
@@ -699,8 +700,32 @@ Ef3 = Ef3 + ( y2(j+1) - (gamma(l2,m2,n2) + rho1_2(j+1) * (gamma(l2_plus,m2,n2) -
 %     end
 % end
 
-% Ef1 = Ef1 + 0.20 * E4_f1;
-% Ef3 = Ef3 + 0.20 * E4_f3;
+l1_reg = zeros(max(l1_now) - min(l1_now) + 1,1);
+
+for i = 1 : length(k1) - 1
+
+    if min(l1_now) == l1_now(i)
+        l1_reg(1) = l1_num(i);
+    end
+
+    
+
+end
+
+for a = 1 : max(l1_now) - min(l1_now) + 1
+    for b = 1 : max(m1_now) - min(m1_now) + 1
+        for c = 1 : max(n1_now) - min(n1_now) + 1
+
+            E4_f1 = E4_f1 + (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
+            E4_f3 = E4_f3 + (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
+
+        end
+    end
+end
+
+Ef1 = Ef1 + 0.20 * E4_f1;
+Ef3 = Ef3 + 0.20 * E4_f3;
+
 
 
 %---最急降下法によるパラメータの決定----------------------------
@@ -708,7 +733,7 @@ Ef3 = Ef3 + ( y2(j+1) - (gamma(l2,m2,n2) + rho1_2(j+1) * (gamma(l2_plus,m2,n2) -
 eta_f1 = 1.0 * 10 ^ (-1); %学習率
 eta_f3 = 1.0 * 10 ^ (-1);
 
-iteration = 300; %パラメータ更新回数（最大）
+iteration = 150; %パラメータ更新回数（最大）
 
 param_alpha = zeros(10,10,10,iteration+1);
 param_gamma = zeros(10,10,10,iteration+1);
@@ -724,7 +749,10 @@ Ef3_initial = double(subs(Ef3, [gamma(1:l_max,1:m_max,1:n_max)],[param_gamma(1:l
 
 disp('Ef1 = ')
 disp(Ef1_initial)
----最急降下法によるパラメータの決定----------------------------
+disp('Ef3 = ')
+disp(Ef3_initial)
+disp('--------------------')
+
 
 Ef1_value = zeros(1,iteration);
 Ef3_value = zeros(1,iteration);
@@ -1180,6 +1208,17 @@ for j = 1:length(k) - 1
             break;
         end
 
+        if i <= length(k1) && l_now(j+1) == l1_now(i) + 1
+            l_num(j+1) = l1_next(i);
+            break;
+        end
+
+        if i <= length(k2) && l_now(j+1) == l2_now(i) + 1
+            l_num(j+1) = l2_next(i);
+            break;
+        end
+
+
         if i == length(k) - 1
             break; %何かしら設定必要
         end
@@ -1200,6 +1239,16 @@ for j = 1:length(k) - 1
 
         if i <= length(k2) && m_now(j+1) == m2_now(i)
             m_num(j+1) = m2_num(i);
+            break;
+        end
+
+        if i <= length(k1) && m_now(j+1) == m1_now(i) + 1
+            m_num(j+1) = m1_next(i);
+            break;
+        end
+
+        if i <= length(k2) && m_now(j+1) == m2_now(i) + 1
+            m_num(j+1) = m2_next(i);
             break;
         end
 
@@ -1226,11 +1275,123 @@ for j = 1:length(k) - 1
             break;
         end
 
+        if i <= length(k1) && n_now(j+1) == n1_now(i) + 1
+            n_num(j+1) = n1_next(i);
+            break;
+        end
+
+        if i <= length(k2) && n_now(j+1) == n2_now(i) + 1
+            n_num(j+1) = n2_next(i);
+            break;
+        end
+
         if i == length(k) - 1
             break; %何かしら設定必要
         end
     
     end
+
+    % next決め
+    for i = 1 : length(k) - 1
+
+        if i <= j && l_now(j+1) == l_now(i)
+            l_next(j+1) = l_next(i);
+            break;
+        end
+            
+        if i <= length(k1) && l_now(j+1) == l1_now(i)
+            l_next(j+1) = l1_next(i);
+            break;
+        end
+
+        if i <= length(k2) && l_now(j+1) == l2_now(i)
+            l_next(j+1) = l2_next(i);
+            break;
+        end
+
+        if i <= length(k1) && l_now(j+1) + 1 == l1_now(i)
+            l_next(j+1) = l1_num(i);
+            break;
+        end
+
+        if i <= length(k2) && l_now(j+1) + 1 == l2_now(i)
+            l_next(j+1) = l2_num(i);
+            break;
+        end
+
+
+        if i == length(k) - 1
+            break; %何かしら設定必要
+        end
+    
+    end
+
+    for i = 1 : length(k) - 1
+
+        if i <= j && m_now(j+1) == m_now(i)
+            m_next(j+1) = m_next(i);
+            break;
+        end
+            
+        if i <= length(k1) && m_now(j+1) == m1_now(i)
+            m_next(j+1) = m1_next(i);
+            break;
+        end
+
+        if i <= length(k2) && m_now(j+1) == m2_now(i)
+            m_next(j+1) = m2_next(i);
+            break;
+        end
+
+        if i <= length(k1) && m_now(j+1) + 1 == m1_now(i)
+            m_next(j+1) = m1_num(i);
+            break;
+        end
+
+        if i <= length(k2) && m_now(j+1) + 1 == m2_now(i)
+            m_next(j+1) = m2_num(i);
+            break;
+        end
+
+        if i == length(k) - 1
+            break; %何かしら設定必要
+        end
+    
+    end
+
+    for i = 1 : length(k) - 1
+
+        if i <= j && n_now(j+1) == n_now(i)
+            n_next(j+1) = n_next(i);
+            break;
+        end
+            
+        if i <= length(k1) && n_now(j+1) == n1_now(i)
+            n_next(j+1) = n1_next(i);
+            break;
+        end
+
+        if i <= length(k2) && n_now(j+1) == n2_now(i)
+            n_next(j+1) = n2_next(i);
+            break;
+        end
+
+        if i <= length(k1) && n_now(j+1) + 1 == n1_now(i)
+            n_next(j+1) = n1_num(i);
+            break;
+        end
+
+        if i <= length(k2) && n_now(j+1) + 1 == n2_now(i)
+            n_next(j+1) = n2_num(i);
+            break;
+        end
+
+        if i == length(k) - 1
+            break; %何かしら設定必要
+        end
+    
+    end
+
 
 
     l = l_num(j); %代入しやすくするため
@@ -1256,12 +1417,7 @@ for j = 1:length(k) - 1
                  / ( (param_alpha(l2,m2,n2,iteration) + rho1(j+1) * (param_alpha(l2_plus,m2,n2,iteration) - param_alpha(l2,m2,n2,iteration)) + rho2(j+1) * (param_alpha(l2,m2_plus,n2,iteration) - param_alpha(l2,m2,n2,iteration)) + rho3(j+1) * (param_alpha(l2,m2,n2_plus,iteration) - param_alpha(l2,m2,n2,iteration)))...
                  - (param_alpha(l,m,n,iteration) + rho1(j) * (param_alpha(l_plus,m,n,iteration) - param_alpha(l,m,n,iteration)) + rho2(j) * (param_alpha(l,m_plus,n,iteration) - param_alpha(l,m,n,iteration)) + rho3(j) * (param_alpha(l,m,n_plus,iteration) - param_alpha(l,m,n,iteration))) ) ) ^ 2;
 
-    % E2 = E2 + ( u2_b(j) / u1_b(j) * ( delta(l,m,n) + rho1(j) * (delta(l+1,m,n) - delta(l,m,n)) + rho2(j) * (delta(l,m+1,n) - delta(l,m,n)) + rho3(j) * (delta(l,m,n+1) - delta(l,m,n)) )...
-    %              - ( (beta(l2,m2,n2) + rho1(j+1) * (beta(l2+1,m2,n2) - beta(l2,m2,n2)) + rho2(j+1) * (beta(l2,m2+1,n2) - beta(l2,m2,n2)) + rho3(j+1) * (beta(l2,m2,n2+1) - beta(l2,m2,n2)))...
-    %              - (beta(l,m,n) + rho1(j) * (beta(l+1,m,n) - beta(l,m,n)) + rho2(j) * (beta(l,m+1,n) - beta(l,m,n)) + rho3(j) * (beta(l,m,n+1) - beta(l,m,n))) )...
-    %              / ( (alpha(l2,m2,n2) + rho1(j+1) * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2(j+1) * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3(j+1) * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2)))...
-    %              - (alpha(l,m,n) + rho1(j) * (alpha(l+1,m,n) - alpha(l,m,n)) + rho2(j) * (alpha(l,m+1,n) - alpha(l,m,n)) + rho3(j) * (alpha(l,m,n+1) - alpha(l,m,n))) ) ) ^ 2;
-    
+
     Eh = Eh + ( u1_b(j) * ( epsilon(l,m,n) + rho1(j) * (epsilon(l_plus,m,n) - epsilon(l,m,n)) + rho2(j) * (epsilon(l,m_plus,n) - epsilon(l,m,n)) + rho3(j) * (epsilon(l,m,n_plus) - epsilon(l,m,n)) )...
                  - ( (param_alpha(l2,m2,n2,iteration) + rho1(j+1) * (param_alpha(l2_plus,m2,n2,iteration) - param_alpha(l2,m2,n2,iteration)) + rho2(j+1) * (param_alpha(l2,m2_plus,n2,iteration) - param_alpha(l2,m2,n2,iteration)) + rho3(j+1) * (param_alpha(l2,m2,n2_plus,iteration) - param_alpha(l2,m2,n2,iteration)))...
                  - (param_alpha(l,m,n,iteration) + rho1(j) * (param_alpha(l_plus,m,n,iteration) - param_alpha(l,m,n,iteration)) + rho2(j) * (param_alpha(l,m_plus,n,iteration) - param_alpha(l,m,n,iteration)) + rho3(j) * (param_alpha(l,m,n_plus,iteration) - param_alpha(l,m,n,iteration))) )...
@@ -1275,7 +1431,7 @@ end
 eta_f2 = 1.0 * 10 ^ (-1); %学習率
 eta_h = 10 * 10 ^ (0);
 
-iteration = 100; %パラメータ更新回数（最大）
+iteration = 150; %パラメータ更新回数（最大）
 
 param_beta = zeros(10,10,10,iteration+1);
 param_epsilon = zeros(10,10,10,iteration+1);
