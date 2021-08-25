@@ -46,8 +46,8 @@ rho3_1 = zeros(length(k1),1);
 alpha = sym('alpha',[10 10 10]); %l,m,nの順
 gamma = sym('gamma',[10 10 10]);
 
-sigma1 = 1.0; %s1のスケーリング定数
-sigma2 = 1.0; %s1のスケーリング定数
+sigma1 = 1.5; %s1のスケーリング定数
+sigma2 = 1.5; %s1のスケーリング定数
 sigma3 = pi/4; %s1のスケーリング定数
 
 Ef1 = 0;
@@ -700,24 +700,137 @@ E4_f3 = 0;
 %     end
 % end
 
-l1_reg = zeros(max(l1_now) - min(l1_now) + 1,1);
-
-for i = 1 : length(k1) - 1
-
-    if min(l1_now) == l1_now(i)
-        l1_reg(1) = l1_num(i);
-    end
-
-    
-
+if min(l1_now) > min(l2_now)
+    l_start = min(l2_now);
+else
+    l_start = min(l1_now);
 end
 
-for a = 1 : max(l1_now) - min(l1_now) + 1
-    for b = 1 : max(m1_now) - min(m1_now) + 1
-        for c = 1 : max(n1_now) - min(n1_now) + 1
+if min(m1_now) > min(m2_now)
+    m_start = min(m2_now);
+else
+    m_start = min(m1_now);
+end
 
-            E4_f1 = E4_f1 + (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
-            E4_f3 = E4_f3 + (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
+if min(n1_now) > min(n2_now)
+    n_start = min(n2_now);
+else
+    n_start = min(n1_now);
+end
+
+
+if max(l1_now) > max(l2_now)
+    l_goal = max(l1_now);
+else
+    l_goal = max(l2_now);
+end
+
+if max(m1_now) > max(m2_now)
+    m_goal = max(m1_now);
+else
+    m_goal = max(m2_now);
+end
+
+if max(n1_now) > max(n2_now)
+    n_goal = max(n1_now);
+else
+    n_goal = max(n2_now);
+end
+
+
+l_reg = zeros(l_max,1);
+m_reg = zeros(m_max,1);
+n_reg = zeros(n_max,1);
+
+l_count = 1;
+m_count = 1;
+n_count = 1;
+
+for i = 1 : l_goal - l_start + 2
+    for j = 1 : length(k1)
+        if l_start + i - 1 == l1_now(j)
+            l_reg(l_count) = l1_num(j);
+            l_count = l_count + 1;
+            break;
+        elseif l_start + i - 1 == l2_now(j)
+            l_reg(l_count) = l2_num(j);
+            l_count = l_count + 1;
+            break;
+        elseif l_start + i - 1 == l1_now(j) + 1
+            l_reg(l_count) = l1_next(j);
+            l_count = l_count + 1;
+            break;
+        elseif l_start + i - 1 == l2_now(j) + 1
+            l_reg(l_count) = l2_next(j);
+            l_count = l_count + 1;
+            break;
+        end
+    end
+end
+
+for i = 1 : m_goal - m_start + 2
+    for j = 1 : length(k1)
+        if m_start + i - 1 == m1_now(j)
+            m_reg(m_count) = m1_num(j);
+            m_count = m_count + 1;
+            break;
+        elseif m_start + i - 1 == m2_now(j)
+            m_reg(m_count) = m2_num(j);
+            m_count = m_count + 1;
+            break;
+        elseif m_start + i - 1 == m1_now(j) + 1
+            m_reg(m_count) = m1_next(j);
+            m_count = m_count + 1;
+            break;
+        elseif m_start + i - 1 == m2_now(j) + 1
+            m_reg(m_count) = m2_next(j);
+            m_count = m_count + 1;
+            break;
+        end
+    end
+end
+
+for i = 1 : n_goal - n_start + 2
+    for j = 1 : length(k1)
+        if n_start + i - 1 == n1_now(j)
+            n_reg(n_count) = n1_num(j);
+            n_count = n_count + 1;
+            break;
+        elseif n_start + i - 1 == n2_now(j)
+            n_reg(n_count) = n2_num(j);
+            n_count = n_count + 1;
+            break;
+        elseif n_start + i - 1 == n1_now(j) + 1
+            n_reg(n_count) = n1_next(j);
+            n_count = n_count + 1;
+            break;
+        elseif n_start + i - 1 == n2_now(j) + 1
+            n_reg(n_count) = n2_next(j);
+            n_count = n_count + 1;
+            break;
+        end
+    end
+end
+
+
+for a = 1 : l_max - 2
+    for b = 1 : m_max - 2
+        for c = 1 : n_max - 2
+
+            l = l_reg(a);
+            l_p = l_reg(a+1);
+            l_pp = l_reg(a+2);
+
+            m = m_reg(b);
+            m_p = m_reg(b+1);
+            m_pp = m_reg(b+2);
+
+            n = n_reg(c);
+            n_p = n_reg(c+1);
+            n_pp = n_reg(c+2);
+
+            E4_f1 = E4_f1 + (alpha(l_pp,m,n) - 2 * alpha(l_p,m,n) - alpha(l,m,n)) ^ 2 + (alpha(l,m_pp,n) - 2 * alpha(l,m_p,n) - alpha(l,m,n)) ^ 2 + (alpha(l,m,n_pp) - 2 * alpha(l,m,n_p) - alpha(l,m,n)) ^ 2;
+            E4_f3 = E4_f3 + (gamma(l_pp,m,n) - 2 * gamma(l_p,m,n) + gamma(l,m,n)) ^ 2 + (gamma(l,m_pp,n) - 2 * gamma(l,m_p,n) + gamma(l,m,n)) ^ 2 + (gamma(l,m,n_pp) - 2 * gamma(l,m,n_p) + gamma(l,m,n)) ^ 2;
 
         end
     end
@@ -733,7 +846,7 @@ Ef3 = Ef3 + 0.20 * E4_f3;
 eta_f1 = 1.0 * 10 ^ (-1); %学習率
 eta_f3 = 1.0 * 10 ^ (-1);
 
-iteration = 150; %パラメータ更新回数（最大）
+iteration = 500; %パラメータ更新回数（最大）
 
 param_alpha = zeros(10,10,10,iteration+1);
 param_gamma = zeros(10,10,10,iteration+1);
@@ -1428,10 +1541,10 @@ end
 
 %---最急降下法によるパラメータの決定----------------------------
 
-eta_f2 = 1.0 * 10 ^ (-1); %学習率
+eta_f2 = 1.0 * 10 ^ (-2); %学習率
 eta_h = 10 * 10 ^ (0);
 
-iteration = 150; %パラメータ更新回数（最大）
+iteration = 500; %パラメータ更新回数（最大）
 
 param_beta = zeros(10,10,10,iteration+1);
 param_epsilon = zeros(10,10,10,iteration+1);
