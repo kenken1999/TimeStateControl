@@ -38,8 +38,8 @@ rho3_1 = zeros(length(k1),1);
 alpha = sym('alpha',[10 10 10]); %l,m,nの順
 gamma = sym('gamma',[10 10 10]);
 
-sigma1 = 1.0; %s1のスケーリング定数
-sigma2 = 1.0; %s1のスケーリング定数
+sigma1 = 0.2; %s1のスケーリング定数
+sigma2 = 0.2; %s1のスケーリング定数
 sigma3 = pi/4; %s1のスケーリング定数
 
 Ef1 = 0;
@@ -172,7 +172,6 @@ end
 Ef1 = Ef1 + ( 0 - ( alpha(l2,m2,n2) + rho1_1(j+1) * (alpha(l2+1,m2,n2) - alpha(l2,m2,n2)) + rho2_1(j+1) * (alpha(l2,m2+1,n2) - alpha(l2,m2,n2)) + rho3_1(j+1) * (alpha(l2,m2,n2+1) - alpha(l2,m2,n2))) ) ^ 2;
 
 Ef3 = Ef3 + ( y1(j+1) - (gamma(l2,m2,n2) + rho1_1(j+1) * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2_1(j+1) * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3_1(j+1) * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2))) ) ^ 2;
-
 
 
 %z1&z3軸の推定(k2軸上)----------------------------------------------------
@@ -388,13 +387,33 @@ Ef1 = Ef1 + ( 1 - ( alpha(l2,m2,n2) + rho1_2(j+1) * (alpha(l2+1,m2,n2) - alpha(l
 Ef3 = Ef3 + ( y2(j+1) - (gamma(l2,m2,n2) + rho1_2(j+1) * (gamma(l2+1,m2,n2) - gamma(l2,m2,n2)) + rho2_2(j+1) * (gamma(l2,m2+1,n2) - gamma(l2,m2,n2)) + rho3_2(j+1) * (gamma(l2,m2,n2+1) - gamma(l2,m2,n2))) ) ^ 2;
 
 
+%---正則化項の追加---------------
+
+E4_f1 = 0;
+E4_f3 = 0;
+
+for a = 1 : l_max - 1
+    for b = 1 : m_max - 1
+        for c = 1 : n_max - 1
+
+            E4_f1 = E4_f1 + (alpha(a+2,b,c) - 2 * alpha(a+1,b,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b+2,c) - 2 * alpha(a,b+1,c) - alpha(a,b,c)) ^ 2 + (alpha(a,b,c+2) - 2 * alpha(a,b,c+1) - alpha(a,b,c)) ^ 2;
+            E4_f3 = E4_f3 + (gamma(a+2,b,c) - 2 * gamma(a+1,b,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b+2,c) - 2 * gamma(a,b+1,c) + gamma(a,b,c)) ^ 2 + (gamma(a,b,c+2) - 2 * gamma(a,b,c+1) + gamma(a,b,c)) ^ 2;
+
+        end
+    end
+end
+
+Ef1 = Ef1 + 0.2 * E4_f1;
+Ef3 = Ef3 + 0.2 * E4_f3;
+
+
 
 %---最急降下法によるパラメータの決定----------------------------
 
-eta_f1 = 2.5 * 10 ^ (-1); %学習率
-eta_f3 = 2.5 * 10 ^ (-1);
+eta_f1 = 2.0 * 10 ^ (-1); %学習率
+eta_f3 = 1.0 * 10 ^ (-1);
 
-iteration = 150; %パラメータ更新回数（最大）
+iteration = 300; %パラメータ更新回数（最大）
 
 param_alpha = zeros(10,10,10,iteration+1);
 param_gamma = zeros(10,10,10,iteration+1);
@@ -603,14 +622,14 @@ dk = 1;   %時間刻み
 Kfin = 15; %シミュレーション終了時間
 k = [0:dk:Kfin];
 
-u1_b = ones(length(k),1) * 0.09;
-u2_b = ones(length(k),1) * (-pi/16);
+u1_b = ones(length(k),1) * 0.069;
+u2_b = zeros(length(k),1);
 
 si_b = zeros(length(k),3); %観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) 3*pi/4];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si_b(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) 7*pi/12];   %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 si_c = zeros(length(k),3); %補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
-si_c(1,:) = [0 0 pi/2];
+si_c(1,:) = [0 0 pi/3];
 
 f2_b = zeros(length(k),1);   %写像f2:s→z2の推定
 gmap_b = zeros(length(k),1);
@@ -827,7 +846,7 @@ end
 eta_f2 = 1.0 * 10 ^ (-1); %学習率
 eta_h = 50 * 10 ^ (-1);
 
-iteration = 150; %パラメータ更新回数（最大）
+iteration = 300; %パラメータ更新回数（最大）
 
 param_beta = zeros(10,10,10,iteration+1);
 param_epsilon = zeros(10,10,10,iteration+1);
@@ -999,7 +1018,7 @@ axis([-5 5 -5 5]) % π/2 ≒ 1.57
 plot(si_c(:,3), tan(si_c(:,3)), '--m', si_c(:,3), f2_b(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
 xlabel("s3' = θ")
 ylabel('z2 = f2(s)')
-legend('真値：tan(s2)','推定値：z2 = f2(s)')
+legend('真値：tan(s3)','推定値：z2 = f2(s)')
 
 hold off;
 
