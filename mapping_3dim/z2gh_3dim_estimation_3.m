@@ -46,8 +46,8 @@ rho3_1 = zeros(length(k1),1);
 alpha = sym('alpha',[15 15 10]); % l,m,nの順
 gamma = sym('gamma',[15 15 10]);
 
-sigma1 = 1.5; % s1のスケーリング定数
-sigma2 = 1.5; % s1のスケーリング定数
+sigma1 = 1.0; % s1のスケーリング定数
+sigma2 = 1.0; % s1のスケーリング定数
 sigma3 = pi/4; % s1のスケーリング定数
 
 Ef1 = 0;
@@ -823,18 +823,15 @@ for a = 1 : l_max - 2
     end
 end
 
-Ef1 = Ef1 + 0.00 * E4_f1;
-Ef3 = Ef3 + 0.00 * E4_f3;
+Ef1 = Ef1 + 0.30 * E4_f1;
+Ef3 = Ef3 + 0.30 * E4_f3;
 
 
 
 %---最急降下法によるパラメータの決定----------------------------
 
-% eta_f1 = 1.0 * 10 ^ (-1); % 学習率
-% eta_f3 = 1.0 * 10 ^ (-1);
-
-eta_f1 = 2.5 * 10 ^ (-1); % 学習率
-eta_f3 = 2.5 * 10 ^ (-1);
+eta_f1 = 1.5 * 10 ^ (-1); % 学習率
+eta_f3 = 1.0 * 10 ^ (-1);
 
 iteration = 300; % パラメータ更新回数（最大）
 
@@ -1529,15 +1526,118 @@ end
 
 
 
+%---正則化項の追加(l_now,l_nowの値をもとに再整理する必要あり)---------------
+
+E4_f2 = 0;
+E4_h = 0;
+
+l_count = 1;
+m_count = 1;
+n_count = 1;
+
+for i = 1 : l_goal - l_start + 2
+    for j = 1 : length(k1)
+        if l_start + i - 1 == l1_now(j)
+            l_reg(l_count) = l1_num(j);
+            l_count = l_count + 1;
+            break;
+        elseif l_start + i - 1 == l2_now(j)
+            l_reg(l_count) = l2_num(j);
+            l_count = l_count + 1;
+            break;
+        elseif l_start + i - 1 == l1_now(j) + 1
+            l_reg(l_count) = l1_next(j);
+            l_count = l_count + 1;
+            break;
+        elseif l_start + i - 1 == l2_now(j) + 1
+            l_reg(l_count) = l2_next(j);
+            l_count = l_count + 1;
+            break;
+        end
+    end
+end
+
+for i = 1 : m_goal - m_start + 2
+    for j = 1 : length(k1)
+        if m_start + i - 1 == m1_now(j)
+            m_reg(m_count) = m1_num(j);
+            m_count = m_count + 1;
+            break;
+        elseif m_start + i - 1 == m2_now(j)
+            m_reg(m_count) = m2_num(j);
+            m_count = m_count + 1;
+            break;
+        elseif m_start + i - 1 == m1_now(j) + 1
+            m_reg(m_count) = m1_next(j);
+            m_count = m_count + 1;
+            break;
+        elseif m_start + i - 1 == m2_now(j) + 1
+            m_reg(m_count) = m2_next(j);
+            m_count = m_count + 1;
+            break;
+        end
+    end
+end
+
+for i = 1 : n_goal - n_start + 2
+    for j = 1 : length(k1)
+        if n_start + i - 1 == n1_now(j)
+            n_reg(n_count) = n1_num(j);
+            n_count = n_count + 1;
+            break;
+        elseif n_start + i - 1 == n2_now(j)
+            n_reg(n_count) = n2_num(j);
+            n_count = n_count + 1;
+            break;
+        elseif n_start + i - 1 == n1_now(j) + 1
+            n_reg(n_count) = n1_next(j);
+            n_count = n_count + 1;
+            break;
+        elseif n_start + i - 1 == n2_now(j) + 1
+            n_reg(n_count) = n2_next(j);
+            n_count = n_count + 1;
+            break;
+        end
+    end
+end
+
+
+for a = 1 : l_max - 2
+    for b = 1 : m_max - 2
+        for c = 1 : n_max - 2
+
+            l = l_reg(a);
+            l_p = l_reg(a+1);
+            l_pp = l_reg(a+2);
+
+            m = m_reg(b);
+            m_p = m_reg(b+1);
+            m_pp = m_reg(b+2);
+
+            n = n_reg(c);
+            n_p = n_reg(c+1);
+            n_pp = n_reg(c+2);
+
+            E4_f2 = E4_f2 + (beta(l_pp,m,n) - 2 * beta(l_p,m,n) - beta(l,m,n)) ^ 2 + (beta(l,m_pp,n) - 2 * beta(l,m_p,n) - beta(l,m,n)) ^ 2 + (beta(l,m,n_pp) - 2 * beta(l,m,n_p) - beta(l,m,n)) ^ 2;
+            E4_h = E4_h + (epsilon(l_pp,m,n) - 2 * epsilon(l_p,m,n) + epsilon(l,m,n)) ^ 2 + (epsilon(l,m_pp,n) - 2 * epsilon(l,m_p,n) + epsilon(l,m,n)) ^ 2 + (epsilon(l,m,n_pp) - 2 * epsilon(l,m,n_p) + epsilon(l,m,n)) ^ 2;
+
+        end
+    end
+end
+
+Ef2 = Ef2 + 0.05 * E4_f2;
+Eh = Eh + 0.05 * E4_h;
+
+
+
+
+
 %---最急降下法によるパラメータの決定----------------------------
 
-% eta_f2 = 1.0 * 10 ^ (-2); % 学習率
-% eta_h = 10 * 10 ^ (0);
+eta_f2 = 1.0 * 10 ^ (-2); % 学習率
+eta_h = 1.0 * 10 ^ (-1);
 
-eta_f2 = 1.0 * 10 ^ (-1); % 学習率
-eta_h = 10 * 10 ^ (0);
-
-iteration_2 = 500; % パラメータ更新回数（最大）
+iteration_2 = 300; % パラメータ更新回数（最大）
 
 param_beta = zeros(15,15,10,iteration_2+1);
 param_epsilon = zeros(15,15,10,iteration_2+1);
