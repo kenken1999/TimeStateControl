@@ -6,7 +6,7 @@ tic
 %---z1&z3軸の推定(k1軸上)----------------------------------------------------
 
 dk1 = 1;   % 時間刻み
-K1fin = 14;  %シミュレーション終了時間, length(k) = Kfin + 1
+K1fin = 33;  %シミュレーション終了時間, length(k) = Kfin + 1
 k1 = [0:dk1:K1fin];
 
 u1_b1 = zeros(length(k1),1); % 並進速度
@@ -16,7 +16,7 @@ si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = 
 si_b1(1,:) = [1 1 -pi/4];    % (s1, s2, s3)の初期値を設定
 
 si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
-si_c1(1,:) = [0 -1 -pi/2];
+si_c1(1,:) = [0 0 -pi/2];
 
 
 f1_b1 = zeros(length(k1),1);   % 写像f1:s→z1の推定
@@ -43,12 +43,12 @@ rho1_1 = zeros(length(k1),1);
 rho2_1 = zeros(length(k1),1);
 rho3_1 = zeros(length(k1),1);
 
-alpha = sym('alpha',[15 15 10]); % l,m,nの順
-gamma = sym('gamma',[15 15 10]);
+alpha = sym('alpha',[15 15 22]); % l,m,nの順
+gamma = sym('gamma',[15 15 22]);
 
-sigma1 = 1.0; % s1のスケーリング定数
-sigma2 = 1.0; % s1のスケーリング定数
-sigma3 = pi/4; % s1のスケーリング定数
+sigma1 = 1.5; % s1のスケーリング定数
+sigma2 = 1.5; % s2のスケーリング定数
+sigma3 = pi/16; % s3のスケーリング定数
 
 Ef1 = 0;
 Ef3 = 0;
@@ -71,32 +71,24 @@ rho3_1(1) = si_b1(1,3) / sigma3  - n1_now(1);
 
 
 y1 = zeros(length(k1),1);
-y1(1) = -1;
+y1(1) = 0;
 
 
 %---誤差関数の定義（k1軸上）----------------------------------------------------
 
 for j = 1 : length(k1) - 1
 
-    if mod(j,10) == 0
-        u1_b1(j+1) = -1;
-        u2_b1(j+1) = 0;
-        y1(j+1) = y1(j) + 1;
-    elseif mod(j,5) == 0
+    if mod(j,17) == 0
         u1_b1(j+1) = 1;
         u2_b1(j+1) = 0;
         y1(j+1) = y1(j) + 1;
-    elseif j < 5
+    elseif j < 17
         u1_b1(j+1) = 0;
-        u2_b1(j+1) = pi/4;
-        y1(j+1) = y1(j);
-    elseif j > 5 && j < 10 
-        u1_b1(j+1) = 0;
-        u2_b1(j+1) = -pi/4;
+        u2_b1(j+1) = pi/16;
         y1(j+1) = y1(j);
     else
         u1_b1(j+1) = 0;
-        u2_b1(j+1) = pi/4;
+        u2_b1(j+1) = -pi/16;
         y1(j+1) = y1(j);
     end
 
@@ -134,6 +126,7 @@ for j = 1 : length(k1) - 1
         if i == j
             l_max = l_max + 1;
             l1_num(j+1) = l_max;
+            break;
         end
 
     end
@@ -153,6 +146,7 @@ for j = 1 : length(k1) - 1
         if i == j
             m_max = m_max + 1;
             m1_num(j+1) = m_max;
+            break;
         end
 
     end
@@ -172,6 +166,7 @@ for j = 1 : length(k1) - 1
         if i == j
             n_max = n_max + 1;
             n1_num(j+1) = n_max;
+            break;
         end
 
     end
@@ -192,6 +187,7 @@ for j = 1 : length(k1) - 1
         if i == j
             l_max = l_max + 1;
             l1_next(j+1) = l_max;
+            break;
         end
 
     end
@@ -211,6 +207,7 @@ for j = 1 : length(k1) - 1
         if i == j
             m_max = m_max + 1;
             m1_next(j+1) = m_max;
+            break;
         end
 
     end
@@ -230,6 +227,7 @@ for j = 1 : length(k1) - 1
         if i == j
             n_max = n_max + 1;
             n1_next(j+1) = n_max;
+            break;
         end
 
     end
@@ -266,7 +264,7 @@ Ef3 = Ef3 + ( y1(j+1) - (gamma(l2,m2,n2) + rho1_1(j+1) * (gamma(l2_plus,m2,n2) -
 %---z1&z3軸の推定(k2軸上)----------------------------------------------------
 
 dk2 = 1;   % 時間刻み
-K2fin = 14; % シミュレーション終了時間, length(k) = Kfin + 1
+K2fin = 33; % シミュレーション終了時間, length(k) = Kfin + 1
 k2 = [0:dk2:K2fin];
 
 u1_b2 = zeros(length(k2),1); % 並進速度
@@ -274,7 +272,7 @@ u2_b2 = zeros(length(k2),1); % 回転角速度
 
 
 si_b2 = zeros(length(k2),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b2(1,:) = [1-1/sqrt(2) 3/sqrt(2) 3*pi/4];    % (s1, s2, s3)の初期値を設定
+si_b2(1,:) = [1 1+sqrt(2) 3*pi/4];    % (s1, s2, s3)の初期値を設定
 
 si_c2 = zeros(length(k2),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
 si_c2(1,:) = [1 1 pi/2];
@@ -316,7 +314,7 @@ y2 = ones(length(k2),1);
 y2(1) = 1;
 
 
-for i = 1 : length(k2) - 1
+for i = 1 : length(k2)
         
     if l2_now(1) == l1_now(i)
         l2_num(1) = l1_num(i);
@@ -328,14 +326,15 @@ for i = 1 : length(k2) - 1
         break;
     end
 
-    if i == length(k2) - 1
+    if i == length(k2)
         l_max = l_max + 1;
         l2_num(1) = l_max;
+        break;
     end
 
 end
 
-for i = 1 : length(k2) - 1
+for i = 1 : length(k2)
         
     if m2_now(1) == m1_now(i)
         m2_num(1) = m1_num(i);
@@ -347,14 +346,15 @@ for i = 1 : length(k2) - 1
         break;
     end
 
-    if i == length(k2) - 1
+    if i == length(k2)
         m_max = m_max + 1;
         m2_num(1) = m_max;
+        break;
     end
 
 end
 
-for i = 1 : length(k2) - 1
+for i = 1 : length(k2)
         
     if n2_now(1) == n1_now(i)
         n2_num(1) = n1_num(i);
@@ -366,15 +366,16 @@ for i = 1 : length(k2) - 1
         break;
     end
 
-    if i == length(k2) - 1
+    if i == length(k2)
         n_max = n_max + 1;
         n2_num(1) = n_max;
+        break;
     end
 
 end
 
 % next決め
-for i = 1 : length(k2) - 1
+for i = 1 : length(k2)
 
     if l2_now(1) + 1 == l1_now(i)
         l2_next(1) = l1_num(i);
@@ -386,14 +387,15 @@ for i = 1 : length(k2) - 1
         break;
     end
 
-    if i == length(k2) - 1
+    if i == length(k2)
         l_max = l_max + 1;
         l2_next(1) = l_max;
+        break;
     end
 
 end
 
-for i = 1 : length(k2) - 1
+for i = 1 : length(k2)
 
     if m2_now(1) + 1 == m1_now(i)
         m2_next(1) = m1_num(i);
@@ -405,14 +407,15 @@ for i = 1 : length(k2) - 1
         break;
     end
 
-    if i == length(k2) - 1
+    if i == length(k2)
         m_max = m_max + 1;
         m2_next(1) = m_max;
+        break;
     end
 
 end
 
-for i = 1 : length(k2) - 1
+for i = 1 : length(k2)
 
     if n2_now(1) + 1 == n1_now(i)
         n2_next(1) = n1_num(i);
@@ -424,37 +427,30 @@ for i = 1 : length(k2) - 1
         break;
     end
 
-    if i == length(k2) - 1
+    if i == length(k2)
         n_max = n_max + 1;
         n2_next(1) = n_max;
+        break;
     end
 
 end
 
 
-%---誤差関数の定義（k1軸上）----------------------------------------------------
+%---誤差関数の定義（k2軸上）----------------------------------------------------
 
 for j = 1 : length(k2) - 1
 
-    if mod(j,10) == 0
-        u1_b2(j+1) = -1;
-        u2_b2(j+1) = 0;
-        y2(j+1) = y2(j) - 1;
-    elseif mod(j,5) == 0
+    if mod(j,17) == 0
         u1_b2(j+1) = 1;
         u2_b2(j+1) = 0;
         y2(j+1) = y2(j) - 1;
-    elseif j < 5
+    elseif j < 17
         u1_b2(j+1) = 0;
-        u2_b2(j+1) = -pi/4;
-        y2(j+1) = y2(j);
-    elseif j > 5 && j < 10
-        u1_b2(j+1) = 0;
-        u2_b2(j+1) = pi/4;
+        u2_b2(j+1) = -pi/16;
         y2(j+1) = y2(j);
     else
         u1_b2(j+1) = 0;
-        u2_b2(j+1) = -pi/4;
+        u2_b2(j+1) = pi/16;
         y2(j+1) = y2(j);
     end
 
@@ -503,6 +499,7 @@ for j = 1 : length(k2) - 1
         if i == length(k2) - 1
             l_max = l_max + 1;
             l2_num(j+1) = l_max;
+            break;
         end
     
     end
@@ -532,6 +529,7 @@ for j = 1 : length(k2) - 1
         if i == length(k2) - 1
             m_max = m_max + 1;
             m2_num(j+1) = m_max;
+            break;
         end
 
     end
@@ -561,6 +559,7 @@ for j = 1 : length(k2) - 1
         if i == length(k2) - 1
             n_max = n_max + 1;
             n2_num(j+1) = n_max;
+            break;
         end
 
     end
@@ -830,13 +829,13 @@ Ef3 = Ef3 + 0.30 * E4_f3;
 
 %---最急降下法によるパラメータの決定----------------------------
 
-eta_f1 = 1.5 * 10 ^ (-1); % 学習率
-eta_f3 = 1.0 * 10 ^ (-1);
+eta_f1 = 1.0 * 10 ^ (-1); % 学習率
+eta_f3 = 7.5 * 10 ^ (-2);
 
 iteration = 300; % パラメータ更新回数（最大）
 
-param_alpha = zeros(15,15,10,iteration+1);
-param_gamma = zeros(15,15,10,iteration+1);
+param_alpha = zeros(15,15,22,iteration+1);
+param_gamma = zeros(15,15,22,iteration+1);
 
 
 
@@ -1054,7 +1053,7 @@ u1_b = ones(length(k),1) * 0.09;
 u2_b = ones(length(k),1) * (-pi/16);
 
 si_b = zeros(length(k),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) 3*pi/4];   % (s1, s2, s3)=(x ,y, θ)の初期値を設定
+si_b(1,:) = [1 1 3*pi/4];   % (s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 si_c = zeros(length(k),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
 si_c(1,:) = [0 0 pi/2];
@@ -1080,9 +1079,9 @@ rho1 = zeros(length(k),1);
 rho2 = zeros(length(k),1);
 rho3 = zeros(length(k),1);
 
-beta = sym('beta',[15 15 10]);
-delta = sym('delta',[15 15 10]);
-epsilon = sym('epsilon',[15 15 10]);
+beta = sym('beta',[15 15 22]);
+delta = sym('delta',[15 15 22]);
+epsilon = sym('epsilon',[15 15 22]);
 
 Ef2 = 0;
 Eg = 0;
@@ -1625,8 +1624,8 @@ for a = 1 : l_max - 2
     end
 end
 
-Ef2 = Ef2 + 0.05 * E4_f2;
-Eh = Eh + 0.05 * E4_h;
+Ef2 = Ef2 + 0.00 * E4_f2;
+Eh = Eh + 0.00 * E4_h;
 
 
 
@@ -1634,13 +1633,13 @@ Eh = Eh + 0.05 * E4_h;
 
 %---最急降下法によるパラメータの決定----------------------------
 
-eta_f2 = 1.0 * 10 ^ (-2); % 学習率
-eta_h = 1.0 * 10 ^ (-1);
+eta_f2 = 5.0 * 10 ^ (-2); % 学習率
+eta_h = 5.0 * 10 ^ (-1);
 
-iteration_2 = 300; % パラメータ更新回数（最大）
+iteration_2 = 100; % パラメータ更新回数（最大）
 
-param_beta = zeros(15,15,10,iteration_2+1);
-param_epsilon = zeros(15,15,10,iteration_2+1);
+param_beta = zeros(15,15,22,iteration_2+1);
+param_epsilon = zeros(15,15,22,iteration_2+1);
 
 
 %---Eの設定---------------------------
