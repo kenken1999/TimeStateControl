@@ -1,15 +1,18 @@
 clear;
 close all;
 
-dt = 0.5;%%時間刻み=離散時間Tsとして使用
-Tfin = 30;%シミュレーション終了時間
+dt = 1;%%時間刻み=離散時間Tsとして使用
+Tfin = 10;%シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
-u1 = ones(1,length(t1)) * 0.05;
-u2 = (rand(1,length(t1)) * 2 - 1) * (pi/2);
+u1 = ones(1,length(t1)) * 0.1;
+% u2 = (rand(1,length(t1)) * 2 - 1) * (pi/6);
+u2 = ones(1,length(t1)) * (pi/32);
+
+theta = rand * (pi) - pi/2
 
 si = zeros(length(t1),3);
-si(1,:) = [0 0 0];%状態ξの初期値を設定
+si(1,:) = [0 0 theta];%状態ξの初期値を設定
 
 x = si(1,1) + 0.2 * cos(si(1,3));
 y = si(1,2) + 0.2 * sin(si(1,3));

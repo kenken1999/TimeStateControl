@@ -46,9 +46,9 @@ rho3_1 = zeros(length(k1),1);
 alpha = sym('alpha',[15 15 22]); % l,m,nの順
 gamma = sym('gamma',[15 15 22]);
 
-sigma1 = 1.5; % s1のスケーリング定数
-sigma2 = 1.5; % s2のスケーリング定数
-sigma3 = pi/16; % s3のスケーリング定数
+sigma1 = 1.0; % s1のスケーリング定数
+sigma2 = 1.0; % s2のスケーリング定数
+sigma3 = pi/15.999999; % s3のスケーリング定数
 
 Ef1 = 0;
 Ef3 = 0;
@@ -78,7 +78,7 @@ y1(1) = 0;
 
 for j = 1 : length(k1) - 1
 
-    if mod(j,17) == 0
+    if mod(j,17) == 0 && j ~= length(k1) - 1
         u1_b1(j+1) = 1;
         u2_b1(j+1) = 0;
         y1(j+1) = y1(j) + 1;
@@ -440,7 +440,7 @@ end
 
 for j = 1 : length(k2) - 1
 
-    if mod(j,17) == 0
+    if mod(j,17) == 0 && j ~= length(k2) - 1
         u1_b2(j+1) = 1;
         u2_b2(j+1) = 0;
         y2(j+1) = y2(j) - 1;
@@ -822,8 +822,8 @@ for a = 1 : l_max - 2
     end
 end
 
-Ef1 = Ef1 + 0.30 * E4_f1;
-Ef3 = Ef3 + 0.30 * E4_f3;
+Ef1 = Ef1 + 0.35 * E4_f1;
+Ef3 = Ef3 + 0.35 * E4_f3;
 
 
 
@@ -832,7 +832,7 @@ Ef3 = Ef3 + 0.30 * E4_f3;
 eta_f1 = 1.0 * 10 ^ (-1); % 学習率
 eta_f3 = 7.5 * 10 ^ (-2);
 
-iteration = 300; % パラメータ更新回数（最大）
+iteration = 500; % パラメータ更新回数（最大）
 
 param_alpha = zeros(15,15,22,iteration+1);
 param_gamma = zeros(15,15,22,iteration+1);
@@ -1046,17 +1046,17 @@ hold off;
 %---f2,g,hの推定----------------------------------------------------
 
 dk = 1;   % 時間刻み
-Kfin = 15; % シミュレーション終了時間
+Kfin = 10; % シミュレーション終了時間
 k = [0:dk:Kfin];
 
 u1_b = ones(length(k),1) * 0.09;
 u2_b = ones(length(k),1) * (-pi/16);
 
 si_b = zeros(length(k),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b(1,:) = [1 1 3*pi/4];   % (s1, s2, s3)=(x ,y, θ)の初期値を設定
+si_b(1,:) = [1 1 pi/2];   % (s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 si_c = zeros(length(k),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
-si_c(1,:) = [0 0 pi/2];
+si_c(1,:) = [0 0 pi/4];
 
 f2_b = zeros(length(k),1);   % 写像f2:s→z2の推定
 gmap_b = zeros(length(k),1);
@@ -1097,7 +1097,7 @@ n_now(1) = floor(si_b(1,3) / sigma3);
 rho3(1) = si_b(1,3) / sigma3  - n_now(1);
 
 
-for i = 1 : length(k1) - 1 %k1=k2より
+for i = 1 : length(k1) %k1=k2より
         
     if l_now(1) == l1_now(i)
         l_num(1) = l1_num(i);
@@ -1119,13 +1119,13 @@ for i = 1 : length(k1) - 1 %k1=k2より
         break;
     end
 
-    if i == length(k1) - 1
+    if i == length(k1)
        break; %何かしら設定必要
     end
 
 end
 
-for i = 1 : length(k1) - 1
+for i = 1 : length(k1)
         
     if m_now(1) == m1_now(i)
         m_num(1) = m1_num(i);
@@ -1147,13 +1147,13 @@ for i = 1 : length(k1) - 1
         break;
     end
 
-    if i == length(k1) - 1
+    if i == length(k1)
        break; %何かしら設定必要
     end
 
 end
 
-for i = 1 : length(k1) - 1
+for i = 1 : length(k1)
         
     if n_now(1) == n1_now(i)
         n_num(1) = n1_num(i);
@@ -1175,14 +1175,14 @@ for i = 1 : length(k1) - 1
         break;
     end
 
-    if i == length(k1) - 1
+    if i == length(k1)
        break; %何かしら設定必要
     end
 
 end
 
 % next決め
-for i = 1 : length(k1) - 1 %k1=k2より
+for i = 1 : length(k1) %k1=k2より
         
     if l_now(1) + 1 == l1_now(i)
         l_next(1) = l1_num(i);
@@ -1204,13 +1204,13 @@ for i = 1 : length(k1) - 1 %k1=k2より
         break;
     end
 
-    if i == length(k1) - 1
+    if i == length(k1)
        break; %何かしら設定必要
     end
 
 end
 
-for i = 1 : length(k1) - 1
+for i = 1 : length(k1)
         
     if m_now(1) + 1 == m1_now(i)
         m_next(1) = m1_num(i);
@@ -1232,13 +1232,13 @@ for i = 1 : length(k1) - 1
         break;
     end
 
-    if i == length(k1) - 1
+    if i == length(k1)
        break; %何かしら設定必要
     end
 
 end
 
-for i = 1 : length(k1) - 1
+for i = 1 : length(k1)
         
     if n_now(1) + 1 == n1_now(i)
         n_next(1) = n1_num(i);
@@ -1260,7 +1260,7 @@ for i = 1 : length(k1) - 1
         break;
     end
 
-    if i == length(k1) - 1
+    if i == length(k1)
        break; %何かしら設定必要
     end
 
@@ -1624,8 +1624,8 @@ for a = 1 : l_max - 2
     end
 end
 
-Ef2 = Ef2 + 0.00 * E4_f2;
-Eh = Eh + 0.00 * E4_h;
+Ef2 = Ef2 + 0.10 * E4_f2;
+Eh = Eh + 0.10 * E4_h;
 
 
 
@@ -1633,10 +1633,13 @@ Eh = Eh + 0.00 * E4_h;
 
 %---最急降下法によるパラメータの決定----------------------------
 
-eta_f2 = 5.0 * 10 ^ (-2); % 学習率
-eta_h = 5.0 * 10 ^ (-1);
+% eta_f2 = 5.0 * 10 ^ (-2); % 学習率
+% eta_h = 1.0 * 10 ^ (-0);
 
-iteration_2 = 100; % パラメータ更新回数（最大）
+eta_f2 = 5.0 * 10 ^ (-2); % 学習率
+eta_h = 1.0 * 10 ^ (-1);
+
+iteration_2 = 500; % パラメータ更新回数（最大）
 
 param_beta = zeros(15,15,22,iteration_2+1);
 param_epsilon = zeros(15,15,22,iteration_2+1);
