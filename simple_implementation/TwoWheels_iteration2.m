@@ -1,25 +1,29 @@
 clear;
 close all;
 
-dt = 1;%%時間刻み=離散時間Tsとして使用
-Tfin = 5;%シミュレーション終了時間
+dt = 0.02;%%時間刻み=離散時間Tsとして使用
+Tfin = 0.68;%シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
-for i = 1 : 4
+for i = 1 : 10
 
-    u1_pm = (-1) ^ (i-1);
+    u1_pm = 1;
 
-    if i < 3
-        u2_pm = 1;
+    u2_pm = 2 * rand - 1;
+
+    u1 = ones(length(t1),1) * u1_pm; % 並進速度
+    u2 = ones(length(t1),1) * u2_pm; % 回転角速度
+
+    if i < 6
+        y_axis = 0;
+        theta = pi/4;
     else
-        u2_pm = -1;
+        y_axis = 1
+        theta = -pi/4;
     end
 
-    u1 = ones(length(t1),1) * u1_pm * 0.15; % 並進速度
-    u2 = ones(length(t1),1) * u2_pm * (pi/16); % 回転角速度
-
     si = zeros(length(t1),3);
-    si(1,:) = [0 0 0];%状態ξの初期値を設定
+    si(1,:) = [0 y_axis theta];%状態ξの初期値を設定
 
     x = si(1,1) + 0.2 * cos(si(1,3));
     y = si(1,2) + 0.2 * sin(si(1,3));

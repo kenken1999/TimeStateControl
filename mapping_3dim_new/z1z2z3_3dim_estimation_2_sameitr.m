@@ -6,7 +6,7 @@ tic
 %---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
 
 l_max = 2;
-m_max = 7;
+m_max = 6;
 n_max = 2;
 
 s = sym('s',[2 * l_max-1 2 * m_max-1 2 * n_max-1 3]); % l,m,nの順
@@ -17,7 +17,7 @@ param_s = zeros(2*l_max-1, 2*m_max-1, 2*n_max-1, 3, iteration);
 
 param_s(1,1,1,:,1) = [1 1 pi/4];
 param_s(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-param_s(1,2,1,:,1) = [1 1 3*pi/8];
+param_s(1,2,1,:,1) = [1 1 9*pi/32];
 param_s(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
 s_l = param_s(2,1,1,:,1) - param_s(1,1,1,:,1);
@@ -55,28 +55,29 @@ end
 
 %---サンプル収集と格子点の更新----------------------------------------------------
 
-for i = 1 : 4
+for i = 1 : 10
 
     dk1 = 1;   % 時間刻み
     K1fin = 5;  %シミュレーション終了時間, length(k) = Kfin + 1
     k1 = [0:dk1:K1fin];
 
-    u1_pm = (-1) ^ (i-1);
+    u1_pm = 1;
+    u2_pm = 2 * rand - 1;
 
-    if i < 3
-        u2_pm = 1;
-    else
-        u2_pm = -1;
-    end
-
-    u1_b1 = ones(length(k1),1) * u1_pm * 0.15; % 並進速度
-    u2_b1 = ones(length(k1),1) * u2_pm * (pi/16); % 回転角速度
+    u1_b1 = ones(length(k1),1) * u1_pm * 0.20; % 並進速度
+    u2_b1 = ones(length(k1),1) * u2_pm * (pi/25); % 回転角速度
 
     si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-    si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
-
     si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
-    si_c1(1,:) = [0 0 0];
+
+    if i < 6
+        si_b1(1,:) = [1 1 pi/2];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 0 pi/4];
+    else
+        si_b1(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) 0];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 1 -pi/4];
+    end
+
 
     l_now = zeros(length(k1),1);
     m_now = zeros(length(k1),1);
@@ -90,7 +91,7 @@ for i = 1 : 4
     m_real = zeros(length(k1),1);
     n_real = zeros(length(k1),1);
 
-    rho_tmp = zeros(length(k1),3);
+    rho_tmp = zeros(length(k1), 2 * l_max - 1, 2 * m_max - 1, 2 * n_max - 1, 3);
     rho = zeros(length(k1),3);
 
     if i > 1
@@ -162,13 +163,13 @@ for i = 1 : 4
 
                 x = [si_b1(1,1) - param_s(a,b,c,1,1); si_b1(1,2) - param_s(a,b,c,2,1); si_b1(1,3) - param_s(a,b,c,3,1)];
 
-                rho_tmp(1,:) = B \ x;
+                rho_tmp(1,a,b,c,:) = B \ x;
 
-                if (0 <= rho_tmp(1,1)) && (rho_tmp(1,1) < 1)
-                    if (0 <= rho_tmp(1,2)) && (rho_tmp(1,2) < 1)
-                        if (0 <= rho_tmp(1,3)) && (rho_tmp(1,3) < 1)
+                if (0 <= rho_tmp(1,a,b,c,1)) && (rho_tmp(1,a,b,c,1) < 1)
+                    if (0 <= rho_tmp(1,a,b,c,2)) && (rho_tmp(1,a,b,c,2) < 1)
+                        if (0 <= rho_tmp(1,a,b,c,3)) && (rho_tmp(1,a,b,c,3) < 1)
 
-                            rho(1,:) = rho_tmp(1,:);
+                            rho(1,:) = rho_tmp(1,a,b,c,:);
 
                             l_now(1) = a;
                             m_now(1) = b;
@@ -189,6 +190,7 @@ for i = 1 : 4
         end
 
     end
+
 
     break_switch = 0;
 
@@ -267,13 +269,13 @@ for i = 1 : 4
 
                     x = [si_b1(j+1,1) - param_s(a,b,c,1,1); si_b1(j+1,2) - param_s(a,b,c,2,1); si_b1(j+1,3) - param_s(a,b,c,3,1)];
 
-                    rho_tmp(j+1,:) = B \ x;
+                    rho_tmp(j+1,a,b,c,:) = B \ x;
 
-                    if (0 <= rho_tmp(j+1,1)) && (rho_tmp(j+1,1) < 1)
-                        if (0 <= rho_tmp(j+1,2)) && (rho_tmp(j+1,2) < 1)
-                            if (0 <= rho_tmp(j+1,3)) && (rho_tmp(j+1,3) < 1)
+                    if (0 <= rho_tmp(j+1,a,b,c,1)) && (rho_tmp(j+1,a,b,c,1) < 1)
+                        if (0 <= rho_tmp(j+1,a,b,c,2)) && (rho_tmp(j+1,a,b,c,2) < 1)
+                            if (0 <= rho_tmp(j+1,a,b,c,3)) && (rho_tmp(j+1,a,b,c,3) < 1)
 
-                                rho(j+1,:) = rho_tmp(j+1,:);
+                                rho(j+1,:) = rho_tmp(j+1,a,b,c,:);
         
                                 l_now(j+1) = a;
                                 m_now(j+1) = b;
@@ -292,6 +294,33 @@ for i = 1 : 4
                 end
             end
         end
+
+        %欠損時の補間
+        if (break_switch == 0)
+
+            l_now(j+1) = l_now(j);
+            m_now(j+1) = m_now(j);
+            n_now(j+1) = n_now(j);
+
+            l_next(j+1) = l_next(j);
+            m_next(j+1) = m_next(j);
+            n_next(j+1) = n_next(j);
+
+            l_real(j+1) = l_real(j);
+            m_real(j+1) = m_real(j);
+            n_real(j+1) = n_real(j);
+
+            a = l_now(j+1);
+            b = m_now(j+1);
+            c = n_now(j+1);
+
+            rho(j+1,:) = rho_tmp(j+1,a,b,c,:);
+            
+            disp(j+1)
+            disp("補間しました")
+
+        end
+
 
         break_switch = 0;
 
@@ -322,7 +351,8 @@ for i = 1 : 4
         y2 = [si_b1(j+1,1) - s(l2,m2,n2,1); si_b1(j+1,2) - s(l2,m2,n2,2); si_b1(j+1,3) - s(l2,m2,n2,3)];
         P2 = H2 \ y2;
 
-        E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+        % E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+        E1 = E1 + ( 0.1 * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
 
     end
 
@@ -352,7 +382,7 @@ for i = 1 : 4
 
     eta_s1 = 0.0 * 10 ^ (-6); % 学習率
     eta_s2 = 0.0 * 10 ^ (-6);
-    eta_s3 = 1.0 * 10 ^ (-3);
+    eta_s3 = 5.0 * 10 ^ (-3);
 
 
     %---Eの設定---------------------------
@@ -408,7 +438,7 @@ for i = 1 : 4
 
                 param_s(1,1,1,:,t+1) = [1 1 pi/4];
                 param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-                % param_s(1,2,1,:,t+1) = [1 1 5*pi/12];
+                param_s(1,2,1,:,t+1) = [1 1 5*pi/16];
                 param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
                 end
@@ -591,8 +621,8 @@ for i = 1 : 4
         break_switch = 0;
 
         z1_b1(j) = l_real_2(j) + rho_2(j,1);
-        z2_b1(j) = m_real_2(j) + rho_2(j,2);
-        % z2_b1(j) = (1/sqrt(3)) * (m_real_2(j) + rho_2(j,2));
+        % z2_b1(j) = m_real_2(j) + rho_2(j,2);
+        z2_b1(j) = 0.2 * (m_real_2(j) + rho_2(j,2));
         z3_b1(j) = n_real_2(j) + rho_2(j,3);
 
     end

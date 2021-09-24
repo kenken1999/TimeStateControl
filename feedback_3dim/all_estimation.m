@@ -6,18 +6,18 @@ tic
 %---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
 
 l_max = 2;
-m_max = 10;
+m_max = 6;
 n_max = 2;
 
 s = sym('s',[2 * l_max-1 2 * m_max-1 2 * n_max-1 3]); % l,m,nの順
 
-iteration = 100;
+iteration = 500;
 
 param_s = zeros(2*l_max-1, 2*m_max-1, 2*n_max-1, 3, iteration);
 
 param_s(1,1,1,:,1) = [1 1 pi/4];
 param_s(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-param_s(1,2,1,:,1) = [1 1 5*pi/16];
+param_s(1,2,1,:,1) = [1 1 3*pi/8];
 param_s(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
 s_l = param_s(2,1,1,:,1) - param_s(1,1,1,:,1);
@@ -308,8 +308,8 @@ for j = 1 : length(k1) - 1
     y2 = [si_b1(j+1,1) - s(l2,m2,n2,1); si_b1(j+1,2) - s(l2,m2,n2,2); si_b1(j+1,3) - s(l2,m2,n2,3)];
     P2 = H2 \ y2;
 
-    % E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
-    E1 = E1 + ( 0.2 * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+    E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+    % E1 = E1 + ( 0.41 * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
 
 
 end
@@ -340,9 +340,8 @@ E1 = E1 + 0.00 * E4;
 
 eta_s1 = 0.0 * 10 ^ (-6); % 学習率
 eta_s2 = 0.0 * 10 ^ (-6);
-eta_s3 = 5.0 * 10 ^ (-2);
+eta_s3 = 1.0 * 10 ^ (-3);
 
-stop_switch = 0;
 
 %---Eの設定---------------------------
 
@@ -394,11 +393,7 @@ for t = 1:iteration - 1
 
             param_s(1,1,1,:,t+1) = [1 1 pi/4];
             param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-            param_s(1,10,1,:,t+1) = [1 1 7*pi/12];
-            param_s(1,6,1,:,t+1) = [1 1 pi/2];
-            % param_s(1,3,1,:,t+1) = [1 1 67*pi/180];
-            % param_s(1,2,1,:,t+1) = [1 1 5*pi/16];
-            % param_s(1,10,1,:,t+1) = [1 1 3*pi/16];
+            % param_s(1,2,1,:,t+1) = [1 1 15*pi/44];
             param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
             end
@@ -418,14 +413,6 @@ for t = 1:iteration - 1
     if t > 1
 
         if (E1_value(t) > E1_value(t-1))
-            disp('Ef1が増加しました')
-            disp('学習率を下げます')
-            eta_s1 = eta_s1 * 0.5; 
-            eta_s2 = eta_s2 * 0.5;
-            eta_s3 = eta_s3 * 0.5;
-            stop_switch = stop_switch + 1;
-        end
-        if stop_switch == 3
             disp('Ef1が増加しました')
             disp('iterationを強制終了します')
             iteration = t-1;
@@ -589,8 +576,8 @@ for j = 1:length(k1)
     break_switch = 0;
 
     z1_b1(j) = l_real_2(j) + rho_2(j,1);
-    % z2_b1(j) = m_real_2(j) + rho_2(j,2);
-    z2_b1(j) = 0.2 * (m_real_2(j) + rho_2(j,2));
+    z2_b1(j) = m_real_2(j) + rho_2(j,2);
+    % z2_b1(j) = 0.41 * (m_real_2(j) + rho_2(j,2));
     z3_b1(j) = n_real_2(j) + rho_2(j,3);
 
 end
@@ -692,4 +679,3 @@ ylabel("h")
 legend("真値：cos(s3')",'推定値：h')
 
 hold off;
-                                                           
