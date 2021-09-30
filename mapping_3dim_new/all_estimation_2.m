@@ -6,18 +6,18 @@ tic
 %---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
 
 l_max = 2;
-m_max = 12;
+m_max = 18;
 n_max = 2;
 
 s = sym('s',[2 * l_max-1 2 * m_max-1 2 * n_max-1 3]); % l,m,nの順
 
-iteration = 100;
+iteration = 50;
 
 param_s = zeros(2*l_max-1, 2*m_max-1, 2*n_max-1, 3, iteration);
 
 param_s(1,1,1,:,1) = [1 1 pi/4];
 param_s(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-param_s(1,2,1,:,1) = [1 1 5*pi/16];
+param_s(1,2,1,:,1) = [1 1 9*pi/32];
 param_s(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
 s_l = param_s(2,1,1,:,1) - param_s(1,1,1,:,1);
@@ -55,18 +55,18 @@ end
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-dk1 = 0.02;   % 時間刻み
-K1fin = 0.68;  %シミュレーション終了時間, length(k) = Kfin + 1
+dk1 = 0.1;   % 時間刻み
+K1fin = 1.0;  %シミュレーション終了時間, length(k) = Kfin + 1
 k1 = [0:dk1:K1fin];
 
-u1_b1 = ones(length(k1),1); % 並進速度
-u2_b1 = ones(length(k1),1) * (2 * rand - 1); % 回転角速度
+u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+u2_b1 = ones(length(k1),1) * (-0.5); % 回転角速度
 
 si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_b1(1,:) = [1 1 pi/2];    % (s1, s2, s3)の初期値を設定
+si_b1(1,:) = [1 1 7*pi/12];    % (s1, s2, s3)の初期値を設定
 
 si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
-si_c1(1,:) = [0 0 pi/4];
+si_c1(1,:) = [0 0 pi/3];
 
 l_now = zeros(length(k1),1);
 m_now = zeros(length(k1),1);
@@ -309,7 +309,7 @@ for j = 1 : length(k1) - 1
     P2 = H2 \ y2;
 
     % E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
-    E1 = E1 + ( 0.2 * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+    E1 = E1 + ( tan(pi/32) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
 
 
 end
@@ -340,7 +340,7 @@ E1 = E1 + 0.00 * E4;
 
 eta_s1 = 0.0 * 10 ^ (-6); % 学習率
 eta_s2 = 0.0 * 10 ^ (-6);
-eta_s3 = 5.0 * 10 ^ (-2);
+eta_s3 = 5.0 * 10 ^ (-3);
 
 stop_switch = 0;
 
@@ -395,9 +395,9 @@ for t = 1:iteration - 1
             param_s(1,1,1,:,t+1) = [1 1 pi/4];
             param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
             % param_s(1,10,1,:,t+1) = [1 1 7*pi/12];
-            % param_s(1,6,1,:,t+1) = [1 1 pi/2];
+            % param_s(1,11,1,:,t+1) = [1 1 pi/2];
             % param_s(1,3,1,:,t+1) = [1 1 67*pi/180];
-            % param_s(1,2,1,:,t+1) = [1 1 5*pi/16];
+            % param_s(1,2,1,:,t+1) = [1 1 9*pi/32];
             % param_s(1,10,1,:,t+1) = [1 1 3*pi/16];
             param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
@@ -590,7 +590,7 @@ for j = 1:length(k1)
 
     z1_b1(j) = l_real_2(j) + rho_2(j,1);
     % z2_b1(j) = m_real_2(j) + rho_2(j,2);
-    z2_b1(j) = 0.2 * (m_real_2(j) + rho_2(j,2));
+    z2_b1(j) = tan(pi/32) * (m_real_2(j) + rho_2(j,2));
     z3_b1(j) = n_real_2(j) + rho_2(j,3);
 
 end

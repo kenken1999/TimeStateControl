@@ -1,24 +1,24 @@
 clear;
 close all;
 
-dt = 1;%%時間刻み=離散時間Tsとして使用
-Tfin = 10;%シミュレーション終了時間
+dt = 0.1;%%時間刻み=離散時間Tsとして使用
+Tfin = 1.9;%シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
-u1 = ones(1,length(t1)) * 0.10;
-u2 = ones(1,length(t1)) * (-pi/16);
+u1 = ones(1,length(t1)) * 0.5;
+u2 = ones(1,length(t1)) * (0.5);
 
 si = zeros(length(t1),3);
-si(1,:) = [0 0 pi/3];%状態ξの初期値を設定
+si(1,:) = [0 0 0];%状態ξの初期値を設定
 
-x = si(1,1) + 0.2 * cos(si(1,3));
-y = si(1,2) + 0.2 * sin(si(1,3));
+x = si(1,1) + 0.05 * cos(si(1,3));
+y = si(1,2) + 0.05 * sin(si(1,3));
 
 hold on;
 axis equal;
 grid on;
 
-axis([0 4 -2 2])
+axis([-0.2 1 -0.2 1])
 
 h = plot(si(1,1),si(1,2), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
 h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
@@ -33,7 +33,7 @@ for i = 1:length(t1)
     end
 
     set(h, 'XData', si(i,1),'YData', si(i,2));
-    set(h2, 'XData', si(i,1) + 0.2 * cos(si(i,3)),'YData', si(i,2) + 0.2 * sin(si(i,3)));
+    set(h2, 'XData', si(i,1) + 0.05 * cos(si(i,3)),'YData', si(i,2) + 0.05 * sin(si(i,3)));
 
     drawnow;
 

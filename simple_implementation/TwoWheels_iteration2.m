@@ -1,20 +1,20 @@
 clear;
 close all;
 
-dt = 0.02;%%時間刻み=離散時間Tsとして使用
-Tfin = 0.68;%シミュレーション終了時間
+dt = 0.1;%%時間刻み=離散時間Tsとして使用
+Tfin = 2.0;%シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
-for i = 1 : 10
+for i = 1 : 6
 
-    u1_pm = 1;
+    u1_pm = 0.5;
 
-    u2_pm = 2 * rand - 1;
+    u2_pm = (2 * rand - 1) * 0.25;
 
     u1 = ones(length(t1),1) * u1_pm; % 並進速度
     u2 = ones(length(t1),1) * u2_pm; % 回転角速度
 
-    if i < 6
+    if i < 4
         y_axis = 0;
         theta = pi/4;
     else
