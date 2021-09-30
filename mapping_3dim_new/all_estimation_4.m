@@ -25,7 +25,7 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 3;
+m_max_now = 2;
 n_max_now = 2;
 
 
@@ -59,10 +59,10 @@ end
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-for i = 1 : 10
+for i = 1 : 40
 
     dk1 = 0.1;   % 時間刻み
-    K1fin = 0.4;  %シミュレーション終了時間, length(k) = Kfin + 1
+    K1fin = 1.9;  %シミュレーション終了時間, length(k) = Kfin + 1
     k1 = [0:dk1:K1fin];
 
     u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
@@ -95,13 +95,33 @@ for i = 1 : 10
 
     rho_tmp = zeros(length(k1), l_max, m_max, n_max, 3);
     rho = zeros(length(k1),3);
-
-    break_switch = 0;
-
+    
 
     if i > 1
+
         param_s(:,:,:,:,1) = param_s(:,:,:,:,iteration);
+
+        if rem(i,3) == 1
+
+            s_m = param_s(1,m_max_now,1,:,1) - param_s(1,m_max_now - 1,1,:,1);
+
+            for b = m_max_now + 1 : m_max
+                        
+                if b <= m_max
+                    m_coef = b - m_max_now;
+                else
+                    m_coef = m_max - b;
+                end
+    
+                param_s(1,b,1,:,1) = param_s(1,m_max_now,1,:,1) + m_coef * s_m;
+            
+            end
+
+        end
+
     end
+
+    break_switch = 0;
 
 
     for a = 1 : l_max
@@ -394,7 +414,7 @@ for i = 1 : 10
 
     end
 
-    E1 = E1 + E4;
+    E1 = E1 + 500 * E4;
 
 
 
@@ -402,7 +422,7 @@ for i = 1 : 10
 
     eta_s1 = 0.0 * 10 ^ (-6); % 学習率
     eta_s2 = 0.0 * 10 ^ (-6);
-    eta_s3 = 1.0 * 10 ^ (-1);
+    eta_s3 = 1.0 * 10 ^ (-3);
 
     iteration = 100;
 
@@ -425,7 +445,7 @@ for i = 1 : 10
 
 
     for a = l_max_now - 1 : l_max_now
-        for b = m_max_now - 2 : m_max_now
+        for b = m_max_now - 1 : m_max_now
             for c = n_max_now - 1 : n_max_now
 
                 DE1_s1(a,b,c) = diff(E1,s(a,b,c,1));
@@ -452,7 +472,7 @@ for i = 1 : 10
         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
 
         for a = l_max_now - 1 : l_max_now
-            for b = m_max_now - 2 : m_max_now
+            for b = m_max_now - 1 : m_max_now
                 for c = n_max_now - 1 : n_max_now
 
                 DE1_s1_2 = DE1_s1_1{a,b,c}(param_s(:,:,:,:,t));
