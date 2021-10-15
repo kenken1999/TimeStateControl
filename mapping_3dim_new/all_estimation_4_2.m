@@ -6,7 +6,7 @@ tic
 %---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
 
 l_max = 2;
-m_max = 15;
+m_max = 9;
 n_max = 2;
 
 iteration = 100;
@@ -17,7 +17,7 @@ param_s = zeros(l_max, m_max, n_max, 3, iteration);
 
 param_s(1,1,1,:,1) = [1 1 pi/4];
 param_s(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-param_s(1,2,1,:,1) = [1 1 9*pi/32];
+param_s(1,2,1,:,1) = [1 1 5*pi/16];
 param_s(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
 s_l = param_s(2,1,1,:,1) - param_s(1,1,1,:,1);
@@ -25,7 +25,7 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 9;
+m_max_now = 4;
 n_max_now = 2;
 
 m_start_change = 1;
@@ -65,7 +65,7 @@ param_s_first = param_s(:,:,:,:,1);
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 10;
+imax = 20;
 
 for i = 1 : imax
 
@@ -390,7 +390,7 @@ for i = 1 : imax
         P2 = H2 \ y2;
 
         % E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
-        E1 = E1 + ( tan(pi/32) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+        E1 = E1 + ( tan(pi/16) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
 
 
     end
@@ -436,7 +436,6 @@ for i = 1 : imax
         end
     end
 
-
     % for b = 1 : m_max - 2
 
     %     E4 = E4 + (( (s(1,b+2,1,1) - s(1,b+1,1,1)) ^ 2 + (s(1,b+2,1,2) - s(1,b+1,1,2)) ^ 2 + (s(1,b+2,1,3) - s(1,b+1,1,3)) ^ 2 )... 
@@ -454,9 +453,9 @@ for i = 1 : imax
     % end
 
     if i > 10
-        E4_coef = 1000;
+        E4_coef = 100;
     else
-        E4_coef = 0;
+        E4_coef = 50;
     end
 
     disp('E4_initial = ')
@@ -471,7 +470,7 @@ for i = 1 : imax
 
     eta_s1 = 0.0 * 10 ^ (-6); % 学習率
     eta_s2 = 0.0 * 10 ^ (-6);
-    eta_s3 = 2.0 * 10 ^ (-4);
+    eta_s3 = 2.0 * 10 ^ (-3);
 
     iteration = 100;
 
@@ -562,7 +561,7 @@ for i = 1 : imax
 
                 param_s(1,1,1,:,t+1) = [1 1 pi/4];
                 param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
-                param_s(1,2,1,:,t+1) = [1 1 9*pi/32];
+                param_s(1,2,1,:,t+1) = [1 1 5*pi/16];
                 param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
                 end
@@ -769,7 +768,7 @@ for i = 1 : imax
 
             z1_b1(j) = l_real_2(j) + rho_2(j,1);
             % z2_b1(j) = m_real_2(j) + rho_2(j,2);
-            z2_b1(j) = tan(pi/32) * (m_real_2(j) + rho_2(j,2));
+            z2_b1(j) = tan(pi/16) * (m_real_2(j) + rho_2(j,2));
             z3_b1(j) = n_real_2(j) + rho_2(j,3);
 
         end
