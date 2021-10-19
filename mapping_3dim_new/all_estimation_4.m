@@ -25,7 +25,7 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 5;
+m_max_now = 9;
 n_max_now = 2;
 
 m_start_change = 1;
@@ -65,7 +65,7 @@ param_s_first = param_s(:,:,:,:,1);
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 40;
+imax = 24;
 
 for i = 1 : imax
 
@@ -453,10 +453,10 @@ for i = 1 : imax
     %     E4_coef = 0.05 * E1_initial / E4_initial;
     % end
 
-    if i > 20
-        E4_coef = 100;
+    if i > 12
+        E4_coef = 200;
     else
-        E4_coef = 100;
+        E4_coef = 200;
     end
 
     disp('E4_initial = ')
