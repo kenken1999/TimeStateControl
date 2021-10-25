@@ -9,11 +9,9 @@ l_max = 2;
 m_max = 7;
 n_max = 2;
 
-iteration = 100;
+s = sym('s',[2*l_max-1 2*m_max-1 2*n_max-1 3]); % l,m,nの順
 
-s = sym('s',[l_max m_max n_max 3]); % l,m,nの順
-
-param_s = zeros(l_max, m_max, n_max, 3, iteration);
+param_s = zeros(2*l_max-1, 2*m_max-1, 2*n_max-1, 3, iteration);
 
 param_s(1,1,1,:,1) = [1 1 pi/4];
 param_s(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
@@ -34,9 +32,9 @@ m_save = 1;
 max_switch = 0;
 
 
-for a = 1 : l_max
-    for b = 1 : m_max
-        for c = 1 : n_max
+for a = 1 : 2*l_max-1
+    for b = 1 : 2*m_max-1
+        for c = 1 : 2*n_max-1
 
             if a <= l_max
                 l_coef = a - 1;
@@ -62,12 +60,15 @@ for a = 1 : l_max
     end
 end
 
-param_s_first = zeros(l_max, m_max, n_max, 3);
-param_s_first = param_s(:,:,:,:,1);
+% param_s_first = zeros(l_max, m_max, n_max, 3);
+% param_s_first = param_s(:,:,:,:,1);
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
 imax = 8;
+
+si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
+si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
 
 for i = 1 : imax
 
@@ -75,29 +76,28 @@ for i = 1 : imax
     K1fin = 1.9;  %シミュレーション終了時間, length(k) = Kfin + 1
     k1 = [0:dk1:K1fin];
 
-    u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
-
-    if rem(i,2) == 1
-        u2_b1 = ones(length(k1),1) * (0.5); % 回転角速度
-    else
+    if rem(i,4) == 1
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
         u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
+        si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 0 0];
+    elseif rem(i,4) == 2
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+        u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
+        si_b1(1,:) = [1-1/sqrt(2) 1+sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 1 0];
+    elseif rem(i,4) == 3
+        u1_b1 = ones(length(k1),1) * (-0.5); % 並進速度
+        u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
+        si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 0 0];
+    else
+        u1_b1 = ones(length(k1),1) * (-0.5); % 並進速度
+        u2_b1 = ones(length(k1),1) * 0.6; % 回転角速度
+        si_b1(1,:) = [1-1/sqrt(2) 1+sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 1 0];
     end
 
-    % if rem(i,4) == 1
-    %     u2_b1 = ones(length(k1),1) * (0.3); % 回転角速度
-    % elseif rem(i,4) == 2
-    %     u2_b1 = ones(length(k1),1) * (0.5); % 回転角速度
-    % elseif rem(i,4) == 3
-    %     u2_b1 = ones(length(k1),1) * (0.4); % 回転角速度
-    % else
-    %     u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
-    % end
-
-    si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-    si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
-
-    si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
-    si_c1(1,:) = [0 0 0];
 
     l_now = zeros(length(k1),1);
     m_now = zeros(length(k1),1);
@@ -111,7 +111,7 @@ for i = 1 : imax
     m_real = zeros(length(k1),1);
     n_real = zeros(length(k1),1);
 
-    rho_tmp = zeros(length(k1), l_max, m_max, n_max, 3);
+    rho_tmp = zeros(length(k1), 2*l_max-1, 2*m_max-1, 2*n_max-1, 3);
     rho = zeros(length(k1),3);
     
 
@@ -119,7 +119,7 @@ for i = 1 : imax
 
         param_s(:,:,:,:,1) = param_s(:,:,:,:,iteration);
 
-        if rem(i,2) == 1 && m_max_now < m_max
+        if rem(i,4) == 1 && m_max_now < m_max
 
             s_m = param_s(1,m_max_now,1,:,1) - param_s(1,m_max_now - 1,1,:,1);
 

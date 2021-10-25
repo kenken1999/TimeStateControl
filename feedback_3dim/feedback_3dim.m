@@ -1,6 +1,6 @@
 clear;
 close all;
-load('test.mat')
+load('test2.mat')
 
 %feedback_simulation------------------------------------------------------
 
@@ -9,7 +9,7 @@ Tfin = 2; %シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
 si = zeros(length(t1),3);
-si(1,:) = [1+1/2 1+1/sqrt(2) pi/4]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si(1,:) = [1+1/4 2 pi/4]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 zi = zeros(length(t1),3);
 %zi(1,:) = [-4 0 5]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
@@ -27,14 +27,14 @@ gmap = zeros(1,length(t1));
 hmap = zeros(1,length(t1));
 
 k2 = 4;
-k3 = 5;
+k3 = 8;
 
 x = si(1,1) + 0.2 * cos(si(1,3));
 y = si(1,2) + 0.2 * sin(si(1,3));
 
 
 l_max = 2;
-m_max = 9;
+m_max = 7;
 n_max = 2;
 
 l_now_3 = zeros(length(t1),1);
@@ -64,8 +64,21 @@ h = plot(zi(1,1),zi(1,3), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
 
 h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
 
-plot(1,2,'kx','MarkerSize', 10,'LineWidth',2)
+plot(1+1/4,2,'kx','MarkerSize', 10,'LineWidth',2)
 plot(1,1,'rx','MarkerSize', 10,'LineWidth',2)
+
+z1_plot = 0:1:3;
+z3_plot = 0:1:3;
+
+for j = 0 : 2
+    if j  == 1
+        plot(z1_plot,z1_plot-sqrt(2)+sqrt(2)*j,'-r')
+        plot(z3_plot,-z3_plot+2+sqrt(2)*(j-1),'-b')
+    else
+        plot(z1_plot,z1_plot-sqrt(2)+sqrt(2)*j,'--k')
+        plot(z3_plot,-z3_plot+2+sqrt(2)*(j-1),'--k')
+    end
+end
 
 
 for i = 1:length(t1)-1
@@ -199,7 +212,7 @@ for i = 1:length(t1)-1
     end
 
     zi(i+1,1) = l_real_3(i+1) + rho_3(i+1,1);
-    zi(i+1,2) = tan(pi/16) * (m_real_3(i+1) + rho_3(i+1,2));
+    zi(i+1,2) = tan(pi/8) * (m_real_3(i+1) + rho_3(i+1,2));
     zi(i+1,3) = n_real_3(i+1) + rho_3(i+1,3);
 
     % gmap(i+1) = ((zi(i+1,2) - zi(i,2)) * u1(i)) / ((zi(i+1,1) - zi(i,1)) * u2(i));
