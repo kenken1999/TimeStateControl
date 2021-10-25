@@ -1,71 +1,43 @@
 clear;
 close all;
+load('test.mat')
 
 tic
 
 %---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
 
-l_max = 2;
-m_max = 15;
-n_max = 2;
+p_max = 8;
+q_max = 8;
 
-iteration = 100;
+s_p = sym('s_g',[g_max 3]);
+s_q = sym('s_h',[h_max 3]);
 
-s = sym('s',[l_max m_max n_max 3]); % l,m,nの順
+param_s_p = zeros(g_max, 3, iteration);
+param_s_q = zeros(h_max, 3, iteration);
 
-param_s = zeros(l_max, m_max, n_max, 3, iteration);
+param_s_g(1,:,1) = [1 1 pi/4];
+param_s_h(10,:,1) = [1 1 pi/4];
 
-param_s(1,1,1,:,1) = [1 1 pi/4];
-param_s(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-param_s(1,2,1,:,1) = [1 1 9*pi/32];
-param_s(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
-
-s_l = param_s(2,1,1,:,1) - param_s(1,1,1,:,1);
-s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
-s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
-
-l_max_now = 2;
-m_max_now = 9;
-n_max_now = 2;
-
-m_start_change = 1;
-m_save = 1;
+p_max_now = 2;
+q_max_now = 2;
 
 
-for a = 1 : l_max
-    for b = 1 : m_max
-        for c = 1 : n_max
+for a = 1 : p_max
 
-            if a <= l_max
-                l_coef = a - 1;
-            else
-                l_coef = l_max - a;
-            end
-
-            if b <= m_max
-                m_coef = b - 1;
-            else
-                m_coef = m_max - b;
-            end
-
-            if c <= n_max
-                n_coef = c - 1;
-            else
-                n_coef = n_max - c;
-            end
-
-            param_s(a,b,c,:,1) = param_s(1,1,1,:,1) + l_coef * s_l + m_coef * s_m + n_coef * s_n;
-    
-        end
+    if a <= p_max
+        p_coef = a - 1;
+    else
+        p_coef = p_max - a;
     end
+
+    param_s_p(a,:,1) = param_s_p(1,:,1) + l_coef * s_l;
+
 end
 
-param_s_first = zeros(l_max, m_max, n_max, 3);
-param_s_first = param_s(:,:,:,:,1);
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 24;
+imax = 16;
 
 for i = 1 : imax
 
@@ -80,16 +52,6 @@ for i = 1 : imax
     else
         u2_b1 = ones(length(k1),1) * (0.5); % 回転角速度
     end
-
-    % if rem(i,4) == 1
-    %     u2_b1 = ones(length(k1),1) * (0.3); % 回転角速度
-    % elseif rem(i,4) == 2
-    %     u2_b1 = ones(length(k1),1) * (0.5); % 回転角速度
-    % elseif rem(i,4) == 3
-    %     u2_b1 = ones(length(k1),1) * (0.4); % 回転角速度
-    % else
-    %     u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
-    % end
 
     si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
     si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
@@ -391,7 +353,7 @@ for i = 1 : imax
         P2 = H2 \ y2;
 
         % E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
-        E1 = E1 + ( tan(pi/32) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+        E1 = E1 + ( tan(pi/16) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
 
 
     end
@@ -437,7 +399,6 @@ for i = 1 : imax
         end
     end
 
-
     % for b = 1 : m_max - 2
 
     %     E4 = E4 + (( (s(1,b+2,1,1) - s(1,b+1,1,1)) ^ 2 + (s(1,b+2,1,2) - s(1,b+1,1,2)) ^ 2 + (s(1,b+2,1,3) - s(1,b+1,1,3)) ^ 2 )... 
@@ -454,10 +415,10 @@ for i = 1 : imax
     %     E4_coef = 0.05 * E1_initial / E4_initial;
     % end
 
-    if i < 15
-        E4_coef = 1000;
+    if i > 10
+        E4_coef = 50;
     else
-        E4_coef = 100;
+        E4_coef = 50;
     end
 
     disp('E4_initial = ')
@@ -499,14 +460,17 @@ for i = 1 : imax
 
     m_start_change = m_save;
 
-    if m_max_now < m_max
+    if m_max_now <= m_max && max_switch < 2
         m_start_change = 1;
         m_save = m_start_change;
         m_max_change = m_max_now;
-    elseif rem(i,15) == 0
-        m_save = m_start_change;
-        m_start_change = 1;
-        m_max_change = m_max;
+        if m_max_now == m_max
+            max_switch = max_switch + 1;
+        end
+    % elseif rem(i,15) == 0
+    %     m_save = m_start_change;
+    %     m_start_change = 1;
+    %     m_max_change = m_max;
     else
         if rem(i,2) == 1
             m_start_change = m_start_change + 1;
@@ -563,7 +527,7 @@ for i = 1 : imax
 
                 param_s(1,1,1,:,t+1) = [1 1 pi/4];
                 param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
-                param_s(1,2,1,:,t+1) = [1 1 9*pi/32];
+                param_s(1,2,1,:,t+1) = [1 1 5*pi/16];
                 param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
                 end
@@ -622,6 +586,10 @@ for i = 1 : imax
 
 
     if i > imax - 2
+
+        param_s(2,:,1,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(1,:,2,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(2,:,2,3,iteration) = param_s(1,:,1,3,iteration);
 
         % z1,z2,z3の推定結果取得--------------------------------------
 
@@ -770,7 +738,7 @@ for i = 1 : imax
 
             z1_b1(j) = l_real_2(j) + rho_2(j,1);
             % z2_b1(j) = m_real_2(j) + rho_2(j,2);
-            z2_b1(j) = tan(pi/32) * (m_real_2(j) + rho_2(j,2));
+            z2_b1(j) = tan(pi/16) * (m_real_2(j) + rho_2(j,2));
             z3_b1(j) = n_real_2(j) + rho_2(j,3);
 
         end

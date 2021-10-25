@@ -25,11 +25,12 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 9;
+m_max_now = 5;
 n_max_now = 2;
 
 m_start_change = 1;
-m_save = 1;
+% m_save = 1;
+p = 0;
 
 
 for a = 1 : l_max
@@ -65,7 +66,7 @@ param_s_first = param_s(:,:,:,:,1);
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 24;
+imax = 20;
 
 for i = 1 : imax
 
@@ -454,8 +455,16 @@ for i = 1 : imax
     %     E4_coef = 0.05 * E1_initial / E4_initial;
     % end
 
-    if i < 15
+    % if i < 11
+    %     E4_coef = 300;
+    % else
+    %     E4_coef = 300;
+    % end
+
+    if i < 6
         E4_coef = 1000;
+    elseif i < 12
+        E4_coef = 500;
     else
         E4_coef = 100;
     end
@@ -497,22 +506,33 @@ for i = 1 : imax
     %     m_max_change = m_max_now;
     % end
 
-    m_start_change = m_save;
+    % m_start_change = m_save;
 
-    if m_max_now < m_max
-        m_start_change = 1;
-        m_save = m_start_change;
+    % if m_max_now < m_max
+    %     m_start_change = 1;
+    %     m_save = m_start_change;
+    %     m_max_change = m_max_now;
+    % elseif rem(i,15) == 0
+    %     m_save = m_start_change;
+    %     m_start_change = 1;
+    %     m_max_change = m_max;
+    % else
+    %     if rem(i,2) == 1
+    %         m_start_change = m_start_change + 1;
+    %         m_save = m_start_change;
+    %         m_max_change = m_max;
+    %     end
+    % end
+
+    if m_start_change < m_max - 5
+        m_start_change = m_max_now - 5;
         m_max_change = m_max_now;
-    elseif rem(i,15) == 0
-        m_save = m_start_change;
-        m_start_change = 1;
-        m_max_change = m_max;
     else
-        if rem(i,2) == 1
-            m_start_change = m_start_change + 1;
-            m_save = m_start_change;
-            m_max_change = m_max;
+        if rem(i,2) == 1 && p < 5
+            p = p + 1;
         end
+        m_start_change = m_max_now - 5 + p;
+        m_max_change = m_max_now;
     end
 
 

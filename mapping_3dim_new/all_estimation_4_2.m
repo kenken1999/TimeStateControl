@@ -6,7 +6,7 @@ tic
 %---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
 
 l_max = 2;
-m_max = 9;
+m_max = 13;
 n_max = 2;
 
 iteration = 100;
@@ -25,11 +25,13 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 4;
+m_max_now = 5;
 n_max_now = 2;
 
 m_start_change = 1;
 m_save = 1;
+
+max_switch = 0;
 
 
 for a = 1 : l_max
@@ -65,7 +67,7 @@ param_s_first = param_s(:,:,:,:,1);
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 26;
+imax = 16;
 
 for i = 1 : imax
 
@@ -76,9 +78,9 @@ for i = 1 : imax
     u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
 
     if rem(i,2) == 1
-        u2_b1 = ones(length(k1),1) * (0.4); % 回転角速度
-    else
         u2_b1 = ones(length(k1),1) * (0.5); % 回転角速度
+    else
+        u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
     end
 
     % if rem(i,4) == 1
@@ -135,6 +137,7 @@ for i = 1 : imax
 
         param_s(2,:,1,3,1) = param_s(1,:,1,3,1);
         param_s(1,:,2,3,1) = param_s(1,:,1,3,1);
+        param_s(2,:,2,3,1) = param_s(1,:,1,3,1);
 
     end
 
@@ -497,14 +500,17 @@ for i = 1 : imax
 
     m_start_change = m_save;
 
-    if m_max_now < m_max
+    if m_max_now <= m_max && max_switch < 2
         m_start_change = 1;
         m_save = m_start_change;
         m_max_change = m_max_now;
-    elseif rem(i,15) == 0
-        m_save = m_start_change;
-        m_start_change = 1;
-        m_max_change = m_max;
+        if m_max_now == m_max
+            max_switch = max_switch + 1;
+        end
+    % elseif rem(i,15) == 0
+    %     m_save = m_start_change;
+    %     m_start_change = 1;
+    %     m_max_change = m_max;
     else
         if rem(i,2) == 1
             m_start_change = m_start_change + 1;
@@ -620,6 +626,10 @@ for i = 1 : imax
 
 
     if i > imax - 2
+
+        param_s(2,:,1,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(1,:,2,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(2,:,2,3,iteration) = param_s(1,:,1,3,iteration);
 
         % z1,z2,z3の推定結果取得--------------------------------------
 

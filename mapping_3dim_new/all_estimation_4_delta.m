@@ -25,11 +25,13 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 9;
+m_max_now = 1;
 n_max_now = 2;
 
 m_start_change = 1;
 m_save = 1;
+
+max_switch = 0;
 
 
 for a = 1 : l_max
@@ -65,7 +67,7 @@ param_s_first = param_s(:,:,:,:,1);
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 24;
+imax = 14;
 
 for i = 1 : imax
 
@@ -410,7 +412,7 @@ for i = 1 : imax
         end
 
         if m_max_now < m_max
-            m_max_now = m_max_now + 1;
+            m_max_now = m_max_now + 2;
         else
             m_max_now = m_max;
         end
@@ -454,8 +456,16 @@ for i = 1 : imax
     %     E4_coef = 0.05 * E1_initial / E4_initial;
     % end
 
-    if i < 15
+    % if i > 4
+    %     E4_coef = 100;
+    % else
+    %     E4_coef = 100;
+    % end
+
+    if i < 4
         E4_coef = 1000;
+    elseif i < 8
+        E4_coef = 500;
     else
         E4_coef = 100;
     end
@@ -499,17 +509,20 @@ for i = 1 : imax
 
     m_start_change = m_save;
 
-    if m_max_now < m_max
+    if m_max_now <= m_max && max_switch < 2
         m_start_change = 1;
         m_save = m_start_change;
         m_max_change = m_max_now;
-    elseif rem(i,15) == 0
-        m_save = m_start_change;
-        m_start_change = 1;
-        m_max_change = m_max;
+        if m_max_now == m_max
+            max_switch = max_switch + 1;
+        end
+    % elseif rem(i,15) == 0
+    %     m_save = m_start_change;
+    %     m_start_change = 1;
+    %     m_max_change = m_max;
     else
         if rem(i,2) == 1
-            m_start_change = m_start_change + 1;
+            m_start_change = m_start_change + 3;
             m_save = m_start_change;
             m_max_change = m_max;
         end
@@ -565,6 +578,10 @@ for i = 1 : imax
                 param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
                 param_s(1,2,1,:,t+1) = [1 1 9*pi/32];
                 param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+
+                if b < m_max_change - 1
+                    param_s(1,b,1,:,t+1) = param_s(1,b,1,:,t);
+                end
 
                 end
             end
@@ -623,6 +640,10 @@ for i = 1 : imax
 
     if i > imax - 2
 
+        param_s(2,:,1,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(1,:,2,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(2,:,2,3,iteration) = param_s(1,:,1,3,iteration);
+
         % z1,z2,z3の推定結果取得--------------------------------------
 
         z1_b1 = zeros(length(k1),1);
@@ -646,7 +667,7 @@ for i = 1 : imax
         rho_2 = zeros(length(k1),3);
 
 
-        for j = 1:length(k1)
+        for j = 0 : length(k1) - 1
 
             for a = 1 : l_max
 
@@ -672,63 +693,63 @@ for i = 1 : imax
             
                         if a < l_max
                             a2 = a + 1;
-                            l_real_2(j) = a - 1;
+                            l_real_2(j+1) = a - 1;
                         elseif a == l_max + 1
                             a2 = 1;
-                            l_real_2(j) = -1;
+                            l_real_2(j+1) = -1;
                         else
                             a2 = a - 1;
-                            l_real_2(j) = - a + l_max; 
+                            l_real_2(j+1) = - a + l_max; 
                         end
             
                         if b < m_max
                             b2 = b + 1;
-                            m_real_2(j) = b - 1;
+                            m_real_2(j+1) = b - 1;
                         elseif b == m_max + 1
                             b2 = 1;
-                            m_real_2(j) = -1;
+                            m_real_2(j+1) = -1;
                         else
                             b2 = b - 1;
-                            m_real_2(j) = - b + m_max;
+                            m_real_2(j+1) = - b + m_max;
                         end
             
                         if c < n_max
                             c2 = c + 1;
-                            n_real_2(j) = c - 1;
+                            n_real_2(j+1) = c - 1;
                         elseif c == n_max + 1
                             c2 = 1;
-                            n_real_2(j) = -1;
+                            n_real_2(j+1) = -1;
                         else
                             c2 = c - 1;
-                            n_real_2(j) = - c + n_max;
+                            n_real_2(j+1) = - c + n_max;
                         end
             
                         A = [param_s(a2,b,c,:,iteration) - param_s(a,b,c,:,iteration); param_s(a,b2,c,:,iteration) - param_s(a,b,c,:,iteration); param_s(a,b,c2,:,iteration) - param_s(a,b,c,:,iteration)];
 
                         B = transpose(reshape(A,[3,3]));
 
-                        x = [si_b1(j,1) - param_s(a,b,c,1,iteration); si_b1(j,2) - param_s(a,b,c,2,iteration); si_b1(j,3) - param_s(a,b,c,3,iteration)];
+                        x = [si_b1(j+1,1) - param_s(a,b,c,1,iteration); si_b1(j+1,2) - param_s(a,b,c,2,iteration); si_b1(j+1,3) - param_s(a,b,c,3,iteration)];
 
-                        rho_2_tmp(j,a,b,c,:) = B \ x;
+                        rho_2_tmp(j+1,a,b,c,:) = B \ x;
 
                         % if j == 9
                         %     disp([a,b,c])
                         %     disp(rho_2_tmp(j,a,b,c,:))
                         % end
 
-                        if (0 <= rho_2_tmp(j,a,b,c,1)) && (rho_2_tmp(j,a,b,c,1) <= 1)
-                            if (0 <= rho_2_tmp(j,a,b,c,2)) && (rho_2_tmp(j,a,b,c,2) <= 1)
-                                if (0 <= rho_2_tmp(j,a,b,c,3)) && (rho_2_tmp(j,a,b,c,3) <= 1)
+                        if (0 <= rho_2_tmp(j+1,a,b,c,1)) && (rho_2_tmp(j+1,a,b,c,1) <= 1)
+                            if (0 <= rho_2_tmp(j+1,a,b,c,2)) && (rho_2_tmp(j+1,a,b,c,2) <= 1)
+                                if (0 <= rho_2_tmp(j+1,a,b,c,3)) && (rho_2_tmp(j+1,a,b,c,3) <= 1)
 
-                                    rho_2(j,:) = rho_2_tmp(j,a,b,c,:);
+                                    rho_2(j+1,:) = rho_2_tmp(j+1,a,b,c,:);
             
-                                    l_now_2(j) = a;
-                                    m_now_2(j) = b;
-                                    n_now_2(j) = c;
+                                    l_now_2(j+1) = a;
+                                    m_now_2(j+1) = b;
+                                    n_now_2(j+1) = c;
 
-                                    l_next_2(j) = a2;
-                                    m_next_2(j) = b2;
-                                    n_next_2(j) = c2;
+                                    l_next_2(j+1) = a2;
+                                    m_next_2(j+1) = b2;
+                                    n_next_2(j+1) = c2;
 
                                     break_switch = 1;
             
@@ -741,37 +762,37 @@ for i = 1 : imax
             end
 
             %欠損時の補間
-            if (break_switch == 0) && (j > 1)
+            if (break_switch == 0)
 
-                l_now_2(j) = l_now_2(j-1);
-                m_now_2(j) = m_now_2(j-1);
-                n_now_2(j) = n_now_2(j-1);
+                l_now_2(j+1) = l_now_2(j);
+                m_now_2(j+1) = m_now_2(j);
+                n_now_2(j+1) = n_now_2(j);
 
-                l_next_2(j) = l_next_2(j-1);
-                m_next_2(j) = m_next_2(j-1);
-                n_next_2(j) = n_next_2(j-1);
+                l_next_2(j+1) = l_next_2(j);
+                m_next_2(j+1) = m_next_2(j);
+                n_next_2(j+1) = n_next_2(j);
 
-                l_real_2(j) = l_real_2(j-1);
-                m_real_2(j) = m_real_2(j-1);
-                n_real_2(j) = n_real_2(j-1);
+                l_real_2(j+1) = l_real_2(j);
+                m_real_2(j+1) = m_real_2(j);
+                n_real_2(j+1) = n_real_2(j);
 
-                a = l_now_2(j);
-                b = m_now_2(j);
-                c = n_now_2(j);
+                a = l_now_2(j+1);
+                b = m_now_2(j+1);
+                c = n_now_2(j+1);
 
-                rho_2(j,:) = rho_2_tmp(j,a,b,c,:);
+                rho_2(j+1,:) = rho_2_tmp(j+1,a,b,c,:);
                 
-                disp(j)
+                disp(j+1)
                 disp("補間しました")
 
             end
 
             break_switch = 0;
 
-            z1_b1(j) = l_real_2(j) + rho_2(j,1);
+            z1_b1(j+1) = l_real_2(j+1) + rho_2(j+1,1);
             % z2_b1(j) = m_real_2(j) + rho_2(j,2);
-            z2_b1(j) = tan(pi/32) * (m_real_2(j) + rho_2(j,2));
-            z3_b1(j) = n_real_2(j) + rho_2(j,3);
+            z2_b1(j+1) = tan(pi/32) * (m_real_2(j+1) + rho_2(j+1,2));
+            z3_b1(j+1) = n_real_2(j+1) + rho_2(j+1,3);
 
         end
 
@@ -828,7 +849,6 @@ for i = 1 : imax
 
         for j = 1 : length(k1) - 1
         
-
             g_b1(j) = ((z2_b1(j+1) - z2_b1(j)) * u1_b1(j)) / ((z1_b1(j+1) - z1_b1(j)) * u2_b1(j));
 
             h_b1(j) = (z1_b1(j+1) - z1_b1(j)) / (u1_b1(j) * dk1);
