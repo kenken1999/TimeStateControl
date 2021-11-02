@@ -457,9 +457,9 @@ for i = 1 : imax
     % end
 
     if i > 6
-        E4_coef = 300;
+        E4_coef = 350;
     else
-        E4_coef = 300;
+        E4_coef = 350;
     end
 
 
@@ -517,10 +517,6 @@ for i = 1 : imax
         if m_max_now == m_max
             max_switch = max_switch + 1;
         end
-    % elseif rem(i,15) == 0
-    %     m_save = m_start_change;
-    %     m_start_change = 1;
-    %     m_max_change = m_max;
     else
         if rem(i,2) == 1
             m_start_change = m_start_change + 3;

@@ -83,16 +83,6 @@ for i = 1 : imax
         u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
     end
 
-    % if rem(i,4) == 1
-    %     u2_b1 = ones(length(k1),1) * (0.3); % 回転角速度
-    % elseif rem(i,4) == 2
-    %     u2_b1 = ones(length(k1),1) * (0.5); % 回転角速度
-    % elseif rem(i,4) == 3
-    %     u2_b1 = ones(length(k1),1) * (0.4); % 回転角速度
-    % else
-    %     u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
-    % end
-
     si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
     si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
 
@@ -392,7 +382,6 @@ for i = 1 : imax
         y2 = [si_b1(j+1,1) - s(l2,m2,n2,1); si_b1(j+1,2) - s(l2,m2,n2,2); si_b1(j+1,3) - s(l2,m2,n2,3)];
         P2 = H2 \ y2;
 
-        % E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
         E1 = E1 + ( tan(pi/8) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
 
 
@@ -439,21 +428,9 @@ for i = 1 : imax
         end
     end
 
-    % for b = 1 : m_max - 2
-
-    %     E4 = E4 + (( (s(1,b+2,1,1) - s(1,b+1,1,1)) ^ 2 + (s(1,b+2,1,2) - s(1,b+1,1,2)) ^ 2 + (s(1,b+2,1,3) - s(1,b+1,1,3)) ^ 2 )... 
-    %             - ( (s(1,b+1,1,1) - s(1,b,1,1)) ^ 2 + (s(1,b+1,1,2) - s(1,b,1,2)) ^ 2 + (s(1,b+1,1,3) - s(1,b,1,3)) ^ 2 )) ^ 2;
-               
-    % end
 
     E1_initial = double(subs(E1, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));    
     E4_initial = double(subs(E4, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));
-
-    % if E4_initial == 0
-    %     E4_coef = 0;
-    % else 
-    %     E4_coef = 0.05 * E1_initial / E4_initial;
-    % end
 
     if i > 10
         E4_coef = 5;
@@ -490,14 +467,6 @@ for i = 1 : imax
 
     E1_value = zeros(1,iteration);
 
-    % if rem(i,10) == 0
-    %     m_start_change = 1;
-    %     m_max_change = m_max;
-    % else
-    %     m_start_change = m_max_now - 5;
-    %     m_max_change = m_max_now;
-    % end
-
     m_start_change = m_save;
 
     if m_max_now <= m_max && max_switch < 2
@@ -507,10 +476,6 @@ for i = 1 : imax
         if m_max_now == m_max
             max_switch = max_switch + 1;
         end
-    % elseif rem(i,15) == 0
-    %     m_save = m_start_change;
-    %     m_start_change = 1;
-    %     m_max_change = m_max;
     else
         if rem(i,2) == 1
             m_start_change = m_start_change + 1;
@@ -718,11 +683,7 @@ for i = 1 : imax
                         x = [si_b1(j,1) - param_s(a,b,c,1,iteration); si_b1(j,2) - param_s(a,b,c,2,iteration); si_b1(j,3) - param_s(a,b,c,3,iteration)];
 
                         rho_2_tmp(j,a,b,c,:) = B \ x;
-
-                        % if j == 9
-                        %     disp([a,b,c])
-                        %     disp(rho_2_tmp(j,a,b,c,:))
-                        % end
+                        
 
                         if (0 <= rho_2_tmp(j,a,b,c,1)) && (rho_2_tmp(j,a,b,c,1) <= 1)
                             if (0 <= rho_2_tmp(j,a,b,c,2)) && (rho_2_tmp(j,a,b,c,2) <= 1)

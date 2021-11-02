@@ -1,6 +1,7 @@
 clear;
 close all;
-load('test2.mat')
+load('all_estimation.mat')
+load('gh_estimation.mat')
 
 %feedback_simulation------------------------------------------------------
 
@@ -9,16 +10,13 @@ Tfin = 2; %シミュレーション終了時間
 t1 = [0:dt:Tfin];
 
 si = zeros(length(t1),3);
-si(1,:) = [1+1/4 2 pi/4]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+si(1,:) = [1+1/4 2 pi/2]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+% si(1,:) = [1 1 pi/4]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 
 zi = zeros(length(t1),3);
-%zi(1,:) = [-4 0 5]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
-
-% zi(1,1) = si(1,1); %z1=s1は既知
-% zi(1,3) = si(1,2); %z3=s2は既知
 
 u1 = ones(1,length(t1)) * (-1);
-u2 = ones(1,length(t1)) * (3);
+u2 = ones(1,length(t1)) * (5);
 
 m1 = ones(1,length(t1)) * (-1); % μ1 = v1 = u1cosθ
 m2 = ones(1,length(t1)); % μ2 = v2/v1 = u2/(u1*cos^3θ)
@@ -27,7 +25,7 @@ gmap = zeros(1,length(t1));
 hmap = zeros(1,length(t1));
 
 k2 = 4;
-k3 = 8;
+k3 = 5;
 
 x = si(1,1) + 0.2 * cos(si(1,3));
 y = si(1,2) + 0.2 * sin(si(1,3));
@@ -54,6 +52,11 @@ rho_3 = zeros(length(t1),3);
 
 iteration = 100;
 
+phi_g_now = zeros(1,imax_g);
+phi_h_now = zeros(1,imax_h);
+
+
+
 hold on;
 axis equal;
 grid on;
@@ -71,12 +74,12 @@ z1_plot = 0:1:3;
 z3_plot = 0:1:3;
 
 for j = 0 : 2
-    if j  == 1
-        plot(z1_plot,z1_plot-sqrt(2)+sqrt(2)*j,'-r')
-        plot(z3_plot,-z3_plot+2+sqrt(2)*(j-1),'-b')
+    if j == 1
+        plot(z1_plot, z1_plot - sqrt(2) + sqrt(2) * j, '-r')
+        plot(z3_plot, - z3_plot + 2 + sqrt(2) * (j-1), '-b')
     else
-        plot(z1_plot,z1_plot-sqrt(2)+sqrt(2)*j,'--k')
-        plot(z3_plot,-z3_plot+2+sqrt(2)*(j-1),'--k')
+        plot(z1_plot, z1_plot - sqrt(2) + sqrt(2) * j, '--k')
+        plot(z3_plot, - z3_plot + 2 + sqrt(2) * (j-1), '--k')
     end
 end
 
@@ -106,18 +109,6 @@ for i = 1:length(t1)-1
     si(i+1,1) = si(i,1) + u1(i) * cos(si(i+1,3)) * dt; %観測されるs1
     si(i+1,2) = si(i,2) + u1(i) * sin(si(i+1,3)) * dt; %観測されるs2
 
-    % zi(i+1,1) = si(i+1,1); %z1=s1は既知
-    % zi(i+1,3) = si(i+1,2); %z3=s2は既知
-
-    % for j = 2:length(k)
-    %     if  p_now(j) == floor(si(i+1,3) / sigma)
-    %         zi(i+1,2) = zi_b(j,2);
-    %         gmap(i+1) = gmap_b(j);
-    %         hmap(i+1) = hmap_b(j);
-    %     % else
-    %     %     zi(i+2,2) = zi(i,2);
-    %     end
-    % end
 
     for a = 1 : l_max
 
@@ -208,18 +199,49 @@ for i = 1:length(t1)-1
     end
 
     if break_switch == 0
-        disp("補間する")
+        % l_now_3(i+1) = l_now_3(i);
+        % m_now_3(i+1) = m_now_3(i);
+        % n_now_3(i+1) = n_now_3(i);
+
+        % l_next_3(i+1) = l_next_3(i);
+        % m_next_3(i+1) = m_next_3(i);
+        % n_next_3(i+1) = n_next_3(i);
+
+        % l_real_3(i+1) = l_real_3(i);
+        % m_real_3(i+1) = m_real_3(i);
+        % n_real_3(i+1) = n_real_3(i);
+
+        % a = l_now_3(i+1);
+        % b = m_now_3(i+1);
+        % c = n_now_3(i+1);
+
+        % rho_3(i+1,:) = rho_3_tmp(i,a,b,c,:);
+        
+        disp(i)
+        disp("補間しました")
     end
 
     zi(i+1,1) = l_real_3(i+1) + rho_3(i+1,1);
     zi(i+1,2) = tan(pi/8) * (m_real_3(i+1) + rho_3(i+1,2));
     zi(i+1,3) = n_real_3(i+1) + rho_3(i+1,3);
 
+
+    for p = 1 : imax_g
+        phi_g_now(p) = exp( - sqrt( (si(i+1,1) - mean_g(p,1)) ^ 2 + (si(i+1,2) - mean_g(p,2)) ^ 2 + (si(i+1,3) - mean_g(p,3)) ^ 2 ) / (2 * var_g ^ 2) );
+    end
+    
+    for q = 1 : imax_h
+        phi_h_now(q) = exp( - sqrt( (si(i+1,1) - mean_h(q,1)) ^ 2 + (si(i+1,2) - mean_h(q,2)) ^ 2 + (si(i+1,3) - mean_h(q,3)) ^ 2 ) / (2 * var_h ^ 2) );
+    end
+
     % gmap(i+1) = ((zi(i+1,2) - zi(i,2)) * u1(i)) / ((zi(i+1,1) - zi(i,1)) * u2(i));
     % hmap(i+1) = (zi(i+1,1) - zi(i,1)) / (u1(i) * dt);
 
     gmap(i+1) = 1 / (cos(si(i+1,3) - pi/4)) ^ 3;
-    hmap(i+1) = cos(si(i+1,3) - pi/4);
+    % hmap(i+1) = cos(si(i+1,3) - pi/4);
+
+    % gmap(i+1) = phi_g_now * w_g;
+    hmap(i+1) = phi_h_now * w_h;
 
     if i > 1
         m1(i+1) = -2 * zi(i+1,1); %入力m1(=v1=u1cosθ), m1=-λz1で(λ>0の定数)z1を0に収束

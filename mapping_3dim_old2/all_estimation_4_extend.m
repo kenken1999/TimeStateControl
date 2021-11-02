@@ -32,9 +32,9 @@ m_save = 1;
 max_switch = 0;
 
 
-for a = 1 : 2*l_max-1
-    for b = 1 : 2*m_max-1
-        for c = 1 : 2*n_max-1
+for a = 1 : 2 * l_max - 1
+    for b = 1 : 2 * m_max - 1
+        for c = 1 : 2 * n_max - 1
 
             if a <= l_max
                 l_coef = a - 1;

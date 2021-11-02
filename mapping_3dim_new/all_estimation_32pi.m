@@ -6,7 +6,7 @@ tic
 %---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
 
 l_max = 2;
-m_max = 7;
+m_max = 22;
 n_max = 2;
 
 iteration = 100;
@@ -17,7 +17,7 @@ param_s = zeros(l_max, m_max, n_max, 3, iteration);
 
 param_s(1,1,1,:,1) = [1 1 pi/4];
 param_s(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-param_s(1,2,1,:,1) = [1 1 3*pi/8];
+param_s(1,2,1,:,1) = [1 1 9*pi/32];
 param_s(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
 s_l = param_s(2,1,1,:,1) - param_s(1,1,1,:,1);
@@ -25,14 +25,13 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 3;
+m_max_now = 10;
 n_max_now = 2;
 
 m_start_change = 1;
 m_save = 1;
 
 max_switch = 0;
-
 
 for a = 1 : l_max
     for b = 1 : m_max
@@ -62,10 +61,12 @@ for a = 1 : l_max
     end
 end
 
+param_s_first = zeros(l_max, m_max, n_max, 3);
+param_s_first = param_s(:,:,:,:,1);
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 8;
+imax = 24;
 
 for i = 1 : imax
 
@@ -80,6 +81,16 @@ for i = 1 : imax
     else
         u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
     end
+
+    % if rem(i,4) == 1
+    %     u2_b1 = ones(length(k1),1) * (0.3); % 回転角速度
+    % elseif rem(i,4) == 2
+    %     u2_b1 = ones(length(k1),1) * (0.5); % 回転角速度
+    % elseif rem(i,4) == 3
+    %     u2_b1 = ones(length(k1),1) * (0.4); % 回転角速度
+    % else
+    %     u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
+    % end
 
     si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
     si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
@@ -380,7 +391,8 @@ for i = 1 : imax
         y2 = [si_b1(j+1,1) - s(l2,m2,n2,1); si_b1(j+1,2) - s(l2,m2,n2,2); si_b1(j+1,3) - s(l2,m2,n2,3)];
         P2 = H2 \ y2;
 
-        E1 = E1 + ( tan(pi/8) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+        % E1 = E1 + ( m_real(j) + P(2) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+        E1 = E1 + ( tan(pi/32) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
 
 
     end
@@ -427,10 +439,36 @@ for i = 1 : imax
     end
 
 
+    % for b = 1 : m_max - 2
+
+    %     E4 = E4 + (( (s(1,b+2,1,1) - s(1,b+1,1,1)) ^ 2 + (s(1,b+2,1,2) - s(1,b+1,1,2)) ^ 2 + (s(1,b+2,1,3) - s(1,b+1,1,3)) ^ 2 )... 
+    %             - ( (s(1,b+1,1,1) - s(1,b,1,1)) ^ 2 + (s(1,b+1,1,2) - s(1,b,1,2)) ^ 2 + (s(1,b+1,1,3) - s(1,b,1,3)) ^ 2 )) ^ 2;
+               
+    % end
+
     E1_initial = double(subs(E1, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));    
     E4_initial = double(subs(E4, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));
 
-    E4_coef = 7;
+    % if E4_initial == 0
+    %     E4_coef = 0;
+    % else 
+    %     E4_coef = 0.05 * E1_initial / E4_initial;
+    % end
+
+    if i > 6
+        E4_coef = 125;
+    else
+        E4_coef = 125;
+    end
+
+
+    % if i < 4
+    %     E4_coef = 1000;
+    % elseif i < 6
+    %     E4_coef = 500;
+    % else
+    %     E4_coef = 100;
+    % end
 
     disp('E4_initial = ')
     disp(E4_initial)
@@ -461,6 +499,14 @@ for i = 1 : imax
 
     E1_value = zeros(1,iteration);
 
+    % if rem(i,10) == 0
+    %     m_start_change = 1;
+    %     m_max_change = m_max;
+    % else
+    %     m_start_change = m_max_now - 5;
+    %     m_max_change = m_max_now;
+    % end
+
     m_start_change = m_save;
 
     if m_max_now <= m_max && max_switch < 2
@@ -472,33 +518,24 @@ for i = 1 : imax
         end
     else
         if rem(i,2) == 1
-            m_start_change = m_start_change + 1;
+            m_start_change = m_start_change + 3;
             m_save = m_start_change;
             m_max_change = m_max;
         end
     end
 
 
-    DE1_s1_1 = cell(l_max, m_max, n_max);
-    DE1_s2_1 = cell(l_max, m_max, n_max);
-    DE1_s3_1 = cell(l_max, m_max, n_max);
-
-
     for a = l_max_now - 1 : l_max_now
         for b = m_start_change : m_max_change
             for c = n_max_now - 1 : n_max_now
 
-                % DE1_s1(a,b,c) = diff(E1,s(a,b,c,1));
-                % DE1_s2(a,b,c) = diff(E1,s(a,b,c,2));
-                % DE1_s3(a,b,c) = diff(E1,s(a,b,c,3));
+                DE1_s1(a,b,c) = diff(E1,s(a,b,c,1));
+                DE1_s2(a,b,c) = diff(E1,s(a,b,c,2));
+                DE1_s3(a,b,c) = diff(E1,s(a,b,c,3));
 
-                % DE1_s1_1{a,b,c} = matlabFunction(DE1_s1(a,b,c), 'vars', {s(:,:,:,:)});
-                % DE1_s2_1{a,b,c} = matlabFunction(DE1_s2(a,b,c), 'vars', {s(:,:,:,:)});
-                % DE1_s3_1{a,b,c} = matlabFunction(DE1_s3(a,b,c), 'vars', {s(:,:,:,:)});
-
-                DE1_s1_1{a,b,c} = matlabFunction(diff(E1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
-                DE1_s2_1{a,b,c} = matlabFunction(diff(E1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
-                DE1_s3_1{a,b,c} = matlabFunction(diff(E1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
+                DE1_s1_1{a,b,c} = matlabFunction(DE1_s1(a,b,c), 'vars', {s(:,:,:,:)});
+                DE1_s2_1{a,b,c} = matlabFunction(DE1_s2(a,b,c), 'vars', {s(:,:,:,:)});
+                DE1_s3_1{a,b,c} = matlabFunction(DE1_s3(a,b,c), 'vars', {s(:,:,:,:)});
 
                 if a == 1 && b == m_start_change && c == 1
                     disp('i = ')
@@ -535,15 +572,17 @@ for i = 1 : imax
 
                 param_s(1,1,1,:,t+1) = [1 1 pi/4];
                 param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
-                param_s(1,2,1,:,t+1) = [1 1 3*pi/8];
+                param_s(1,2,1,:,t+1) = [1 1 9*pi/32];
                 param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+
+                % param_s(1,3,1,:,t+1) = [1 1 pi/4+atan(2*tan(pi/32))];
 
                 end
             end
         end
 
 
-        E1_value(t) = double(subs(E1, (s(:,:,:,:)),(param_s(:,:,:,:,t+1))));
+        E1_value(t) = double(subs(E1, [s(:,:,:,:)],[param_s(:,:,:,:,t+1)]));
 
         if (t == 1 || t == 50 || t == 99)
 
@@ -622,7 +661,7 @@ for i = 1 : imax
         rho_2 = zeros(length(k1),3);
 
 
-        for j = 1:length(k1)
+        for j = 0 : length(k1) - 1
 
             for a = 1 : l_max
 
@@ -648,59 +687,63 @@ for i = 1 : imax
             
                         if a < l_max
                             a2 = a + 1;
-                            l_real_2(j) = a - 1;
+                            l_real_2(j+1) = a - 1;
                         elseif a == l_max + 1
                             a2 = 1;
-                            l_real_2(j) = -1;
+                            l_real_2(j+1) = -1;
                         else
                             a2 = a - 1;
-                            l_real_2(j) = - a + l_max; 
+                            l_real_2(j+1) = - a + l_max; 
                         end
             
                         if b < m_max
                             b2 = b + 1;
-                            m_real_2(j) = b - 1;
+                            m_real_2(j+1) = b - 1;
                         elseif b == m_max + 1
                             b2 = 1;
-                            m_real_2(j) = -1;
+                            m_real_2(j+1) = -1;
                         else
                             b2 = b - 1;
-                            m_real_2(j) = - b + m_max;
+                            m_real_2(j+1) = - b + m_max;
                         end
             
                         if c < n_max
                             c2 = c + 1;
-                            n_real_2(j) = c - 1;
+                            n_real_2(j+1) = c - 1;
                         elseif c == n_max + 1
                             c2 = 1;
-                            n_real_2(j) = -1;
+                            n_real_2(j+1) = -1;
                         else
                             c2 = c - 1;
-                            n_real_2(j) = - c + n_max;
+                            n_real_2(j+1) = - c + n_max;
                         end
             
                         A = [param_s(a2,b,c,:,iteration) - param_s(a,b,c,:,iteration); param_s(a,b2,c,:,iteration) - param_s(a,b,c,:,iteration); param_s(a,b,c2,:,iteration) - param_s(a,b,c,:,iteration)];
 
                         B = transpose(reshape(A,[3,3]));
 
-                        x = [si_b1(j,1) - param_s(a,b,c,1,iteration); si_b1(j,2) - param_s(a,b,c,2,iteration); si_b1(j,3) - param_s(a,b,c,3,iteration)];
+                        x = [si_b1(j+1,1) - param_s(a,b,c,1,iteration); si_b1(j+1,2) - param_s(a,b,c,2,iteration); si_b1(j+1,3) - param_s(a,b,c,3,iteration)];
 
-                        rho_2_tmp(j,a,b,c,:) = B \ x;
-                        
+                        rho_2_tmp(j+1,a,b,c,:) = B \ x;
 
-                        if (0 <= rho_2_tmp(j,a,b,c,1)) && (rho_2_tmp(j,a,b,c,1) <= 1)
-                            if (0 <= rho_2_tmp(j,a,b,c,2)) && (rho_2_tmp(j,a,b,c,2) <= 1)
-                                if (0 <= rho_2_tmp(j,a,b,c,3)) && (rho_2_tmp(j,a,b,c,3) <= 1)
+                        % if j == 9
+                        %     disp([a,b,c])
+                        %     disp(rho_2_tmp(j,a,b,c,:))
+                        % end
 
-                                    rho_2(j,:) = rho_2_tmp(j,a,b,c,:);
+                        if (0 <= rho_2_tmp(j+1,a,b,c,1)) && (rho_2_tmp(j+1,a,b,c,1) <= 1)
+                            if (0 <= rho_2_tmp(j+1,a,b,c,2)) && (rho_2_tmp(j+1,a,b,c,2) <= 1)
+                                if (0 <= rho_2_tmp(j+1,a,b,c,3)) && (rho_2_tmp(j+1,a,b,c,3) <= 1)
+
+                                    rho_2(j+1,:) = rho_2_tmp(j+1,a,b,c,:);
             
-                                    l_now_2(j) = a;
-                                    m_now_2(j) = b;
-                                    n_now_2(j) = c;
+                                    l_now_2(j+1) = a;
+                                    m_now_2(j+1) = b;
+                                    n_now_2(j+1) = c;
 
-                                    l_next_2(j) = a2;
-                                    m_next_2(j) = b2;
-                                    n_next_2(j) = c2;
+                                    l_next_2(j+1) = a2;
+                                    m_next_2(j+1) = b2;
+                                    n_next_2(j+1) = c2;
 
                                     break_switch = 1;
             
@@ -713,37 +756,37 @@ for i = 1 : imax
             end
 
             %欠損時の補間
-            if (break_switch == 0) && (j > 1)
+            if (break_switch == 0)
 
-                l_now_2(j) = l_now_2(j-1);
-                m_now_2(j) = m_now_2(j-1);
-                n_now_2(j) = n_now_2(j-1);
+                l_now_2(j+1) = l_now_2(j);
+                m_now_2(j+1) = m_now_2(j);
+                n_now_2(j+1) = n_now_2(j);
 
-                l_next_2(j) = l_next_2(j-1);
-                m_next_2(j) = m_next_2(j-1);
-                n_next_2(j) = n_next_2(j-1);
+                l_next_2(j+1) = l_next_2(j);
+                m_next_2(j+1) = m_next_2(j);
+                n_next_2(j+1) = n_next_2(j);
 
-                l_real_2(j) = l_real_2(j-1);
-                m_real_2(j) = m_real_2(j-1);
-                n_real_2(j) = n_real_2(j-1);
+                l_real_2(j+1) = l_real_2(j);
+                m_real_2(j+1) = m_real_2(j);
+                n_real_2(j+1) = n_real_2(j);
 
-                a = l_now_2(j);
-                b = m_now_2(j);
-                c = n_now_2(j);
+                a = l_now_2(j+1);
+                b = m_now_2(j+1);
+                c = n_now_2(j+1);
 
-                rho_2(j,:) = rho_2_tmp(j,a,b,c,:);
+                rho_2(j+1,:) = rho_2_tmp(j+1,a,b,c,:);
                 
-                disp(j)
+                disp(j+1)
                 disp("補間しました")
 
             end
 
             break_switch = 0;
 
-            z1_b1(j) = l_real_2(j) + rho_2(j,1);
+            z1_b1(j+1) = l_real_2(j+1) + rho_2(j+1,1);
             % z2_b1(j) = m_real_2(j) + rho_2(j,2);
-            z2_b1(j) = tan(pi/8) * (m_real_2(j) + rho_2(j,2));
-            z3_b1(j) = n_real_2(j) + rho_2(j,3);
+            z2_b1(j+1) = tan(pi/32) * (m_real_2(j+1) + rho_2(j+1,2));
+            z3_b1(j+1) = n_real_2(j+1) + rho_2(j+1,3);
 
         end
 
@@ -800,7 +843,6 @@ for i = 1 : imax
 
         for j = 1 : length(k1) - 1
         
-
             g_b1(j) = ((z2_b1(j+1) - z2_b1(j)) * u1_b1(j)) / ((z1_b1(j+1) - z1_b1(j)) * u2_b1(j));
 
             h_b1(j) = (z1_b1(j+1) - z1_b1(j)) / (u1_b1(j) * dk1);
@@ -820,10 +862,8 @@ for i = 1 : imax
 
         axis([-5 5 -5 5]) % π/2 ≒ 1.57
 
-        g_ans = zeros(length(k1),1);
-
-        for j = 1 : length(k1)
-            g_ans(j) = 1 / (cos(si_c1(j,3)) * cos(si_c1(j,3)) * cos(si_c1(j,3)));
+        for i = 1 : length(k1)
+            g_ans(i) = 1 / (cos(si_c1(i,3)) * cos(si_c1(i,3)) * cos(si_c1(i,3)));
         end
 
         plot(si_c1(:,3), g_ans(:), '--m', si_c1(:,3), g_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
