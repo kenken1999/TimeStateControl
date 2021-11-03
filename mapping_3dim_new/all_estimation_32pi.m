@@ -456,9 +456,9 @@ for i = 1 : imax
     % end
 
     if i > 6
-        E4_coef = 125;
+        E4_coef = 130;
     else
-        E4_coef = 125;
+        E4_coef = 130;
     end
 
 
