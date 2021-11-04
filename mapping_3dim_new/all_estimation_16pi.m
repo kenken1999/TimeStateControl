@@ -76,7 +76,7 @@ for i = 1 : imax
     u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
 
     if rem(i,2) == 1
-        u2_b1 = ones(length(k1),1) * (0.5); % 回転角速度
+        u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
     else
         u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
     end
@@ -430,7 +430,7 @@ for i = 1 : imax
     E1_initial = double(subs(E1, s(:,:,:,:),param_s(:,:,:,:,1)));    
     E4_initial = double(subs(E4, s(:,:,:,:),param_s(:,:,:,:,1)));
 
-    E4_coef = 95;
+    E4_coef = 100;
 
     disp('E4_initial = ')
     disp(E4_initial)

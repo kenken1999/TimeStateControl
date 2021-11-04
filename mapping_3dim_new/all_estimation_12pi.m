@@ -6,7 +6,7 @@ tic
 %---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
 
 l_max = 2;
-m_max = 7;
+m_max = 10;
 n_max = 2;
 
 iteration = 100;
@@ -17,7 +17,7 @@ param_s = zeros(l_max, m_max, n_max, 3, iteration);
 
 param_s(1,1,1,:,1) = [1 1 pi/4];
 param_s(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-param_s(1,2,1,:,1) = [1 1 3*pi/8];
+param_s(1,2,1,:,1) = [1 1 pi/3];
 param_s(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
 s_l = param_s(2,1,1,:,1) - param_s(1,1,1,:,1);
@@ -65,7 +65,7 @@ end
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 8;
+imax = 14;
 
 for i = 1 : imax
 
@@ -380,7 +380,7 @@ for i = 1 : imax
         y2 = [si_b1(j+1,1) - s(l2,m2,n2,1); si_b1(j+1,2) - s(l2,m2,n2,2); si_b1(j+1,3) - s(l2,m2,n2,3)];
         P2 = H2 \ y2;
 
-        E1 = E1 + ( tan(pi/8) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
+        E1 = E1 + ( tan(pi/12) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
 
 
     end
@@ -430,7 +430,7 @@ for i = 1 : imax
     E1_initial = double(subs(E1, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));    
     E4_initial = double(subs(E4, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));
 
-    E4_coef = 1;
+    E4_coef = 10;
 
     disp('E4_initial = ')
     disp(E4_initial)
@@ -535,7 +535,7 @@ for i = 1 : imax
 
                 param_s(1,1,1,:,t+1) = [1 1 pi/4];
                 param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
-                param_s(1,2,1,:,t+1) = [1 1 3*pi/8];
+                param_s(1,2,1,:,t+1) = [1 1 pi/3];
                 param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
                 end
@@ -741,8 +741,7 @@ for i = 1 : imax
             break_switch = 0;
 
             z1_b1(j) = l_real_2(j) + rho_2(j,1);
-            % z2_b1(j) = m_real_2(j) + rho_2(j,2);
-            z2_b1(j) = tan(pi/8) * (m_real_2(j) + rho_2(j,2));
+            z2_b1(j) = tan(pi/12) * (m_real_2(j) + rho_2(j,2));
             z3_b1(j) = n_real_2(j) + rho_2(j,3);
 
         end

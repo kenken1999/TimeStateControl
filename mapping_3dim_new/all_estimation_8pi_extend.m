@@ -9,6 +9,8 @@ l_max = 2;
 m_max = 7;
 n_max = 2;
 
+iteration = 100;
+
 s = sym('s',[2*l_max-1 2*m_max-1 2*n_max-1 3]); % l,m,nの順
 
 param_s = zeros(2*l_max-1, 2*m_max-1, 2*n_max-1, 3, iteration);
@@ -62,16 +64,16 @@ end
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 8;
-
-si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
+imax = 16;
 
 for i = 1 : imax
 
     dk1 = 0.1;   % 時間刻み
     K1fin = 1.9;  %シミュレーション終了時間, length(k) = Kfin + 1
     k1 = [0:dk1:K1fin];
+
+    si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
+    si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
 
     if rem(i,4) == 1
         u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
@@ -81,7 +83,7 @@ for i = 1 : imax
     elseif rem(i,4) == 2
         u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
         u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
-        si_b1(1,:) = [1-1/sqrt(2) 1+sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_b1(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
         si_c1(1,:) = [0 1 0];
     elseif rem(i,4) == 3
         u1_b1 = ones(length(k1),1) * (-0.5); % 並進速度
@@ -91,10 +93,9 @@ for i = 1 : imax
     else
         u1_b1 = ones(length(k1),1) * (-0.5); % 並進速度
         u2_b1 = ones(length(k1),1) * 0.6; % 回転角速度
-        si_b1(1,:) = [1-1/sqrt(2) 1+sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_b1(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
         si_c1(1,:) = [0 1 0];
     end
-
 
     l_now = zeros(length(k1),1);
     m_now = zeros(length(k1),1);
@@ -111,7 +112,7 @@ for i = 1 : imax
     rho_tmp = zeros(length(k1), 2*l_max-1, 2*m_max-1, 2*n_max-1, 3);
     rho = zeros(length(k1),3);
     
-
+    
     if i > 1
 
         param_s(:,:,:,:,1) = param_s(:,:,:,:,iteration);
@@ -167,10 +168,6 @@ for i = 1 : imax
                 end
 
                 if (a == l_max) || (b == m_max) || (c == n_max)
-                    continue;
-                end
-
-                if (a == 2*l_max-1) || (b == 2*m_max-1) || (c == 2*n_max-1)
                     continue;
                 end
 
@@ -277,10 +274,6 @@ for i = 1 : imax
                     end
 
                     if (a == l_max) || (b == m_max) || (c == n_max)
-                        continue;
-                    end
-
-                    if (a == 2*l_max-1) || (b == 2*m_max-1) || (c == 2*n_max-1)
                         continue;
                     end
         
@@ -697,9 +690,6 @@ for i = 1 : imax
                             continue;
                         end
 
-                        if (a == 2*l_max-1) || (b == 2*m_max-1) || (c == 2*n_max-1)
-                            continue;
-                        end
             
                         if a < l_max
                             a2 = a + 1;
@@ -875,8 +865,8 @@ for i = 1 : imax
 
         g_ans = zeros(length(k1),1);
 
-        for i = 1 : length(k1)
-            g_ans(i) = 1 / (cos(si_c1(i,3)) * cos(si_c1(i,3)) * cos(si_c1(i,3)));
+        for j = 1 : length(k1)
+            g_ans(j) = 1 / (cos(si_c1(j,3)) * cos(si_c1(j,3)) * cos(si_c1(j,3)));
         end
 
         plot(si_c1(:,3), g_ans(:), '--m', si_c1(:,3), g_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
