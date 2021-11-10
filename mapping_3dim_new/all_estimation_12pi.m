@@ -25,7 +25,7 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 3;
+m_max_now = 4;
 n_max_now = 2;
 
 m_start_change = 1;
@@ -107,7 +107,7 @@ for i = 1 : imax
 
         param_s(:,:,:,:,1) = param_s(:,:,:,:,iteration);
 
-        if rem(i,2) == 1 && m_max_now < m_max
+        if rem(i,1) == 1 && m_max_now < m_max
 
             s_m = param_s(1,m_max_now,1,:,1) - param_s(1,m_max_now - 1,1,:,1);
 
@@ -430,7 +430,7 @@ for i = 1 : imax
     E1_initial = double(subs(E1, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));    
     E4_initial = double(subs(E4, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));
 
-    E4_coef = 10;
+    E4_coef = 100;
 
     disp('E4_initial = ')
     disp(E4_initial)
@@ -438,7 +438,6 @@ for i = 1 : imax
     disp(E4_coef)
 
     E1 = E1 + E4_coef * E4;
-
 
     %---最急降下法のパラメータ決定----------------------------
 
@@ -463,7 +462,7 @@ for i = 1 : imax
 
     m_start_change = m_save;
 
-    if m_max_now <= m_max && max_switch < 2
+    if m_max_now <= m_max && max_switch < 30
         m_start_change = 1;
         m_save = m_start_change;
         m_max_change = m_max_now;
