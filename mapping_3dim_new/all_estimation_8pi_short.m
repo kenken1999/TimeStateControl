@@ -426,14 +426,13 @@ for i = 1 : imax
         end
     end
 
-
     E1_initial = double(subs(E1, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));    
     E4_initial = double(subs(E4, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));
 
     if i < 6
-        E4_coef = 5;
+        E4_coef = 10;
     else
-        E4_coef = 2.5;
+        E4_coef = 5;
     end
 
     disp('E4_initial = ')

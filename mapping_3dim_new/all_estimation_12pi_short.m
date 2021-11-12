@@ -65,7 +65,7 @@ end
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 10;
+imax = 18;
 
 for i = 1 : imax
 
@@ -431,9 +431,9 @@ for i = 1 : imax
     E4_initial = double(subs(E4, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));
 
     if i < 4
-        E4_coef = 100;
+        E4_coef = 70;
     else
-        E4_coef = 25;
+        E4_coef = 35;
     end
 
 
@@ -450,7 +450,11 @@ for i = 1 : imax
     eta_s2 = 0.0 * 10 ^ (-6);
     eta_s3 = 1.0 * 10 ^ (-2);
 
-    iteration = 100;
+    if i < 8
+        iteration = 100;
+    else
+        iteration = 150;
+    end
 
     stop_switch = 0;
 
@@ -549,7 +553,7 @@ for i = 1 : imax
 
         E1_value(t) = double(subs(E1, (s(:,:,:,:)),(param_s(:,:,:,:,t+1))));
 
-        if (t == 1 || t == 50 || t == 99)
+        if (t == 1 || t == 50 || t == 99 || t == 149)
 
             disp('i = ')
             disp(i)
@@ -576,7 +580,7 @@ for i = 1 : imax
                 param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
                 stop_switch = stop_switch + 1;
             end
-            if stop_switch == 8
+            if stop_switch == 14
                 disp('t = ')
                 disp(t)
                 disp('Ef1が増加しました')
