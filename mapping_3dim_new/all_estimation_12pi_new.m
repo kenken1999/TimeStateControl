@@ -3,15 +3,46 @@ close all;
 
 tic
 
-%---(l,m,n)=(0,0,0),(1,0,0),(0,1,0),(0,0,1)のfix, およびその他初期値の決定(線形補間)----------------------------------------------------
+%---サンプル収集------------------------------------------------------------------------
+
+dk1 = 0.1;   % 時間刻み
+K1fin = 1.9;  %シミュレーション終了時間, length(k) = Kfin + 1
+k1 = [0:dk1:K1fin];
+
+u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+
+if rem(i,1) == 1
+    u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
+else
+    u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
+end
+
+si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
+si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
+
+si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
+si_c1(1,:) = [0 0 0];
+
+for j = 1 : length(k1) - 1
+    
+    si_b1(j+1,3) = si_b1(j,3) + u2_b1(j+1) * dk1;
+    si_b1(j+1,1) = si_b1(j,1) + u1_b1(j+1) * cos(si_b1(j+1,3)) * dk1;
+    si_b1(j+1,2) = si_b1(j,2) + u1_b1(j+1) * sin(si_b1(j+1,3)) * dk1;
+
+    si_c1(j+1,3) = si_c1(j,3) + u2_b1(j+1) * dk1;
+    si_c1(j+1,1) = si_c1(j,1) + u1_b1(j+1) * cos(si_c1(j+1,3)) * dk1;
+    si_c1(j+1,2) = si_c1(j,2) + u1_b1(j+1) * sin(si_c1(j+1,3)) * dk1;
+
+end
+
+
+%---原点付近の格子点探索・固定, およびその他初期値の決定(線形補間)------------------------------
 
 l_max = 2;
 m_max = 10;
 n_max = 2;
 
 iteration = 150;
-
-s = sym('s',[l_max m_max n_max 3]); % l,m,nの順
 
 param_s = zeros(l_max, m_max, n_max, 3, iteration);
 
@@ -23,15 +54,6 @@ param_s(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 s_l = param_s(2,1,1,:,1) - param_s(1,1,1,:,1);
 s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
-
-l_max_now = 2;
-m_max_now = 4;
-n_max_now = 2;
-
-m_start_change = 1;
-m_save = 1;
-
-max_switch = 0;
 
 
 for a = 1 : l_max
@@ -63,29 +85,54 @@ for a = 1 : l_max
 end
 
 
-%---サンプル収集と誤差関数の定義----------------------------------------------------
+%---偏微分後関数の生成------------------------------------------------------------------
 
-imax = 13;
+s1 = sym('s1',[2 2 2 3]); % l,m,n,iの順
+s2 = sym('s2',[2 2 2 3]); % l,m,n,iの順
+
+
+for j = 1 : length(k1) - 1
+
+    G = [s1(2,1,1,:) - s1(1,1,1,:); s1(1,2,1,:) - s1(1,1,1,:); s1(1,1,2,:) - s1(1,1,1,:)];
+    H =  transpose(reshape(G,[3,3]));
+    y = [si_b1(j,1) - s1(1,1,1,1); si_b1(j,2) - s1(1,1,1,2); si_b1(j,3) - s1(1,1,1,3)];
+    P = H \ y;
+
+    G2_same = [s1(2,1,1,:) - s1(1,1,1,:); s1(1,2,1,:) - s1(1,1,1,:); s1(1,1,2,:) - s1(1,1,1,:)];
+    H2_same =  transpose(reshape(G2_same[3,3]));
+    y2_same = [si_b1(j+1,1) - s1(1,1,1,1); si_b1(j+1,2) - s1(1,1,1,2); si_b1(j+1,3) - s1(1,1,1,3)];
+    P2_same = H2_same \ y2_same;
+
+    G2 = [s2(2,1,1,:) - s2(1,1,1,:); s2(1,2,1,:) - s2(1,1,1,:); s2(1,1,2,:) - s2(1,1,1,:)];
+    H2 =  transpose(reshape(G2,[3,3]));
+    y2 = [si_b1(j+1,1) - s2(1,1,1,1); si_b1(j+1,2) - s2(1,1,1,2); si_b1(j+1,3) - s2(1,1,1,3)];
+    P2 = H2 \ y2;
+
+    e1 = P(2) - (P2(3) - P(3)) / (P2(1) - P(1));
+
+    DE1_s1_1{a,b,c} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
+    DE1_s2_1{a,b,c} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
+    DE1_s3_1{a,b,c} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
+
+end
+
+
+
+
+%---格子点選択および更新-----------------------------------------------------------------
+
+imax = 18;
+
+l_max_now = 2;
+m_max_now = 4;
+n_max_now = 2;
+
+m_start_change = 1;
+m_save = 1;
+
+max_switch = 0;
 
 for i = 1 : imax
-
-    dk1 = 0.1;   % 時間刻み
-    K1fin = 1.9;  %シミュレーション終了時間, length(k) = Kfin + 1
-    k1 = [0:dk1:K1fin];
-
-    u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
-
-    if rem(i,1) == 1
-        u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
-    else
-        u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
-    end
-
-    si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
-    si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
-
-    si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
-    si_c1(1,:) = [0 0 0];
 
     l_now = zeros(length(k1),1);
     m_now = zeros(length(k1),1);
@@ -107,21 +154,21 @@ for i = 1 : imax
 
         param_s(:,:,:,:,1) = param_s(:,:,:,:,iteration);
 
-        if rem(i,1) == 1 && m_max_now < m_max
+        % if rem(i,2) == 1 && m_max_now < m_max
 
-            s_m = param_s(1,m_max_now,1,:,1) - param_s(1,m_max_now - 1,1,:,1);
+        %     s_m = param_s(1,m_max_now,1,:,1) - param_s(1,m_max_now - 1,1,:,1);
 
-            for b = m_max_now : m_max
+        %     for b = m_max_now : m_max
 
-                if b <= m_max
-                    m_coef = b - m_max_now;
-                end
+        %         if b <= m_max
+        %             m_coef = b - m_max_now;
+        %         end
     
-                param_s(1,b,1,:,1) = param_s(1,m_max_now,1,:,1) + m_coef * s_m;
+        %         param_s(1,b,1,:,1) = param_s(1,m_max_now,1,:,1) + m_coef * s_m;
                               
-            end
+        %     end
 
-        end
+        % end
 
         param_s(2,:,1,3,1) = param_s(1,:,1,3,1);
         param_s(1,:,2,3,1) = param_s(1,:,1,3,1);
@@ -228,15 +275,6 @@ for i = 1 : imax
 
 
     for j = 1 : length(k1) - 1
-    
-        si_b1(j+1,3) = si_b1(j,3) + u2_b1(j+1) * dk1;
-        si_b1(j+1,1) = si_b1(j,1) + u1_b1(j+1) * cos(si_b1(j+1,3)) * dk1;
-        si_b1(j+1,2) = si_b1(j,2) + u1_b1(j+1) * sin(si_b1(j+1,3)) * dk1;
-
-        si_c1(j+1,3) = si_c1(j,3) + u2_b1(j+1) * dk1;
-        si_c1(j+1,1) = si_c1(j,1) + u1_b1(j+1) * cos(si_c1(j+1,3)) * dk1;
-        si_c1(j+1,2) = si_c1(j,2) + u1_b1(j+1) * sin(si_c1(j+1,3)) * dk1;
-
 
         for a = 1 : l_max
 
@@ -453,7 +491,7 @@ for i = 1 : imax
     if i < 11
         iteration = 100;
     else
-        iteration = 150;
+        iteration = 200;
     end
 
     stop_switch = 0;
@@ -524,6 +562,7 @@ for i = 1 : imax
     end
 
 
+    %---勾配法によるパラメータ更新---------------------------
 
     for t = 1:iteration - 1
 
