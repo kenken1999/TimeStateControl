@@ -375,14 +375,16 @@ for i = 1 : imax
 
         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
 
-        for j = 1 : length(k1)
+        for j = 1 : length(k1) - 1
             for a = 1 : l_max_now
                 for b = 1 : m_max_now
                     for c = 1 : n_max_now
 
-                        DE1_s1_2 = DE1_s1_1{a,b,c}(param_s(:,:,:,:,t));
-                        DE1_s2_2 = DE1_s2_1{a,b,c}(param_s(:,:,:,:,t));
-                        DE1_s3_2 = DE1_s3_1{a,b,c}(param_s(:,:,:,:,t));
+                        if a == l_now(j)
+
+                        DE1_s1_2 = De1_s1_1{a,b,c}(param_s(:,:,:,:,t));
+                        DE1_s2_2 = De1_s2_1{a,b,c}(param_s(:,:,:,:,t));
+                        DE1_s3_2 = De1_s3_1{a,b,c}(param_s(:,:,:,:,t));
 
                         param_s(a,b,c,1,t+1) = param_s(a,b,c,1,t) - eta_s1 * DE1_s1_2;
                         param_s(a,b,c,2,t+1) = param_s(a,b,c,2,t) - eta_s2 * DE1_s2_2;
