@@ -9,7 +9,7 @@ l_max = 2;
 m_max = 10;
 n_max = 2;
 
-iteration = 150;
+iteration = 2000;
 
 s = sym('s',[l_max m_max n_max 3]); % l,m,nの順
 
@@ -65,7 +65,7 @@ end
 
 %---サンプル収集と誤差関数の定義----------------------------------------------------
 
-imax = 13;
+imax = 20;
 
 for i = 1 : imax
 
@@ -431,7 +431,7 @@ for i = 1 : imax
     E4_initial = double(subs(E4, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));
 
     if i < 4
-        E4_coef = 70;
+        E4_coef = 60;
     else
         E4_coef = 35;
     end
@@ -452,6 +452,8 @@ for i = 1 : imax
 
     if i < 11
         iteration = 100;
+    elseif i > 18
+        iteration = 900;
     else
         iteration = 150;
     end
@@ -553,7 +555,7 @@ for i = 1 : imax
 
         E1_value(t) = double(subs(E1, (s(:,:,:,:)),(param_s(:,:,:,:,t+1))));
 
-        if (t == 1 || t == 50 || t == 99 || t == 149)
+        if (t == 1 || t == 50 || t == 99 || t == 149 || t == 499)
 
             disp('i = ')
             disp(i)

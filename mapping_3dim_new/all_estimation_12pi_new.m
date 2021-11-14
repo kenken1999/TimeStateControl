@@ -87,48 +87,74 @@ end
 
 %---偏微分後関数の生成------------------------------------------------------------------
 
-s1 = sym('s1',[2 2 2 3]); % l,m,n,iの順
-s2 = sym('s2',[2 2 2 3]); % l,m,n,iの順
+%---E1の偏微分後関数の生成----------------
 
+s = sym('s1',[4 4 4 3]); % l,m,n,iの順
 
 for j = 1 : length(k1) - 1
 
-    G = [s1(2,1,1,:) - s1(1,1,1,:); s1(1,2,1,:) - s1(1,1,1,:); s1(1,1,2,:) - s1(1,1,1,:)];
+    G = [s(2,1,1,:) - s(1,1,1,:); s(1,2,1,:) - s(1,1,1,:); s(1,1,2,:) - s(1,1,1,:)];
     H =  transpose(reshape(G,[3,3]));
-    y = [si_b1(j,1) - s1(1,1,1,1); si_b1(j,2) - s1(1,1,1,2); si_b1(j,3) - s1(1,1,1,3)];
+    y = [si_b1(j,1) - s(1,1,1,1); si_b1(j,2) - s(1,1,1,2); si_b1(j,3) - s(1,1,1,3)];
     P = H \ y;
 
-    G2_same = [s1(2,1,1,:) - s1(1,1,1,:); s1(1,2,1,:) - s1(1,1,1,:); s1(1,1,2,:) - s1(1,1,1,:)];
-    H2_same =  transpose(reshape(G2_same[3,3]));
-    y2_same = [si_b1(j+1,1) - s1(1,1,1,1); si_b1(j+1,2) - s1(1,1,1,2); si_b1(j+1,3) - s1(1,1,1,3)];
-    P2_same = H2_same \ y2_same;
+    for a = 1 : 3
+        for b = 1 : 3
+            for c = 1 : 3
 
-    G2 = [s2(2,1,1,:) - s2(1,1,1,:); s2(1,2,1,:) - s2(1,1,1,:); s2(1,1,2,:) - s2(1,1,1,:)];
-    H2 =  transpose(reshape(G2,[3,3]));
-    y2 = [si_b1(j+1,1) - s2(1,1,1,1); si_b1(j+1,2) - s2(1,1,1,2); si_b1(j+1,3) - s2(1,1,1,3)];
-    P2 = H2 \ y2;
+                G2 = [s(a+1,b,c,:) - s(a,b,c,:); s(a,b+1,c,:) - s(a,b,c,:); s(a,b,c+1,:) - s(a,b,c,:)];
+                H2 =  transpose(reshape(G2,[3,3]));
+                y2 = [si_b1(j+1,1) - s(a,b,c,1); si_b1(j+1,2) - s(a,b,c,2); si_b1(j+1,3) - s(a,b,c,3)];
+                P2 = H2 \ y2;
 
-    e1 = P(2) - (P2(3) - P(3)) / (P2(1) - P(1));
+                e1 = P(2) - (P2(3) - P(3)) / (P2(1) - P(1));
 
-    DE1_s1_1{a,b,c} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
-    DE1_s2_1{a,b,c} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
-    DE1_s3_1{a,b,c} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
+                De1_s1_1{j,a,b,c} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
+                De1_s2_1{j,a,b,c} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
+                De1_s3_1{j,a,b,c} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
+
+                De1_s1_next_1{j,a+1,b,c} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
+                De1_s2_next_1{j,a+1,b,c} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
+                De1_s3_next_1{j,a+1,b,c} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
+
+                De1_s1_next_1{j,a,b+1,c} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
+                De1_s2_next_1{j,a,b+1,c} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
+                De1_s3_next_1{j,a,b+1,c} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
+
+                De1_s1_next_1{j,a,b,c+1} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
+                De1_s3_next_1{j,a,b,c+1} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
+                De1_s3_next_1{j,a,b,c+1} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
+
+            end
+        end
+    end
 
 end
 
+%---E4の偏微分後関数の生成----------------
+
+E4 = 0;
+
+for a = 1 : 2
+    for b = 1 : m_max - 2
+        for c = 1 : 2
+
+            E4 = E4 + (( (s(a,b+2,c,1) - s(a,b+1,c,1)) ^ 2 + (s(a,b+2,c,2) - s(a,b+1,c,2)) ^ 2 + (s(a,b+2,c,3) - s(a,b+1,c,3)) ^ 2 )... 
+                    - ( (s(a,b+1,c,1) - s(a,b,c,1)) ^ 2 + (s(a,b+1,c,2) - s(a,b,c,2)) ^ 2 + (s(a,b+1,c,3) - s(a,b,c,3)) ^ 2 )) ^ 2;
+                
+        end
+    end
+end
 
 
 
 %---格子点選択および更新-----------------------------------------------------------------
 
-imax = 18;
+imax = 10;
 
 l_max_now = 2;
 m_max_now = 4;
 n_max_now = 2;
-
-m_start_change = 1;
-m_save = 1;
 
 max_switch = 0;
 
@@ -154,204 +180,82 @@ for i = 1 : imax
 
         param_s(:,:,:,:,1) = param_s(:,:,:,:,iteration);
 
-        % if rem(i,2) == 1 && m_max_now < m_max
-
-        %     s_m = param_s(1,m_max_now,1,:,1) - param_s(1,m_max_now - 1,1,:,1);
-
-        %     for b = m_max_now : m_max
-
-        %         if b <= m_max
-        %             m_coef = b - m_max_now;
-        %         end
-    
-        %         param_s(1,b,1,:,1) = param_s(1,m_max_now,1,:,1) + m_coef * s_m;
-                              
-        %     end
-
-        % end
-
         param_s(2,:,1,3,1) = param_s(1,:,1,3,1);
         param_s(1,:,2,3,1) = param_s(1,:,1,3,1);
         param_s(2,:,2,3,1) = param_s(1,:,1,3,1);
 
     end
 
-    break_switch = 0;
-
-
-    for a = 1 : l_max
-
-        if break_switch == 1 
-            break;
-        end
-
-        for b = 1 : m_max
-
-            if break_switch == 1 
-                break;
-            end
-
-            for c = 1 : n_max
-
-                if break_switch == 1 
-                    break;
-                end
-
-                if (a == l_max) || (b == m_max) || (c == n_max)
-                    continue;
-                end
-
-                if a < l_max
-                    a2 = a + 1;
-                    l_real(1) = a - 1;
-                elseif a == l_max + 1
-                    a2 = 1;
-                    l_real(1) = -1;
-                else
-                    a2 = a - 1;
-                    l_real(1) = - a + l_max;
-                end
-
-                if b < m_max
-                    b2 = b + 1;
-                    m_real(1) = b - 1;
-                elseif b == m_max + 1
-                    b2 = 1;
-                    m_real(1) = -1;
-                else
-                    b2 = b - 1;
-                    m_real(1) = - b + m_max;
-                end
-
-                if c < n_max
-                    c2 = c + 1;
-                    n_real(1) = c - 1;
-                elseif c == n_max + 1
-                    c2 = 1;
-                    n_real(1) = -1;
-                else
-                    c2 = c - 1;
-                    n_real(1) = - c + n_max;
-                end
-            
-
-                A = [param_s(a2,b,c,:,1) - param_s(a,b,c,:,1); param_s(a,b2,c,:,1) - param_s(a,b,c,:,1); param_s(a,b,c2,:,1) - param_s(a,b,c,:,1)];
-
-                B = transpose(reshape(A,[3,3]));
-
-                x = [si_b1(1,1) - param_s(a,b,c,1,1); si_b1(1,2) - param_s(a,b,c,2,1); si_b1(1,3) - param_s(a,b,c,3,1)];
-
-                rho_tmp(1,a,b,c,:) = B \ x;
-
-                if (0 <= rho_tmp(1,a,b,c,1)) && (rho_tmp(1,a,b,c,1) <= 1)
-                    if (0 <= rho_tmp(1,a,b,c,2)) && (rho_tmp(1,a,b,c,2) <= 1)
-                        if (0 <= rho_tmp(1,a,b,c,3)) && (rho_tmp(1,a,b,c,3) <= 1)
-
-                            rho(1,:) = rho_tmp(1,a,b,c,:);
-
-                            l_now(1) = a;
-                            m_now(1) = b;
-                            n_now(1) = c;
-
-                            l_next(1) = a2;
-                            m_next(1) = b2;
-                            n_next(1) = c2;
-
-                            break_switch = 1;
-
-                        end
-                    end
-                end
-                
-            end
-
-        end
-
-    end
+    %---格子点の選択---------------------
 
     break_switch = 0;
 
-    E1 = 0;
+    for j = 1 : length(k1)
 
+        for a = 1 : l_max - 1
 
-    for j = 1 : length(k1) - 1
+            for b = 1 : m_max - 1
 
-        for a = 1 : l_max
-
-            if break_switch == 1 
-                break;
-            end
-
-            for b = 1 : m_max
-
-                if break_switch == 1 
-                    break;
-                end
-
-                for c = 1 : n_max
+                for c = 1 : n_max - 1
 
                     if break_switch == 1 
                         break;
                     end
-
-                    if (a == l_max) || (b == m_max) || (c == n_max)
-                        continue;
-                    end
         
                     if a < l_max
                         a2 = a + 1;
-                        l_real(j+1) = a - 1;
+                        l_real(j) = a - 1;
                     elseif a == l_max + 1
                         a2 = 1;
-                        l_real(j+1) = -1;
+                        l_real(j) = -1;
                     else
                         a2 = a - 1;
-                        l_real(j+1) = - a + l_max; 
+                        l_real(j) = - a + l_max; 
                     end
         
                     if b < m_max
                         b2 = b + 1;
-                        m_real(j+1) = b - 1;
+                        m_real(j) = b - 1;
                     elseif b == m_max + 1
                         b2 = 1;
-                        m_real(j+1) = -1;
+                        m_real(j) = -1;
                     else
                         b2 = b - 1;
-                        m_real(j+1) = - b + m_max;
+                        m_real(j) = - b + m_max;
                     end
         
                     if c < n_max
                         c2 = c + 1;
-                        n_real(j+1) = c - 1;
+                        n_real(j) = c - 1;
                     elseif c == n_max + 1
                         c2 = 1;
-                        n_real(j+1) = -1;
+                        n_real(j) = -1;
                     else
                         c2 = c - 1;
-                        n_real(j+1) = - c + n_max;
+                        n_real(j) = - c + n_max;
                     end
         
                     A = [param_s(a2,b,c,:,1) - param_s(a,b,c,:,1); param_s(a,b2,c,:,1) - param_s(a,b,c,:,1); param_s(a,b,c2,:,1) - param_s(a,b,c,:,1)];
 
                     B = transpose(reshape(A,[3,3]));
 
-                    x = [si_b1(j+1,1) - param_s(a,b,c,1,1); si_b1(j+1,2) - param_s(a,b,c,2,1); si_b1(j+1,3) - param_s(a,b,c,3,1)];
+                    x = [si_b1(j,1) - param_s(a,b,c,1,1); si_b1(j,2) - param_s(a,b,c,2,1); si_b1(j,3) - param_s(a,b,c,3,1)];
 
-                    rho_tmp(j+1,a,b,c,:) = B \ x;
+                    rho_tmp(j,a,b,c,:) = B \ x;
 
-                    if (0 <= rho_tmp(j+1,a,b,c,1)) && (rho_tmp(j+1,a,b,c,1) <= 1)
-                        if (0 <= rho_tmp(j+1,a,b,c,2)) && (rho_tmp(j+1,a,b,c,2) <= 1)
-                            if (0 <= rho_tmp(j+1,a,b,c,3)) && (rho_tmp(j+1,a,b,c,3) <= 1)
+                    if (0 <= rho_tmp(j,a,b,c,1)) && (rho_tmp(j,a,b,c,1) <= 1)
+                        if (0 <= rho_tmp(j,a,b,c,2)) && (rho_tmp(j,a,b,c,2) <= 1)
+                            if (0 <= rho_tmp(j,a,b,c,3)) && (rho_tmp(j,a,b,c,3) <= 1)
 
-                                rho(j+1,:) = rho_tmp(j+1,a,b,c,:);
+                                rho(j,:) = rho_tmp(j,a,b,c,:);
         
-                                l_now(j+1) = a;
-                                m_now(j+1) = b;
-                                n_now(j+1) = c;
+                                l_now(j) = a;
+                                m_now(j) = b;
+                                n_now(j) = c;
 
-                                l_next(j+1) = a2;
-                                m_next(j+1) = b2;
-                                n_next(j+1) = c2;
+                                l_next(j) = a2;
+                                m_next(j) = b2;
+                                n_next(j) = c2;
 
                                 break_switch = 1;
         
@@ -363,63 +267,59 @@ for i = 1 : imax
             end
         end
 
-        %欠損時の補間
-        if (break_switch == 0)
+        % 欠損時の補間
+        if (break_switch == 0 && j > 1)
 
-            l_now(j+1) = l_now(j);
-            m_now(j+1) = m_now(j);
-            n_now(j+1) = n_now(j);
+            l_now(j) = l_now(j-1);
+            m_now(j) = m_now(j-1);
+            n_now(j) = n_now(j-1);
 
-            l_next(j+1) = l_next(j);
-            m_next(j+1) = m_next(j);
-            n_next(j+1) = n_next(j);
+            l_next(j) = l_next(j-1);
+            m_next(j) = m_next(j-1);
+            n_next(j) = n_next(j-1);
 
-            l_real(j+1) = l_real(j);
-            m_real(j+1) = m_real(j);
-            n_real(j+1) = n_real(j);
+            l_real(j) = l_real(j-1);
+            m_real(j) = m_real(j-1);
+            n_real(j) = n_real(j-1);
 
-            a = l_now(j+1);
-            b = m_now(j+1);
-            c = n_now(j+1);
+            a = l_now(j);
+            b = m_now(j);
+            c = n_now(j);
 
-            rho(j+1,:) = rho_tmp(j+1,a,b,c,:);
+            rho(j,:) = rho_tmp(j,a,b,c,:);
             
             disp(j)
             disp("補間しました")
 
         end
 
+        % 誤差関数の偏微分後関数選択のための記憶
+        if l_now(j+1) == l_now(j)
+            a_mem(j) = 1;
+        elseif l_now(j+1) == l_now(j) + 1
+            a_mem(j) = 2;
+        else
+            a_mem(j) = 3;
+        end
+
+        if m_now(j+1) == m_now(j)
+            b_mem(j) = 1;
+        elseif m_now(j+1) == m_now(j) + 1
+            b_mem(j) = 2;
+        else
+            b_mem(j) = 3;
+        end
+
+        if n_now(j+1) == n_now(j)
+            c_mem(j) = 1;
+        elseif n_now(j+1) == n_now(j) + 1
+            c_mem(j) = 2;
+        else
+            c_mem(j) = 3;
+        end
+
+
         break_switch = 0;
-
-        l = l_now(j);
-        m = m_now(j);
-        n = n_now(j);
-
-        l_p = l_next(j);
-        m_p = m_next(j);
-        n_p = n_next(j);
-
-        l2 = l_now(j+1);
-        m2 = m_now(j+1);
-        n2 = n_now(j+1);
-
-        l2_p = l_next(j+1);
-        m2_p = m_next(j+1);
-        n2_p = n_next(j+1);
-
-
-        G = [s(l_p,m,n,:) - s(l,m,n,:); s(l,m_p,n,:) - s(l,m,n,:); s(l,m,n_p,:) - s(l,m,n,:)];
-        H =  transpose(reshape(G,[3,3]));
-        y = [si_b1(j,1) - s(l,m,n,1); si_b1(j,2) - s(l,m,n,2); si_b1(j,3) - s(l,m,n,3)];
-        P = H \ y;
-
-        G2 = [s(l2_p,m2,n2,:) - s(l2,m2,n2,:); s(l2,m2_p,n2,:) - s(l2,m2,n2,:); s(l2,m2,n2_p,:) - s(l2,m2,n2,:)];
-        H2 =  transpose(reshape(G2,[3,3]));
-        y2 = [si_b1(j+1,1) - s(l2,m2,n2,1); si_b1(j+1,2) - s(l2,m2,n2,2); si_b1(j+1,3) - s(l2,m2,n2,3)];
-        P2 = H2 \ y2;
-
-        E1 = E1 + ( tan(pi/12) * (m_real(j) + P(2)) - ((n_real(j+1) + P2(3)) - (n_real(j) + P(3))) / ((l_real(j+1) + P2(1)) - (l_real(j) + P(1))) ) ^ 2;
-
 
     end
 
@@ -427,8 +327,27 @@ for i = 1 : imax
 
 
 
-    %---正則化項の追加-----------------------------
+    %---最急降下法による格子点更新-----------------------------------
 
+    eta_s1 = 0.0 * 10 ^ (-6); % 学習率
+    eta_s2 = 0.0 * 10 ^ (-6);
+    eta_s3 = 1.0 * 10 ^ (-2);
+
+    if i < 11
+        iteration = 100;
+    else
+        iteration = 150;
+    end
+
+    if i < 4
+        E4_coef = 70;
+    else
+        E4_coef = 35;
+    end
+
+    stop_switch = 0;
+
+    % 格子点更新範囲の拡大
     if rem(i,1) == 0
         if l_max_now < l_max
             l_max_now = l_max_now + 1;
@@ -450,192 +369,66 @@ for i = 1 : imax
     end
 
 
-
-    E4 = 0;
-
-    for a = 1 : 2
-        for b = 1 : m_max - 2
-            for c = 1 : 2
-
-                E4 = E4 + (( (s(a,b+2,c,1) - s(a,b+1,c,1)) ^ 2 + (s(a,b+2,c,2) - s(a,b+1,c,2)) ^ 2 + (s(a,b+2,c,3) - s(a,b+1,c,3)) ^ 2 )... 
-                        - ( (s(a,b+1,c,1) - s(a,b,c,1)) ^ 2 + (s(a,b+1,c,2) - s(a,b,c,2)) ^ 2 + (s(a,b+1,c,3) - s(a,b,c,3)) ^ 2 )) ^ 2;
-                    
-            end
-        end
-    end
-
-
-    E1_initial = double(subs(E1, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));    
-    E4_initial = double(subs(E4, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));
-
-    if i < 4
-        E4_coef = 70;
-    else
-        E4_coef = 35;
-    end
-
-
-    disp('E4_initial = ')
-    disp(E4_initial)
-    disp('E4_coef = ')
-    disp(E4_coef)
-
-    E1 = E1 + E4_coef * E4;
-
-    %---最急降下法のパラメータ決定----------------------------
-
-    eta_s1 = 0.0 * 10 ^ (-6); % 学習率
-    eta_s2 = 0.0 * 10 ^ (-6);
-    eta_s3 = 1.0 * 10 ^ (-2);
-
-    if i < 11
-        iteration = 100;
-    else
-        iteration = 200;
-    end
-
-    stop_switch = 0;
-
-    %---Eの設定---------------------------
-
-    E1_initial = double(subs(E1, [s(:,:,:,:)],[param_s(:,:,:,:,1)]));                 
-
-    disp('E1_initial = ')
-    disp(E1_initial)
-    disp('--------------------')
-
-
-    E1_value = zeros(1,iteration);
-
-    m_start_change = m_save;
-
-    if m_max_now <= m_max && max_switch < 30
-        m_start_change = 1;
-        m_save = m_start_change;
-        m_max_change = m_max_now;
-        if m_max_now == m_max
-            max_switch = max_switch + 1;
-        end
-    else
-        if rem(i,2) == 1
-            m_start_change = m_start_change + 1;
-            m_save = m_start_change;
-            m_max_change = m_max;
-        end
-    end
-
-
-    DE1_s1_1 = cell(l_max, m_max, n_max);
-    DE1_s2_1 = cell(l_max, m_max, n_max);
-    DE1_s3_1 = cell(l_max, m_max, n_max);
-
-
-    for a = l_max_now - 1 : l_max_now
-        for b = m_start_change : m_max_change
-            for c = n_max_now - 1 : n_max_now
-
-                % DE1_s1(a,b,c) = diff(E1,s(a,b,c,1));
-                % DE1_s2(a,b,c) = diff(E1,s(a,b,c,2));
-                % DE1_s3(a,b,c) = diff(E1,s(a,b,c,3));
-
-                % DE1_s1_1{a,b,c} = matlabFunction(DE1_s1(a,b,c), 'vars', {s(:,:,:,:)});
-                % DE1_s2_1{a,b,c} = matlabFunction(DE1_s2(a,b,c), 'vars', {s(:,:,:,:)});
-                % DE1_s3_1{a,b,c} = matlabFunction(DE1_s3(a,b,c), 'vars', {s(:,:,:,:)});
-
-                DE1_s1_1{a,b,c} = matlabFunction(diff(E1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
-                DE1_s2_1{a,b,c} = matlabFunction(diff(E1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
-                DE1_s3_1{a,b,c} = matlabFunction(diff(E1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
-
-                if a == 1 && b == m_start_change && c == 1
-                    disp('i = ')
-                    disp(i)
-                    disp('m_start_change = ')
-                    disp(m_start_change)
-                    disp('m_max_change = ')
-                    disp(m_max_change)
-                    disp([a b c])
-                    disp('-----')
-                end
-
-            end
-        end
-    end
-
-
     %---勾配法によるパラメータ更新---------------------------
 
-    for t = 1:iteration - 1
+    for t = 1 : iteration - 1
 
         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
 
-        for a = l_max_now - 1 : l_max_now
-            for b = m_start_change : m_max_change
-                for c = n_max_now - 1 : n_max_now
+        for j = 1 : length(k1)
+            for a = 1 : l_max_now
+                for b = 1 : m_max_now
+                    for c = 1 : n_max_now
 
-                DE1_s1_2 = DE1_s1_1{a,b,c}(param_s(:,:,:,:,t));
-                DE1_s2_2 = DE1_s2_1{a,b,c}(param_s(:,:,:,:,t));
-                DE1_s3_2 = DE1_s3_1{a,b,c}(param_s(:,:,:,:,t));
+                        DE1_s1_2 = DE1_s1_1{a,b,c}(param_s(:,:,:,:,t));
+                        DE1_s2_2 = DE1_s2_1{a,b,c}(param_s(:,:,:,:,t));
+                        DE1_s3_2 = DE1_s3_1{a,b,c}(param_s(:,:,:,:,t));
 
-                param_s(a,b,c,1,t+1) = param_s(a,b,c,1,t) - eta_s1 * DE1_s1_2;
-                param_s(a,b,c,2,t+1) = param_s(a,b,c,2,t) - eta_s2 * DE1_s2_2;
-                param_s(a,b,c,3,t+1) = param_s(a,b,c,3,t) - eta_s3 * DE1_s3_2;
+                        param_s(a,b,c,1,t+1) = param_s(a,b,c,1,t) - eta_s1 * DE1_s1_2;
+                        param_s(a,b,c,2,t+1) = param_s(a,b,c,2,t) - eta_s2 * DE1_s2_2;
+                        param_s(a,b,c,3,t+1) = param_s(a,b,c,3,t) - eta_s3 * DE1_s3_2;
 
-                param_s(1,1,1,:,t+1) = [1 1 pi/4];
-                param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
-                param_s(1,2,1,:,t+1) = [1 1 pi/3];
-                param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+                        param_s(1,1,1,:,t+1) = [1 1 pi/4];
+                        param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
+                        param_s(1,2,1,:,t+1) = [1 1 pi/3];
+                        param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
+                    end
                 end
             end
         end
 
+        % if t > 1
 
-        E1_value(t) = double(subs(E1, (s(:,:,:,:)),(param_s(:,:,:,:,t+1))));
+        %     if (E1_value(t) > E1_value(t-1))
+        %         disp('t = ')
+        %         disp(t)
+        %         disp('Ef1が増加しました')
+        %         disp('学習率を下げて再開します')
+        %         disp('--------------------')
+        %         eta_s1 = eta_s1 * 0.5; 
+        %         eta_s2 = eta_s2 * 0.5;
+        %         eta_s3 = eta_s3 * 0.5;
+        %         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
+        %         stop_switch = stop_switch + 1;
+        %     end
+        %     if stop_switch == 14
+        %         disp('t = ')
+        %         disp(t)
+        %         disp('Ef1が増加しました')
+        %         disp('iterationを強制終了します')
+        %         disp("####################")
+        %         iteration = t-1;
+        %         break;
+        %     end
+        %     if t == iteration - 1
+        %         iteration = t+1;
+        %         disp('iterationを正常に終了することができました！')
+        %         disp("####################")
+        %         break
+        %     end
 
-        if (t == 1 || t == 50 || t == 99 || t == 149)
-
-            disp('i = ')
-            disp(i)
-            disp('t = ')
-            disp(t)
-            disp('E1(t) = ')
-            disp(E1_value(t))
-
-            disp('--------------------')
-
-        end
-
-        if t > 1
-
-            if (E1_value(t) > E1_value(t-1))
-                disp('t = ')
-                disp(t)
-                disp('Ef1が増加しました')
-                disp('学習率を下げて再開します')
-                disp('--------------------')
-                eta_s1 = eta_s1 * 0.5; 
-                eta_s2 = eta_s2 * 0.5;
-                eta_s3 = eta_s3 * 0.5;
-                param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
-                stop_switch = stop_switch + 1;
-            end
-            if stop_switch == 14
-                disp('t = ')
-                disp(t)
-                disp('Ef1が増加しました')
-                disp('iterationを強制終了します')
-                disp("####################")
-                iteration = t-1;
-                break;
-            end
-            if t == iteration - 1
-                iteration = t+1;
-                disp('iterationを正常に終了することができました！')
-                disp("####################")
-                break
-            end
-
-        end
+        % end
     
     end
 
@@ -664,33 +457,20 @@ for i = 1 : imax
         m_real_2 = zeros(length(k1),1);
         n_real_2 = zeros(length(k1),1);
 
-
         rho_2_tmp = zeros(length(k1), l_max, m_max, n_max, 3);
         rho_2 = zeros(length(k1),3);
 
 
         for j = 1:length(k1)
 
-            for a = 1 : l_max
+            for a = 1 : l_max - 1
 
-                if break_switch == 1 
-                    break;
-                end
+                for b = 1 : m_max - 1
 
-                for b = 1 : m_max
-
-                    if break_switch == 1 
-                        break;
-                    end
-
-                    for c = 1 : n_max
+                    for c = 1 : n_max - 1
 
                         if break_switch == 1 
                             break;
-                        end
-
-                        if (a == l_max) || (b == m_max) || (c == n_max)
-                            continue;
                         end
             
                         if a < l_max
@@ -846,15 +626,12 @@ for i = 1 : imax
 
         for j = 1 : length(k1) - 1
         
-
             g_b1(j) = ((z2_b1(j+1) - z2_b1(j)) * u1_b1(j)) / ((z1_b1(j+1) - z1_b1(j)) * u2_b1(j));
-
             h_b1(j) = (z1_b1(j+1) - z1_b1(j)) / (u1_b1(j) * dk1);
 
         end
 
         g_b1(length(k1)) = 2 * g_b1(length(k1)-1) - g_b1(length(k1)-2);
-
         h_b1(length(k1)) = 2 * h_b1(length(k1)-1) - h_b1(length(k1)-2);
 
 
