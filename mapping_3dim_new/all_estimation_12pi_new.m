@@ -10,12 +10,7 @@ K1fin = 1.9;  %シミュレーション終了時間, length(k) = Kfin + 1
 k1 = [0:dk1:K1fin];
 
 u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
-
-if rem(i,1) == 1
-    u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
-else
-    u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
-end
+u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
 
 si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
 si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
@@ -89,7 +84,7 @@ end
 
 %---E1の偏微分後関数の生成----------------
 
-s = sym('s1',[4 4 4 3]); % l,m,n,iの順
+s = sym('s',[4 4 4 3]); % l,m,n,iの順
 
 for j = 1 : length(k1) - 1
 
@@ -98,53 +93,65 @@ for j = 1 : length(k1) - 1
     y = [si_b1(j,1) - s(1,1,1,1); si_b1(j,2) - s(1,1,1,2); si_b1(j,3) - s(1,1,1,3)];
     P = H \ y;
 
-    for a = 1 : 3
-        for b = 1 : 3
-            for c = 1 : 3
+    for b = 1 : 3
 
-                G2 = [s(a+1,b,c,:) - s(a,b,c,:); s(a,b+1,c,:) - s(a,b,c,:); s(a,b,c+1,:) - s(a,b,c,:)];
-                H2 =  transpose(reshape(G2,[3,3]));
-                y2 = [si_b1(j+1,1) - s(a,b,c,1); si_b1(j+1,2) - s(a,b,c,2); si_b1(j+1,3) - s(a,b,c,3)];
-                P2 = H2 \ y2;
+        G2 = [s(2,b,1,:) - s(1,b,1,:); s(1,b+1,1,:) - s(1,b,1,:); s(1,b,2,:) - s(1,b,1,:)];
+        H2 =  transpose(reshape(G2,[3,3]));
+        y2 = [si_b1(j+1,1) - s(1,b,1,1); si_b1(j+1,2) - s(1,b,1,2); si_b1(j+1,3) - s(1,b,1,3)];
+        P2 = H2 \ y2;
 
-                e1 = P(2) - (P2(3) - P(3)) / (P2(1) - P(1));
+        e1 = P(2) - (P2(3) - P(3)) / (P2(1) - P(1));
 
-                De1_s1_1{j,a,b,c} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
-                De1_s2_1{j,a,b,c} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
-                De1_s3_1{j,a,b,c} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
-
-                De1_s1_next_1{j,a+1,b,c} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
-                De1_s2_next_1{j,a+1,b,c} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
-                De1_s3_next_1{j,a+1,b,c} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
-
-                De1_s1_next_1{j,a,b+1,c} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
-                De1_s2_next_1{j,a,b+1,c} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
-                De1_s3_next_1{j,a,b+1,c} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
-
-                De1_s1_next_1{j,a,b,c+1} = matlabFunction(diff(e1,s(a,b,c,1)), 'vars', {s(:,:,:,:)});
-                De1_s3_next_1{j,a,b,c+1} = matlabFunction(diff(e1,s(a,b,c,2)), 'vars', {s(:,:,:,:)});
-                De1_s3_next_1{j,a,b,c+1} = matlabFunction(diff(e1,s(a,b,c,3)), 'vars', {s(:,:,:,:)});
-
+        if b == 1
+            for x = 1 : 3
+                De1_type1{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type1{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type1{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type1{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
             end
+        elseif b == 2
+            for x = 1 : 3
+                De1_type2{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,2,2,1,x} = matlabFunction(diff(e1,s(2,2,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,1,2,2,x} = matlabFunction(diff(e1,s(1,2,2,x)), 'vars', {s(:,:,:,:)});
+            end     
+        else
+            for x = 1 : 3
+                De1_type3{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,2,3,1,x} = matlabFunction(diff(e1,s(2,3,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,4,1,x} = matlabFunction(diff(e1,s(1,4,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,3,2,x} = matlabFunction(diff(e1,s(1,3,2,x)), 'vars', {s(:,:,:,:)});
+            end     
         end
+
     end
 
 end
+
+disp("end")
 
 %---E4の偏微分後関数の生成----------------
 
-E4 = 0;
+% E4 = 0;
 
-for a = 1 : 2
-    for b = 1 : m_max - 2
-        for c = 1 : 2
+% for a = 1 : 2
+%     for b = 1 : m_max - 2
+%         for c = 1 : 2
 
-            E4 = E4 + (( (s(a,b+2,c,1) - s(a,b+1,c,1)) ^ 2 + (s(a,b+2,c,2) - s(a,b+1,c,2)) ^ 2 + (s(a,b+2,c,3) - s(a,b+1,c,3)) ^ 2 )... 
-                    - ( (s(a,b+1,c,1) - s(a,b,c,1)) ^ 2 + (s(a,b+1,c,2) - s(a,b,c,2)) ^ 2 + (s(a,b+1,c,3) - s(a,b,c,3)) ^ 2 )) ^ 2;
+%             E4 = E4 + (( (s(a,b+2,c,1) - s(a,b+1,c,1)) ^ 2 + (s(a,b+2,c,2) - s(a,b+1,c,2)) ^ 2 + (s(a,b+2,c,3) - s(a,b+1,c,3)) ^ 2 )... 
+%                     - ( (s(a,b+1,c,1) - s(a,b,c,1)) ^ 2 + (s(a,b+1,c,2) - s(a,b,c,2)) ^ 2 + (s(a,b+1,c,3) - s(a,b,c,3)) ^ 2 )) ^ 2;
                 
-        end
-    end
-end
+%         end
+%     end
+% end
 
 
 
@@ -174,6 +181,8 @@ for i = 1 : imax
 
     rho_tmp = zeros(length(k1), l_max, m_max, n_max, 3);
     rho = zeros(length(k1),3);
+
+    b_mem = zeros(length(k1)-1, 1);
     
 
     if i > 1
@@ -293,31 +302,16 @@ for i = 1 : imax
 
         end
 
-        % 誤差関数の偏微分後関数選択のための記憶
-        if l_now(j+1) == l_now(j)
-            a_mem(j) = 1;
-        elseif l_now(j+1) == l_now(j) + 1
-            a_mem(j) = 2;
-        else
-            a_mem(j) = 3;
+        % 誤差関数の偏微分後関数選択のための分類
+        if j > 1
+            if m_now(j) == m_now(j-1)
+                b_mem(j-1) = 1;
+            elseif m_now(j) == m_next(j-1)
+                b_mem(j-1) = 2;
+            else
+                b_mem(j-1) = 3;
+            end
         end
-
-        if m_now(j+1) == m_now(j)
-            b_mem(j) = 1;
-        elseif m_now(j+1) == m_now(j) + 1
-            b_mem(j) = 2;
-        else
-            b_mem(j) = 3;
-        end
-
-        if n_now(j+1) == n_now(j)
-            c_mem(j) = 1;
-        elseif n_now(j+1) == n_now(j) + 1
-            c_mem(j) = 2;
-        else
-            c_mem(j) = 3;
-        end
-
 
         break_switch = 0;
 
@@ -369,36 +363,48 @@ for i = 1 : imax
     end
 
 
-    %---勾配法によるパラメータ更新---------------------------
-
     for t = 1 : iteration - 1
 
         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
 
-        for j = 1 : length(k1) - 1
-            for a = 1 : l_max_now
-                for b = 1 : m_max_now
-                    for c = 1 : n_max_now
+        for b = 3 : m_max_now % m = 1&2 はfix
 
-                        if a == l_now(j)
+            for j = 1 : length(k1) - 1 
 
-                        DE1_s1_2 = De1_s1_1{a,b,c}(param_s(:,:,:,:,t));
-                        DE1_s2_2 = De1_s2_1{a,b,c}(param_s(:,:,:,:,t));
-                        DE1_s3_2 = De1_s3_1{a,b,c}(param_s(:,:,:,:,t));
+                for p = 1 : 8
+                    % 時刻kの格子点とピッタリ一致した場合
+                    if b == m_now(j)
 
-                        param_s(a,b,c,1,t+1) = param_s(a,b,c,1,t) - eta_s1 * DE1_s1_2;
-                        param_s(a,b,c,2,t+1) = param_s(a,b,c,2,t) - eta_s2 * DE1_s2_2;
-                        param_s(a,b,c,3,t+1) = param_s(a,b,c,3,t) - eta_s3 * DE1_s3_2;
-
-                        param_s(1,1,1,:,t+1) = [1 1 pi/4];
-                        param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
-                        param_s(1,2,1,:,t+1) = [1 1 pi/3];
-                        param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+                        if b_mem(j) == 1
+                            for x = 1 : 3
+                                DE1(x) = DE1(x) + De1_type1{j,1,1,1,x}(param_s(:,:,:,:,t));
+                            end
+                        elseif b_mem(j) == 2
+                            for x = 1 : 3
+                                DE1(x) = DE1(x) + De1_type2{j,1,1,1,x}(param_s(:,:,:,:,t));
+                            end
+                        else
+                            for x = 1 : 3
+                                DE1(x) = DE1(x) + De1_type3{j,1,1,1,x}(param_s(:,:,:,:,t));
+                            end
+                        end
 
                     end
                 end
+
+                if j == length(k1) - 1
+                    param_s(a,b,c,1,t+1) = param_s(a,b,c,1,t) - eta_s1 * DE1(1);
+                    param_s(a,b,c,2,t+1) = param_s(a,b,c,2,t) - eta_s2 * DE1(2);
+                    param_s(a,b,c,3,t+1) = param_s(a,b,c,3,t) - eta_s3 * DE1(3);
+                end
+
             end
+                
         end
+
+        param_s(2,:,1,3,t+1) = param_s(1,:,1,3,t+1);
+        param_s(1,:,2,3,t+1) = param_s(1,:,1,3,t+1);
+        param_s(2,:,2,3,t+1) = param_s(1,:,1,3,t+1);
 
         % if t > 1
 
