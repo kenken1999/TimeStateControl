@@ -453,7 +453,7 @@ for i = 1 : imax
     if i < 11
         iteration = 100;
     elseif i > 18
-        iteration = 1300;
+        iteration = 1000;
     else
         iteration = 150;
     end

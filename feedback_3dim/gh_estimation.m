@@ -1,6 +1,6 @@
 clear;
 close all;
-load('all_estimation.mat')
+load('all_estimation_12pi.mat')
 
 tic
 
@@ -20,7 +20,7 @@ si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等し�
 si_c1(1,:) = [0 0 0];
 
 
-imax_g = 14;
+imax_g = 40;
 imax_h = 10;
 
 mean_g = zeros(imax_g,3);

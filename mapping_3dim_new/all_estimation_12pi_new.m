@@ -84,7 +84,7 @@ end
 
 %---E1の偏微分後関数の生成----------------
 
-s = sym('s',[4 4 4 3]); % l,m,n,iの順
+s = sym('s',[2 4 2 3]); % l,m,n,iの順
 
 for j = 1 : length(k1) - 1
 
@@ -104,31 +104,31 @@ for j = 1 : length(k1) - 1
 
         if b == 1
             for x = 1 : 3
-                De1_type1{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type1{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type1{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type1{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
+                De1_type1{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:)});
+                % De1_type1{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type1{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:)});
+                % De1_type1{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
             end
         elseif b == 2
             for x = 1 : 3
-                De1_type2{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type2{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type2{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type2{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
-                De1_type2{j,2,2,1,x} = matlabFunction(diff(e1,s(2,2,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type2{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type2{j,1,2,2,x} = matlabFunction(diff(e1,s(1,2,2,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:3,:,:)});
+                % De1_type2{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:3,:,:)});
+                % De1_type2{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
+                % De1_type2{j,2,2,1,x} = matlabFunction(diff(e1,s(2,2,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type2{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:3,:,:)});
+                % De1_type2{j,1,2,2,x} = matlabFunction(diff(e1,s(1,2,2,x)), 'vars', {s(:,:,:,:)});
             end     
         else
             for x = 1 : 3
-                De1_type3{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,2,3,1,x} = matlabFunction(diff(e1,s(2,3,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,1,4,1,x} = matlabFunction(diff(e1,s(1,4,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,1,3,2,x} = matlabFunction(diff(e1,s(1,3,2,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:)});
+                % De1_type3{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:)});
+                % De1_type3{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:)});
+                % De1_type3{j,2,3,1,x} = matlabFunction(diff(e1,s(2,3,1,x)), 'vars', {s(:,:,:,:)});
+                De1_type3{j,1,4,1,x} = matlabFunction(diff(e1,s(1,4,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:)});
+                % De1_type3{j,1,3,2,x} = matlabFunction(diff(e1,s(1,3,2,x)), 'vars', {s(:,:,:,:)});
             end     
         end
 
@@ -320,7 +320,6 @@ for i = 1 : imax
     disp('-----')
 
 
-
     %---最急降下法による格子点更新-----------------------------------
 
     eta_s1 = 0.0 * 10 ^ (-6); % 学習率
@@ -365,37 +364,76 @@ for i = 1 : imax
 
     for t = 1 : iteration - 1
 
+        if rem(t,10) == 0
+            disp(t)
+        end
+
         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
 
         for b = 3 : m_max_now % m = 1&2 はfix
 
+            DE1 = zeros(3,1);
+
             for j = 1 : length(k1) - 1 
-
-                for p = 1 : 8
-                    % 時刻kの格子点とピッタリ一致した場合
-                    if b == m_now(j)
-
-                        if b_mem(j) == 1
-                            for x = 1 : 3
-                                DE1(x) = DE1(x) + De1_type1{j,1,1,1,x}(param_s(:,:,:,:,t));
-                            end
-                        elseif b_mem(j) == 2
-                            for x = 1 : 3
-                                DE1(x) = DE1(x) + De1_type2{j,1,1,1,x}(param_s(:,:,:,:,t));
-                            end
-                        else
-                            for x = 1 : 3
-                                DE1(x) = DE1(x) + De1_type3{j,1,1,1,x}(param_s(:,:,:,:,t));
-                            end
+              
+                % 時刻kの格子点とピッタリ一致した場合
+                if b == m_now(j)
+                    if b_mem(j) == 1
+                        for x = 1 : 3
+                            DE1(x) = DE1(x) + De1_type1{j,1,1,1,x}(param_s(:,b:b+1,:,:,t));
                         end
-
+                    elseif b_mem(j) == 2
+                        for x = 1 : 3
+                            DE1(x) = DE1(x) + De1_type2{j,1,1,1,x}(param_s(:,b:b+2,:,:,t));
+                        end
+                    else
+                        for x = 1 : 3
+                            DE1(x) = DE1(x) + De1_type3{j,1,1,1,x}(param_s(:,b:b+1,:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
+                        end
                     end
-                end
+
+                elseif b == m_next(j) && b ~= m_now(j)
+                    
+                    if b_mem(j) == 1
+                        for x = 1 : 3
+                            DE1(x) = DE1(x) + De1_type1{j,1,2,1,x}(param_s(:,b:b+1,:,:,t));
+                        end
+                    elseif b_mem(j) == 2
+                        for x = 1 : 3
+                            DE1(x) = DE1(x) + De1_type2{j,1,2,1,x}(param_s(:,b:b+2,:,:,t));
+                        end
+                    else
+                        for x = 1 : 3
+                            DE1(x) = DE1(x) + De1_type3{j,1,2,1,x}(param_s(:,b:b+1,:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
+                        end
+                    end               
+                
+                elseif b == m_now(j+1) && b ~= m_now(j) && b ~= m_next(j)
+                    
+                    for x = 1 : 3
+                        DE1(x) = DE1(x) + De1_type3{j,1,3,1,x}(param_s(:,b:b+1,:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
+                    end
+                    
+                elseif b == m_next(j+1) && b ~= m_now(j) && b ~= m_next(j) && b == m_now(j+1)
+                    
+                    if b_mem(j) == 2
+                        for x = 1 : 3
+                            DE1(x) = DE1(x) + De1_type2{j,1,3,1,x}(param_s(:,b:b+2,:,:,t));
+                        end
+                    else
+                        for x = 1 : 3
+                            DE1(x) = DE1(x) + De1_type3{j,1,4,1,x}(param_s(:,b:b+1,:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
+                        end
+                    end
+                    
+                else
+                    
+                end       
 
                 if j == length(k1) - 1
-                    param_s(a,b,c,1,t+1) = param_s(a,b,c,1,t) - eta_s1 * DE1(1);
-                    param_s(a,b,c,2,t+1) = param_s(a,b,c,2,t) - eta_s2 * DE1(2);
-                    param_s(a,b,c,3,t+1) = param_s(a,b,c,3,t) - eta_s3 * DE1(3);
+                    param_s(1,b,1,1,t+1) = param_s(1,b,1,1,t) - eta_s1 * DE1(1);
+                    param_s(1,b,1,2,t+1) = param_s(1,b,1,2,t) - eta_s2 * DE1(2);
+                    param_s(1,b,1,3,t+1) = param_s(1,b,1,3,t) - eta_s3 * DE1(3);
                 end
 
             end
