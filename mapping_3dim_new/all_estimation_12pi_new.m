@@ -8,10 +8,10 @@ tic
 
 %---格子点選択および更新-----------------------------------------------------------------
 
-imax = 1;
+imax = 20;
 
 l_max_now = 2;
-m_max_now = 9;
+m_max_now = 4;
 n_max_now = 2;
 
 for i = 1 : imax
@@ -173,7 +173,7 @@ for i = 1 : imax
 
     eta_s1 = 0.0 * 10 ^ (-6); % 学習率
     eta_s2 = 0.0 * 10 ^ (-6);
-    eta_s3 = 1.0 * 10 ^ (-3);
+    eta_s3 = 1.0 * 10 ^ (-4);
 
     if i < 11
         iteration = 100;
@@ -184,9 +184,9 @@ for i = 1 : imax
     end
 
     if i < 4
-        Ereg_coef = 0;
+        Ereg_coef = 50;
     else
-        Ereg_coef = 0;
+        Ereg_coef = 50;
     end
 
     stop_switch = 0;
@@ -217,27 +217,27 @@ for i = 1 : imax
 
         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
 
-        for j = 1 : length(k1) - 1 
-       
-            DE1 = zeros(3,1);
-            DEreg = zeros(3,1);
+        DE1 = zeros(m_max,3);
+        DEreg = zeros(m_max,3);
 
-            for b = 3 : m_max_now % m = 1&2 はfix
+        for b = 3 : m_max_now % m = 1&2 はfix
+
+            for j = 1 : length(k1) - 1 
               
                 % 時刻kの格子点とピッタリ一致した場合
                 if b == m_now(j)
 
                     if b_mem(j) == 1
                         for x = 1 : 3
-                            DE1(x) = DE1(x) + De1_type1{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t));
+                            DE1(b,x) = DE1(b,x) + De1_type1{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t));
                         end
                     elseif b_mem(j) == 2
                         for x = 1 : 3
-                            DE1(x) = DE1(x) + De1_type2{j,1,1,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t));
+                            DE1(b,x) = DE1(b,x) + De1_type2{j,1,1,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t));
                         end
                     else
                         for x = 1 : 3
-                            DE1(x) = DE1(x) + De1_type3{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
+                            DE1(b,x) = DE1(b,x) + De1_type3{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
                         end
                     end
 
@@ -245,33 +245,33 @@ for i = 1 : imax
                     
                     if b_mem(j) == 1
                         for x = 1 : 3
-                            DE1(x) = DE1(x) + De1_type1{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t));
+                            DE1(b,x) = DE1(b,x) + De1_type1{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t));
                         end
                     elseif b_mem(j) == 2
                         for x = 1 : 3
-                            DE1(x) = DE1(x) + De1_type2{j,1,2,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t));
+                            DE1(b,x) = DE1(b,x) + De1_type2{j,1,2,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t));
                         end
                     else
                         for x = 1 : 3
-                            DE1(x) = DE1(x) + De1_type3{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
+                            DE1(b,x) = DE1(b,x) + De1_type3{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
                         end
                     end               
                 
                 elseif b == m_now(j+1) && b ~= m_now(j) && b ~= m_next(j)
                     
                     for x = 1 : 3
-                        DE1(x) = DE1(x) + De1_type3{j,1,3,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
+                        DE1(b,x) = DE1(b,x) + De1_type3{j,1,3,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
                     end
                     
                 elseif b == m_next(j+1) && b ~= m_now(j) && b ~= m_next(j) && b == m_now(j+1)
                     
                     if b_mem(j) == 2
                         for x = 1 : 3
-                            DE1(x) = DE1(x) + De1_type2{j,1,3,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t));
+                            DE1(b,x) = DE1(b,x) + De1_type2{j,1,3,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t));
                         end
                     else
                         for x = 1 : 3
-                            DE1(x) = DE1(x) + De1_type3{j,1,4,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
+                            DE1(b,x) = DE1(b,x) + De1_type3{j,1,4,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t));
                         end
                     end
                     
@@ -282,23 +282,23 @@ for i = 1 : imax
                     % Eregの追加
                     if b == 1                    
                         for x = 1 : 3
-                            DEreg(x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t));
+                            DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t));
                         end
                     elseif b == m_max
                         for x = 1 : 3
-                            DEreg(x) = De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t));
+                            DEreg(b,x) = De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t));
                         end
                     elseif b == 2
                         for x = 1 : 3
-                            DEreg(x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t));
+                            DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t));
                         end
                     elseif b == m_max - 1
                         for x = 1 : 3
-                            DEreg(x) = De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t));
+                            DEreg(b,x) = De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t));
                         end
                     else
                         for x = 1 : 3
-                            DEreg(x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t)) + De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t));
+                            DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t)) + De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t));
                         end
                     end
 
