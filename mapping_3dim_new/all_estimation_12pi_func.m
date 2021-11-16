@@ -37,7 +37,7 @@ l_max = 2;
 m_max = 10;
 n_max = 2;
 
-iteration = 150;
+iteration = 1000;
 
 param_s = zeros(l_max, m_max, n_max, 3, iteration);
 
@@ -86,6 +86,10 @@ end
 
 s = sym('s',[2 4 2 3]); % l,m,n,iの順
 
+l_int = sym('l_int',2); % l (k, k+1)
+m_int = sym('m_int',2); % m
+n_int = sym('n_int',2); % n
+
 for j = 1 : length(k1) - 1
 
     G = [s(2,1,1,:) - s(1,1,1,:); s(1,2,1,:) - s(1,1,1,:); s(1,1,2,:) - s(1,1,1,:)];
@@ -100,34 +104,34 @@ for j = 1 : length(k1) - 1
         y2 = [si_b1(j+1,1) - s(1,b,1,1); si_b1(j+1,2) - s(1,b,1,2); si_b1(j+1,3) - s(1,b,1,3)];
         P2 = H2 \ y2;
 
-        e1 = P(2) - (P2(3) - P(3)) / (P2(1) - P(1));
+        e1 = ( tan(pi/12) * (m_int(1) + P(2)) - (n_int(2) + P2(3) - n_int(1) - P(3)) / (l_int(2) + P2(1) - l_int(1) - P(1)) ) ^ 2;
 
         if b == 1
             for x = 1 : 3
-                De1_type1{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:)});
+                De1_type1{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:), l_int, m_int, n_int});
                 % De1_type1{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type1{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:)});
+                De1_type1{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:), l_int, m_int, n_int});
                 % De1_type1{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
             end
         elseif b == 2
             for x = 1 : 3
-                De1_type2{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:3,:,:)});
+                De1_type2{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:3,:,:), l_int, m_int, n_int});
                 % De1_type2{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type2{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:3,:,:)});
+                De1_type2{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:3,:,:), l_int, m_int, n_int});
                 % De1_type2{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
                 % De1_type2{j,2,2,1,x} = matlabFunction(diff(e1,s(2,2,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type2{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:3,:,:)});
+                De1_type2{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:3,:,:), l_int, m_int, n_int});
                 % De1_type2{j,1,2,2,x} = matlabFunction(diff(e1,s(1,2,2,x)), 'vars', {s(:,:,:,:)});
             end     
         else
             for x = 1 : 3
-                De1_type3{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:)});
+                De1_type3{j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:), l_int, m_int, n_int});
                 % De1_type3{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:)});
+                De1_type3{j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:), l_int, m_int, n_int});
                 % De1_type3{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:)});
+                De1_type3{j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:), l_int, m_int, n_int});
                 % De1_type3{j,2,3,1,x} = matlabFunction(diff(e1,s(2,3,1,x)), 'vars', {s(:,:,:,:)});
-                De1_type3{j,1,4,1,x} = matlabFunction(diff(e1,s(1,4,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:)});
+                De1_type3{j,1,4,1,x} = matlabFunction(diff(e1,s(1,4,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:), l_int, m_int, n_int});
                 % De1_type3{j,1,3,2,x} = matlabFunction(diff(e1,s(1,3,2,x)), 'vars', {s(:,:,:,:)});
             end     
         end
