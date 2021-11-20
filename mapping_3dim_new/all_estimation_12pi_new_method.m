@@ -7,7 +7,7 @@ tic
 
 %---格子点選択および更新-----------------------------------------------------------------
 
-imax = 4;
+imax = 1;
 
 sa = sym('sa',[l_max m_max n_max 3]); % l,m,nの順
 
@@ -60,195 +60,6 @@ for i = 1 : imax
 
     end
 
-    %---格子点の選択---------------------
-
-    break_switch = 0;
-
-    E1 = 0;
-
-    for j = 1 : length(k1)
-
-        for a = 1 : l_max - 1
-
-            for b = 1 : m_max - 1
-
-                for c = 1 : n_max - 1
-
-                    if break_switch == 1 
-                        break;
-                    end
-        
-                    if a < l_max
-                        a2 = a + 1;
-                        l_real(j) = a - 1;
-                    elseif a == l_max + 1
-                        a2 = 1;
-                        l_real(j) = -1;
-                    else
-                        a2 = a - 1;
-                        l_real(j) = - a + l_max; 
-                    end
-        
-                    if b < m_max
-                        b2 = b + 1;
-                        m_real(j) = b - 1;
-                    elseif b == m_max + 1
-                        b2 = 1;
-                        m_real(j) = -1;
-                    else
-                        b2 = b - 1;
-                        m_real(j) = - b + m_max;
-                    end
-        
-                    if c < n_max
-                        c2 = c + 1;
-                        n_real(j) = c - 1;
-                    elseif c == n_max + 1
-                        c2 = 1;
-                        n_real(j) = -1;
-                    else
-                        c2 = c - 1;
-                        n_real(j) = - c + n_max;
-                    end
-        
-                    A = [param_s(a2,b,c,:,1) - param_s(a,b,c,:,1); param_s(a,b2,c,:,1) - param_s(a,b,c,:,1); param_s(a,b,c2,:,1) - param_s(a,b,c,:,1)];
-
-                    B = transpose(reshape(A,[3,3]));
-
-                    x = [si_b1(j,1) - param_s(a,b,c,1,1); si_b1(j,2) - param_s(a,b,c,2,1); si_b1(j,3) - param_s(a,b,c,3,1)];
-
-                    rho_tmp(j,a,b,c,:) = B \ x;
-
-                    if (0 <= rho_tmp(j,a,b,c,1)) && (rho_tmp(j,a,b,c,1) <= 1)
-                        if (0 <= rho_tmp(j,a,b,c,2)) && (rho_tmp(j,a,b,c,2) <= 1)
-                            if (0 <= rho_tmp(j,a,b,c,3)) && (rho_tmp(j,a,b,c,3) <= 1)
-
-                                rho(j,:) = rho_tmp(j,a,b,c,:);
-        
-                                l_now(j) = a;
-                                m_now(j) = b;
-                                n_now(j) = c;
-
-                                l_next(j) = a2;
-                                m_next(j) = b2;
-                                n_next(j) = c2;
-
-                                break_switch = 1;
-        
-                            end
-                        end
-                    end
-
-                end
-            end
-        end
-
-        % 欠損時の補間
-        if (break_switch == 0 && j > 1)
-
-            l_now(j) = l_now(j-1);
-            m_now(j) = m_now(j-1);
-            n_now(j) = n_now(j-1);
-
-            l_next(j) = l_next(j-1);
-            m_next(j) = m_next(j-1);
-            n_next(j) = n_next(j-1);
-
-            l_real(j) = l_real(j-1);
-            m_real(j) = m_real(j-1);
-            n_real(j) = n_real(j-1);
-
-            a = l_now(j);
-            b = m_now(j);
-            c = n_now(j);
-
-            rho(j,:) = rho_tmp(j,a,b,c,:);
-            
-            disp(j)
-            disp("補間しました")
-
-        end
-
-        % if j > 1 % （評価のための）誤差関数E1の作成
-
-        %     l = l_now(j-1);
-        %     m = m_now(j-1);
-        %     n = n_now(j-1);
-
-        %     l_p = l_next(j-1);
-        %     m_p = m_next(j-1);
-        %     n_p = n_next(j-1);
-
-        %     l2 = l_now(j);
-        %     m2 = m_now(j);
-        %     n2 = n_now(j);
-
-        %     l2_p = l_next(j);
-        %     m2_p = m_next(j);
-        %     n2_p = n_next(j);
-
-        %     G = [sa(l_p,m,n,:) - sa(l,m,n,:); sa(l,m_p,n,:) - sa(l,m,n,:); sa(l,m,n_p,:) - sa(l,m,n,:)];
-        %     H =  transpose(reshape(G,[3,3]));
-        %     y = [si_b1(j-1,1) - sa(l,m,n,1); si_b1(j-1,2) - sa(l,m,n,2); si_b1(j-1,3) - sa(l,m,n,3)];
-        %     P = H \ y;
-
-        %     G2 = [sa(l2_p,m2,n2,:) - sa(l2,m2,n2,:); sa(l2,m2_p,n2,:) - sa(l2,m2,n2,:); sa(l2,m2,n2_p,:) - sa(l2,m2,n2,:)];
-        %     H2 =  transpose(reshape(G2,[3,3]));
-        %     y2 = [si_b1(j,1) - sa(l2,m2,n2,1); si_b1(j,2) - sa(l2,m2,n2,2); si_b1(j,3) - sa(l2,m2,n2,3)];
-        %     P2 = H2 \ y2;
-
-        %     E1 = E1 + ( tan(pi/12) * (m_real(j-1) + P(2)) - ((n_real(j) + P2(3)) - (n_real(j-1) + P(3))) / ((l_real(j) + P2(1)) - (l_real(j-1) + P(1))) ) ^ 2;
-
-        % end
-
-        % 誤差関数の偏微分後関数選択のための分類
-        if j > 1
-            if m_now(j) == m_now(j-1)
-                b_mem(j-1) = 1;
-            elseif m_now(j) == m_next(j-1) && m_now(j) ~= m_now(j-1)
-                b_mem(j-1) = 2;
-            else
-                b_mem(j-1) = 3;
-            end
-        end
-
-        break_switch = 0;
-
-    end
-
-    disp('-----')
-
-
-    % % （評価のための）Eregの作成
-    % Ereg = 0;
-
-    % for b = 1 : m_max - 2
-
-    %     Ereg = Ereg + (( (sa(1,b+2,1,1) - sa(1,b+1,1,1)) ^ 2 + (sa(1,b+2,1,2) - sa(1,b+1,1,2)) ^ 2 + (sa(1,b+2,1,3) - sa(1,b+1,1,3)) ^ 2 )... 
-    %                 - ( (sa(1,b+1,1,1) - sa(1,b,1,1)) ^ 2 + (sa(1,b+1,1,2) - sa(1,b,1,2)) ^ 2 + (sa(1,b+1,1,3) - sa(1,b,1,3)) ^ 2 )) ^ 2;
-            
-    % end
-
-
-    % E1_initial = double(subs(E1, [sa(:,:,:,:)],[param_s(:,:,:,:,1)]));    
-    % Ereg_initial = double(subs(Ereg, [sa(:,:,:,:)],[param_s(:,:,:,:,1)]));
-
-    % if i < 11
-    %     Ereg_coef = 80;
-    % else
-    %     Ereg_coef = 150;
-    % end
-
-    % disp('E1_initial = ')
-    % disp(E1_initial)
-    % disp('Ereg_initial = ')
-    % disp(Ereg_initial)
-    % disp('Ereg_coef = ')
-    % disp(Ereg_coef)
-    % disp('--------------------')
-
-    % E_all = E1 + Ereg_coef * Ereg;
-
     %---最急降下法による格子点更新-----------------------------------
 
     eta_s1 = 0.0 * 10 ^ (-6); % 学習率
@@ -256,7 +67,7 @@ for i = 1 : imax
     % eta_s3 = 1.0 * 10 ^ (-3);
 
     if i < 11
-        iteration = 100;
+        iteration = 1000;
     elseif i > 15
         iteration = 100;
     else
@@ -297,7 +108,133 @@ for i = 1 : imax
 
     for t = 1 : iteration - 1
 
+        %---格子点の選択---------------------
+
+        break_switch = 0;
+
         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
+
+        for j = 1 : length(k1)
+
+            for a = 1 : l_max - 1
+
+                for b = 1 : m_max - 1
+
+                    for c = 1 : n_max - 1
+
+                        if break_switch == 1 
+                            break;
+                        end
+            
+                        if a < l_max
+                            a2 = a + 1;
+                            l_real(j) = a - 1;
+                        elseif a == l_max + 1
+                            a2 = 1;
+                            l_real(j) = -1;
+                        else
+                            a2 = a - 1;
+                            l_real(j) = - a + l_max; 
+                        end
+            
+                        if b < m_max
+                            b2 = b + 1;
+                            m_real(j) = b - 1;
+                        elseif b == m_max + 1
+                            b2 = 1;
+                            m_real(j) = -1;
+                        else
+                            b2 = b - 1;
+                            m_real(j) = - b + m_max;
+                        end
+            
+                        if c < n_max
+                            c2 = c + 1;
+                            n_real(j) = c - 1;
+                        elseif c == n_max + 1
+                            c2 = 1;
+                            n_real(j) = -1;
+                        else
+                            c2 = c - 1;
+                            n_real(j) = - c + n_max;
+                        end
+            
+                        A = [param_s(a2,b,c,:,1) - param_s(a,b,c,:,1); param_s(a,b2,c,:,1) - param_s(a,b,c,:,1); param_s(a,b,c2,:,1) - param_s(a,b,c,:,1)];
+
+                        B = transpose(reshape(A,[3,3]));
+
+                        x = [si_b1(j,1) - param_s(a,b,c,1,1); si_b1(j,2) - param_s(a,b,c,2,1); si_b1(j,3) - param_s(a,b,c,3,1)];
+
+                        rho_tmp(j,a,b,c,:) = B \ x;
+
+                        if (0 <= rho_tmp(j,a,b,c,1)) && (rho_tmp(j,a,b,c,1) <= 1)
+                            if (0 <= rho_tmp(j,a,b,c,2)) && (rho_tmp(j,a,b,c,2) <= 1)
+                                if (0 <= rho_tmp(j,a,b,c,3)) && (rho_tmp(j,a,b,c,3) <= 1)
+
+                                    rho(j,:) = rho_tmp(j,a,b,c,:);
+            
+                                    l_now(j) = a;
+                                    m_now(j) = b;
+                                    n_now(j) = c;
+
+                                    l_next(j) = a2;
+                                    m_next(j) = b2;
+                                    n_next(j) = c2;
+
+                                    break_switch = 1;
+            
+                                end
+                            end
+                        end
+
+                    end
+                end
+            end
+
+            % 欠損時の補間
+            if (break_switch == 0 && j > 1)
+
+                l_now(j) = l_now(j-1);
+                m_now(j) = m_now(j-1);
+                n_now(j) = n_now(j-1);
+
+                l_next(j) = l_next(j-1);
+                m_next(j) = m_next(j-1);
+                n_next(j) = n_next(j-1);
+
+                l_real(j) = l_real(j-1);
+                m_real(j) = m_real(j-1);
+                n_real(j) = n_real(j-1);
+
+                a = l_now(j);
+                b = m_now(j);
+                c = n_now(j);
+
+                rho(j,:) = rho_tmp(j,a,b,c,:);
+                
+                disp(j)
+                disp("補間しました")
+
+            end
+
+            % 誤差関数の偏微分後関数選択のための分類
+            if j > 1
+                if m_now(j) == m_now(j-1)
+                    b_mem(j-1) = 1;
+                elseif m_now(j) == m_next(j-1) && m_now(j) ~= m_now(j-1)
+                    b_mem(j-1) = 2;
+                else
+                    b_mem(j-1) = 3;
+                end
+            end
+
+            break_switch = 0;
+
+        end
+
+        % disp('-----')
+
+
 
         DE1 = zeros(m_max,3);
         DEreg = zeros(m_max,3);
@@ -306,16 +243,16 @@ for i = 1 : imax
 
             if b < 4
                 eta_s3 = 1.0 * 10 ^ (-3);
-                Ereg_coef = 1.0 * 10 ^ (-2);
+                Ereg_coef = 5.0 * 10 ^ (-2);
             elseif b < 6
                 eta_s3 = 1.0 * 10 ^ (-3);
-                Ereg_coef = 3.0 * 10 ^ (-2);
+                Ereg_coef = 5.0 * 10 ^ (-2);
             elseif b < 8
                 eta_s3 = 1.0 * 10 ^ (-3);
                 Ereg_coef = 5.0 * 10 ^ (-2);
             else
-                eta_s3 = 1.0 * 10 ^ (-2);
-                Ereg_coef = 8.0 * 10 ^ (-2);
+                eta_s3 = 1.0 * 10 ^ (-3);
+                Ereg_coef = 5.0 * 10 ^ (-2);
             end
 
             for j = 1 : length(k1) - 1
