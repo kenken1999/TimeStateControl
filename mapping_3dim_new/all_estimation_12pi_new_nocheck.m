@@ -7,7 +7,7 @@ tic
 
 %---格子点選択および更新-----------------------------------------------------------------
 
-imax = 4;
+imax = 10;
 
 sa = sym('sa',[l_max m_max n_max 3]); % l,m,nの順
 
@@ -37,6 +37,22 @@ for i = 1 : imax
     if i > 1
 
         param_s(:,:,:,:,1) = param_s(:,:,:,:,iteration);
+
+        % if m_max_now < m_max
+
+        %     s_m = param_s(1,m_max_now,1,:,1) - param_s(1,m_max_now - 1,1,:,1);
+
+        %     for b = m_max_now : m_max
+
+        %         if b <= m_max
+        %             m_coef = b - m_max_now;
+        %         end
+    
+        %         param_s(1,b,1,:,1) = param_s(1,m_max_now,1,:,1) + m_coef * s_m;
+                              
+        %     end
+
+        % end
 
         param_s(2,:,1,3,1) = param_s(1,:,1,3,1);
         param_s(1,:,2,3,1) = param_s(1,:,1,3,1);
@@ -153,37 +169,37 @@ for i = 1 : imax
 
         end
 
-        if j > 1 % （評価のための）誤差関数E1の作成
+        % if j > 1 % （評価のための）誤差関数E1の作成
 
-            l = l_now(j-1);
-            m = m_now(j-1);
-            n = n_now(j-1);
+        %     l = l_now(j-1);
+        %     m = m_now(j-1);
+        %     n = n_now(j-1);
 
-            l_p = l_next(j-1);
-            m_p = m_next(j-1);
-            n_p = n_next(j-1);
+        %     l_p = l_next(j-1);
+        %     m_p = m_next(j-1);
+        %     n_p = n_next(j-1);
 
-            l2 = l_now(j);
-            m2 = m_now(j);
-            n2 = n_now(j);
+        %     l2 = l_now(j);
+        %     m2 = m_now(j);
+        %     n2 = n_now(j);
 
-            l2_p = l_next(j);
-            m2_p = m_next(j);
-            n2_p = n_next(j);
+        %     l2_p = l_next(j);
+        %     m2_p = m_next(j);
+        %     n2_p = n_next(j);
 
-            G = [sa(l_p,m,n,:) - sa(l,m,n,:); sa(l,m_p,n,:) - sa(l,m,n,:); sa(l,m,n_p,:) - sa(l,m,n,:)];
-            H =  transpose(reshape(G,[3,3]));
-            y = [si_b1(j-1,1) - sa(l,m,n,1); si_b1(j-1,2) - sa(l,m,n,2); si_b1(j-1,3) - sa(l,m,n,3)];
-            P = H \ y;
+        %     G = [sa(l_p,m,n,:) - sa(l,m,n,:); sa(l,m_p,n,:) - sa(l,m,n,:); sa(l,m,n_p,:) - sa(l,m,n,:)];
+        %     H =  transpose(reshape(G,[3,3]));
+        %     y = [si_b1(j-1,1) - sa(l,m,n,1); si_b1(j-1,2) - sa(l,m,n,2); si_b1(j-1,3) - sa(l,m,n,3)];
+        %     P = H \ y;
 
-            G2 = [sa(l2_p,m2,n2,:) - sa(l2,m2,n2,:); sa(l2,m2_p,n2,:) - sa(l2,m2,n2,:); sa(l2,m2,n2_p,:) - sa(l2,m2,n2,:)];
-            H2 =  transpose(reshape(G2,[3,3]));
-            y2 = [si_b1(j,1) - sa(l2,m2,n2,1); si_b1(j,2) - sa(l2,m2,n2,2); si_b1(j,3) - sa(l2,m2,n2,3)];
-            P2 = H2 \ y2;
+        %     G2 = [sa(l2_p,m2,n2,:) - sa(l2,m2,n2,:); sa(l2,m2_p,n2,:) - sa(l2,m2,n2,:); sa(l2,m2,n2_p,:) - sa(l2,m2,n2,:)];
+        %     H2 =  transpose(reshape(G2,[3,3]));
+        %     y2 = [si_b1(j,1) - sa(l2,m2,n2,1); si_b1(j,2) - sa(l2,m2,n2,2); si_b1(j,3) - sa(l2,m2,n2,3)];
+        %     P2 = H2 \ y2;
 
-            E1 = E1 + ( tan(pi/12) * (m_real(j-1) + P(2)) - ((n_real(j) + P2(3)) - (n_real(j-1) + P(3))) / ((l_real(j) + P2(1)) - (l_real(j-1) + P(1))) ) ^ 2;
+        %     E1 = E1 + ( tan(pi/12) * (m_real(j-1) + P(2)) - ((n_real(j) + P2(3)) - (n_real(j-1) + P(3))) / ((l_real(j) + P2(1)) - (l_real(j-1) + P(1))) ) ^ 2;
 
-        end
+        % end
 
         % 誤差関数の偏微分後関数選択のための分類
         if j > 1
@@ -203,45 +219,45 @@ for i = 1 : imax
     disp('-----')
 
 
-    % （評価のための）Eregの作成
-    Ereg = 0;
+    % % （評価のための）Eregの作成
+    % Ereg = 0;
 
-    for b = 1 : m_max - 2
+    % for b = 1 : m_max - 2
 
-        Ereg = Ereg + (( (sa(1,b+2,1,1) - sa(1,b+1,1,1)) ^ 2 + (sa(1,b+2,1,2) - sa(1,b+1,1,2)) ^ 2 + (sa(1,b+2,1,3) - sa(1,b+1,1,3)) ^ 2 )... 
-                    - ( (sa(1,b+1,1,1) - sa(1,b,1,1)) ^ 2 + (sa(1,b+1,1,2) - sa(1,b,1,2)) ^ 2 + (sa(1,b+1,1,3) - sa(1,b,1,3)) ^ 2 )) ^ 2;
+    %     Ereg = Ereg + (( (sa(1,b+2,1,1) - sa(1,b+1,1,1)) ^ 2 + (sa(1,b+2,1,2) - sa(1,b+1,1,2)) ^ 2 + (sa(1,b+2,1,3) - sa(1,b+1,1,3)) ^ 2 )... 
+    %                 - ( (sa(1,b+1,1,1) - sa(1,b,1,1)) ^ 2 + (sa(1,b+1,1,2) - sa(1,b,1,2)) ^ 2 + (sa(1,b+1,1,3) - sa(1,b,1,3)) ^ 2 )) ^ 2;
             
-    end
+    % end
 
 
-    E1_initial = double(subs(E1, [sa(:,:,:,:)],[param_s(:,:,:,:,1)]));    
-    Ereg_initial = double(subs(Ereg, [sa(:,:,:,:)],[param_s(:,:,:,:,1)]));
+    % E1_initial = double(subs(E1, [sa(:,:,:,:)],[param_s(:,:,:,:,1)]));    
+    % Ereg_initial = double(subs(Ereg, [sa(:,:,:,:)],[param_s(:,:,:,:,1)]));
 
-    if i == 1
-        Ereg_coef = 1;
-    else
-        Ereg_coef = 1;
-    end
+    % if i < 11
+    %     Ereg_coef = 80;
+    % else
+    %     Ereg_coef = 150;
+    % end
 
-    disp('E1_initial = ')
-    disp(E1_initial)
-    disp('Ereg_initial = ')
-    disp(Ereg_initial)
-    disp('Ereg_coef = ')
-    disp(Ereg_coef)
-    disp('--------------------')
+    % disp('E1_initial = ')
+    % disp(E1_initial)
+    % disp('Ereg_initial = ')
+    % disp(Ereg_initial)
+    % disp('Ereg_coef = ')
+    % disp(Ereg_coef)
+    % disp('--------------------')
 
-    E_all = E1 + Ereg_coef * Ereg;
+    % E_all = E1 + Ereg_coef * Ereg;
 
     %---最急降下法による格子点更新-----------------------------------
 
     eta_s1 = 0.0 * 10 ^ (-6); % 学習率
     eta_s2 = 0.0 * 10 ^ (-6);
-    eta_s3 = 1.0 * 10 ^ (-2);
+    % eta_s3 = 1.0 * 10 ^ (-3);
 
     if i < 11
         iteration = 100;
-    elseif i > 18
+    elseif i > 15
         iteration = 100;
     else
         iteration = 100;
@@ -249,10 +265,10 @@ for i = 1 : imax
 
     stop_switch = 0;
 
-    E_all_value = zeros(iteration,1);
+    % E_all_value = zeros(iteration,1);
 
     % 格子点更新範囲の拡大
-    if rem(i,1) == 0
+    if rem(i,2) == 1
         if l_max_now < l_max
             l_max_now = l_max_now + 1;
         else
@@ -286,7 +302,18 @@ for i = 1 : imax
         DE1 = zeros(m_max,3);
         DEreg = zeros(m_max,3);
 
-        for b = 3 : m_max_now % m = 1&2 はfix
+        for b = 1 : m_max_now % m = 1&2 はfix
+
+            if b < 5
+                Ereg_coef = 60;
+                eta_s3 = 1.0 * 10 ^ (-3);
+            elseif b < 8 && b > 4
+                Ereg_coef = 40;
+                eta_s3 = 1.0 * 10 ^ (-3);
+            else
+                Ereg_coef = 60;
+                eta_s3 = 1.0 * 10 ^ (-3);
+            end
 
             for j = 1 : length(k1) - 1
               
@@ -383,30 +410,35 @@ for i = 1 : imax
                     param_s(1,b,1,2,t+1) = param_s(1,b,1,2,t) - eta_s2 * (DE1(b,2) + Ereg_coef * DEreg(b,2));
                     param_s(1,b,1,3,t+1) = param_s(1,b,1,3,t) - eta_s3 * (DE1(b,3) + Ereg_coef * DEreg(b,3));
 
+                    param_s(1,1,1,:,t+1) = [1 1 pi/4];
+                    param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
+                    param_s(1,2,1,:,t+1) = [1 1 pi/3];
+                    param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+
                 end
 
             end
 
-            param_s(2,:,1,3,t+1) = param_s(1,:,1,3,t+1);
-            param_s(1,:,2,3,t+1) = param_s(1,:,1,3,t+1);
-            param_s(2,:,2,3,t+1) = param_s(1,:,1,3,t+1);
+            % param_s(2,:,1,3,t+1) = param_s(1,:,1,3,t+1);
+            % param_s(1,:,2,3,t+1) = param_s(1,:,1,3,t+1);
+            % param_s(2,:,2,3,t+1) = param_s(1,:,1,3,t+1);
            
         end
 
-        E_all_value(t) = double(subs(E_all, (sa(:,:,:,:)),(param_s(:,:,:,:,t+1))));
+        % E_all_value(t) = double(subs(E_all, (sa(:,:,:,:)),(param_s(:,:,:,:,t+1))));
 
-        if (t == 1 || rem(t,100) == 99)
+        % if (t == 1 || rem(t,100) == 99)
 
-            disp('i = ')
-            disp(i)
-            disp('t = ')
-            disp(t)
-            disp('E_all(t) = ')
-            disp(E_all_value(t))
+        %     disp('i = ')
+        %     disp(i)
+        %     disp('t = ')
+        %     disp(t)
+        %     disp('E_all(t) = ')
+        %     disp(E_all_value(t))
 
-            disp('--------------------')
+        %     disp('--------------------')
 
-        end
+        % end
        
         % if t > 1
 
@@ -443,7 +475,11 @@ for i = 1 : imax
     end
 
 
-    if i > imax - 2
+    if i > imax - 3
+
+        param_s(2,:,1,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(1,:,2,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(2,:,2,3,iteration) = param_s(1,:,1,3,iteration);
 
         % z1,z2,z3の推定結果取得--------------------------------------
 
@@ -584,8 +620,8 @@ for i = 1 : imax
 
         % 推定結果のplot--------------------------------------
 
-        if i == imax - 1 
-            tiledlayout(2,2);
+        if i == imax - 2 
+            tiledlayout(3,2);
         end
 
         % figure;

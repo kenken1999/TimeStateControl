@@ -25,7 +25,7 @@ s_m = param_s(1,2,1,:,1) - param_s(1,1,1,:,1);
 s_n = param_s(1,1,2,:,1) - param_s(1,1,1,:,1);
 
 l_max_now = 2;
-m_max_now = 3;
+m_max_now = 4;
 n_max_now = 2;
 
 m_start_change = 1;
