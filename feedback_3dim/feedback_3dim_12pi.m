@@ -1,7 +1,7 @@
 clear;
 close all;
-load('all_estimation_12pi.mat')
-load('gh_estimation_12pi.mat')
+load('all_estimation_12pi_new.mat')
+load('gh_estimation_12pi_new.mat')
 
 %feedback_simulation------------------------------------------------------
 
@@ -24,8 +24,8 @@ m2 = ones(1,length(t1)); % μ2 = v2/v1 = u2/(u1*cos^3θ)
 gmap = zeros(1,length(t1));
 hmap = zeros(1,length(t1));
 
-k2 = 4;
-k3 = 5;
+k2 = 6;
+k3 = 6;
 
 x = si(1,1) + 0.2 * cos(si(1,3));
 y = si(1,2) + 0.2 * sin(si(1,3));

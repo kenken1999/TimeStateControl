@@ -66,13 +66,7 @@ for i = 1 : imax
     eta_s2 = 0.0 * 10 ^ (-6);
     % eta_s3 = 1.0 * 10 ^ (-3);
 
-    if i < 11
-        iteration = 1000;
-    elseif i > 15
-        iteration = 100;
-    else
-        iteration = 100;
-    end
+    iteration = 1224;
 
     stop_switch = 0;
 
@@ -245,7 +239,7 @@ for i = 1 : imax
                 Ereg_coef = 1.0 * 10 ^ (-1);
             else
                 eta_s3 = 7.5 * 10 ^ (-3);
-                Ereg_coef = 5.0 * 10 ^ (-1);
+                Ereg_coef = 2.0 * 10 ^ (-1);
             end
 
             for j = 1 : length(k1) - 1
@@ -602,8 +596,8 @@ for i = 1 : imax
 
         %---g,hの導出--------------------------------------------------------
 
-        g_b1 = zeros(length(k1),1);
-        h_b1 = zeros(length(k1),1);
+        g_b1 = zeros(length(k1)-1,1);
+        h_b1 = zeros(length(k1)-1,1);
 
         for j = 1 : length(k1) - 1
         
@@ -612,8 +606,8 @@ for i = 1 : imax
 
         end
 
-        g_b1(length(k1)) = 2 * g_b1(length(k1)-1) - g_b1(length(k1)-2);
-        h_b1(length(k1)) = 2 * h_b1(length(k1)-1) - h_b1(length(k1)-2);
+        % g_b1(length(k1)) = 2 * g_b1(length(k1)-1) - g_b1(length(k1)-2);
+        % h_b1(length(k1)) = 2 * h_b1(length(k1)-1) - h_b1(length(k1)-2);
 
 
         % 推定結果のplot--------------------------------------
@@ -626,13 +620,13 @@ for i = 1 : imax
 
         axis([-5 5 -5 5]) % π/2 ≒ 1.57
 
-        g_ans = zeros(length(k1),1);
+        g_ans = zeros(length(k1)-1,1);
 
-        for j = 1 : length(k1)
+        for j = 1 : length(k1)-1
             g_ans(j) = 1 / (cos(si_c1(j,3)) * cos(si_c1(j,3)) * cos(si_c1(j,3)));
         end
 
-        plot(si_c1(:,3), g_ans(:), '--m', si_c1(:,3), g_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+        plot(si_c1(1:length(k1)-1,3), g_ans(:), '--m', si_c1(1:length(k1)-1,3), g_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
         xlabel("s3' = θ")
         ylabel('g')
         legend("真値：1/cos^3(s3')",'推定値：g')

@@ -1,6 +1,6 @@
 clear;
 close all;
-load('all_estimation_12pi.mat')
+load('all_estimation_12pi_new.mat')
 
 tic
 
@@ -20,7 +20,7 @@ si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等し�
 si_c1(1,:) = [0 0 0];
 
 
-imax_g = 40;
+imax_g = 20;
 imax_h = 10;
 
 mean_g = zeros(imax_g,3);
@@ -42,17 +42,17 @@ for i = 1 : imax_h
 end
 
 
-phi_g = zeros(length(k1),imax_g);
-phi_h = zeros(length(k1),imax_h);
+phi_g = zeros(length(k1)-1,imax_g);
+phi_h = zeros(length(k1)-1,imax_h);
 
 w_g = zeros(imax_g,1);
 w_h = zeros(imax_h,1);
 
-g_est = zeros(length(k1),1);
-h_est = zeros(length(k1),1);
+g_est = zeros(length(k1)-1,1);
+h_est = zeros(length(k1)-1,1);
 
 
-for j = 1 : length(k1)
+for j = 1 : length(k1)-1
 
     for i = 1 : imax_g
         phi_g(j,i) = exp( - sqrt( (si_b1(j,1) - mean_g(i,1)) ^ 2 + (si_b1(j,2) - mean_g(i,2)) ^ 2 + (si_b1(j,3) - mean_g(i,3)) ^ 2 ) / (2 * var_g ^ 2) );
@@ -62,7 +62,7 @@ for j = 1 : length(k1)
         phi_h(j,i) = exp( - sqrt( (si_b1(j,1) - mean_h(i,1)) ^ 2 + (si_b1(j,2) - mean_h(i,2)) ^ 2 + (si_b1(j,3) - mean_h(i,3)) ^ 2 ) / (2 * var_h ^ 2) );
     end
 
-    if j < length(k1) 
+    if j < length(k1) - 1
 
         si_b1(j+1,3) = si_b1(j,3) + u2_b1(j+1) * dk1;
         si_b1(j+1,1) = si_b1(j,1) + u1_b1(j+1) * cos(si_b1(j+1,3)) * dk1;
@@ -93,11 +93,11 @@ grid on;
 
 axis([-5 5 -5 5]) % π/2 ≒ 1.57
 
-for i = 1 : length(k1)
+for i = 1 : length(k1)-1
     g_ans(i) = 1 / (cos(si_c1(i,3)) * cos(si_c1(i,3)) * cos(si_c1(i,3)));
 end
 
-plot(si_c1(:,3), g_ans(:), '--m', si_c1(:,3), g_est(:), '-k', si_c1(:,3), g_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+plot(si_c1(1:length(k1)-1,3), g_ans(:), '--m', si_c1(1:length(k1)-1,3), g_est(:), '-k', si_c1(1:length(k1)-1,3), g_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel("s3' = θ")
 ylabel('g')
 legend("真値：1/cos^3(s3')",'推定値：g')
@@ -111,7 +111,7 @@ grid on;
 
 axis([-5 5 -5 5]) % π/2 ≒ 1.57
 
-plot(si_c1(:,3), cos(si_c1(:,3)), '--m', si_c1(:,3), h_est(:), '-k', si_c1(:,3), h_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+plot(si_c1(1:length(k1)-1,3), cos(si_c1(1:length(k1)-1,3)), '--m', si_c1(1:length(k1)-1,3), h_est(:), '-k', si_c1(1:length(k1)-1,3), h_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel("s3' = θ")
 ylabel("h")
 legend("真値：cos(s3')",'推定値：h')
