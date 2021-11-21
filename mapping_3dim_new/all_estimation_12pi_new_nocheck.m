@@ -309,13 +309,13 @@ for i = 1 : imax
                 Ereg_coef = 1.0 * 10 ^ (-2);
             elseif b < 6
                 eta_s3 = 1.0 * 10 ^ (-3);
-                Ereg_coef = 3.0 * 10 ^ (-2);
+                Ereg_coef = 1.0 * 10 ^ (-2);
             elseif b < 8
                 eta_s3 = 1.0 * 10 ^ (-3);
-                Ereg_coef = 5.0 * 10 ^ (-2);
+                Ereg_coef = 1.0 * 10 ^ (-2);
             else
                 eta_s3 = 1.0 * 10 ^ (-2);
-                Ereg_coef = 8.0 * 10 ^ (-2);
+                Ereg_coef = 1.0 * 10 ^ (-2);
             end
 
             for j = 1 : length(k1) - 1

@@ -12,7 +12,7 @@ imax = 1;
 sa = sym('sa',[l_max m_max n_max 3]); % l,m,nの順
 
 l_max_now = 2;
-m_max_now = 9;
+m_max_now = 10;
 n_max_now = 2;
 
 for i = 1 : imax
@@ -106,12 +106,13 @@ for i = 1 : imax
 
     b_judge = zeros(m_max,length(k1)-1);
 
+
     for t = 1 : iteration - 1
 
         %---格子点の選択---------------------
 
         break_switch = 0;
-
+       
         param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
 
         for j = 1 : length(k1)
@@ -159,11 +160,11 @@ for i = 1 : imax
                             n_real(j) = - c + n_max;
                         end
             
-                        A = [param_s(a2,b,c,:,1) - param_s(a,b,c,:,1); param_s(a,b2,c,:,1) - param_s(a,b,c,:,1); param_s(a,b,c2,:,1) - param_s(a,b,c,:,1)];
+                        A = [param_s(a2,b,c,:,t) - param_s(a,b,c,:,t); param_s(a,b2,c,:,t) - param_s(a,b,c,:,t); param_s(a,b,c2,:,t) - param_s(a,b,c,:,t)];
 
                         B = transpose(reshape(A,[3,3]));
 
-                        x = [si_b1(j,1) - param_s(a,b,c,1,1); si_b1(j,2) - param_s(a,b,c,2,1); si_b1(j,3) - param_s(a,b,c,3,1)];
+                        x = [si_b1(j,1) - param_s(a,b,c,1,t); si_b1(j,2) - param_s(a,b,c,2,t); si_b1(j,3) - param_s(a,b,c,3,t)];
 
                         rho_tmp(j,a,b,c,:) = B \ x;
 
@@ -234,25 +235,17 @@ for i = 1 : imax
 
         % disp('-----')
 
-
-
         DE1 = zeros(m_max,3);
         DEreg = zeros(m_max,3);
 
         for b = 1 : m_max_now % m = 1&2 はfix
 
-            if b < 4
-                eta_s3 = 1.0 * 10 ^ (-3);
-                Ereg_coef = 5.0 * 10 ^ (-2);
-            elseif b < 6
-                eta_s3 = 1.0 * 10 ^ (-3);
-                Ereg_coef = 5.0 * 10 ^ (-2);
-            elseif b < 8
-                eta_s3 = 1.0 * 10 ^ (-3);
-                Ereg_coef = 5.0 * 10 ^ (-2);
+            if b < 9
+                eta_s3 = 7.5 * 10 ^ (-3);
+                Ereg_coef = 1.0 * 10 ^ (-1);
             else
-                eta_s3 = 1.0 * 10 ^ (-3);
-                Ereg_coef = 5.0 * 10 ^ (-2);
+                eta_s3 = 7.5 * 10 ^ (-3);
+                Ereg_coef = 5.0 * 10 ^ (-1);
             end
 
             for j = 1 : length(k1) - 1
@@ -358,12 +351,12 @@ for i = 1 : imax
                 end
 
             end
-
-            % param_s(2,:,1,3,t+1) = param_s(1,:,1,3,t+1);
-            % param_s(1,:,2,3,t+1) = param_s(1,:,1,3,t+1);
-            % param_s(2,:,2,3,t+1) = param_s(1,:,1,3,t+1);
            
         end
+
+        param_s(2,:,1,3,t+1) = param_s(1,:,1,3,t+1);
+        param_s(1,:,2,3,t+1) = param_s(1,:,1,3,t+1);
+        param_s(2,:,2,3,t+1) = param_s(1,:,1,3,t+1);
 
         % E_all_value(t) = double(subs(E_all, (sa(:,:,:,:)),(param_s(:,:,:,:,t+1))));
 
@@ -560,9 +553,9 @@ for i = 1 : imax
 
         % 推定結果のplot--------------------------------------
 
-        if i == imax - 2 
-            tiledlayout(3,2);
-        end
+        % if i == imax - 2 
+        %     tiledlayout(3,2);
+        % end
 
         % figure;
         % hold on;
@@ -577,10 +570,10 @@ for i = 1 : imax
 
         % hold off;
 
-        nexttile
+        % nexttile
 
-        % figure;
-        % hold on;
+        figure;
+        hold on;
         grid on;
 
         axis([-5 5 -5 5]) % π/2 ≒ 1.57
@@ -590,7 +583,7 @@ for i = 1 : imax
         ylabel("z2")
         legend("真値：tan(s3')",'推定値：z2')
 
-        % hold off;
+        hold off;
 
         % figure;
         % hold on;
@@ -625,10 +618,10 @@ for i = 1 : imax
 
         % 推定結果のplot--------------------------------------
 
-        nexttile
+        % nexttile
 
-        % figure;
-        % hold on;
+        figure;
+        hold on;
         grid on;
 
         axis([-5 5 -5 5]) % π/2 ≒ 1.57
@@ -644,7 +637,7 @@ for i = 1 : imax
         ylabel('g')
         legend("真値：1/cos^3(s3')",'推定値：g')
 
-        % hold off;
+        hold off;
 
 
         % figure;
