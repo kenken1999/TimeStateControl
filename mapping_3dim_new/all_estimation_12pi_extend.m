@@ -1,21 +1,65 @@
 clear;
 close all;
 
-load('all_estimation_12pi_func.mat')
+load('all_estimation_12pi_extend_func.mat')
 
 tic
 
 %---格子点選択および更新-----------------------------------------------------------------
 
-imax = 1;
+imax = 4;
 
-sa = sym('sa',[l_max m_max n_max 3]); % l,m,nの順
+% sa = sym('sa',[2*l_max-1 2*m_max-1 2*n_max-1 3]); % l,m,nの順
 
 l_max_now = 2;
 m_max_now = 10;
 n_max_now = 2;
 
 for i = 1 : imax
+
+    %---サンプル収集------------------------------------------------------------------------
+
+    dk1 = 0.1;   % 時間刻み
+    K1fin = 1.9;  %シミュレーション終了時間, length(k) = Kfin + 1
+    k1 = [0:dk1:K1fin];
+
+    si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
+    si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
+
+    if rem(i,4) == 1
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+        u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
+        si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 0 0];
+    elseif rem(i,4) == 2
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+        u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
+        si_b1(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 1 0];
+    elseif rem(i,4) == 3
+        u1_b1 = ones(length(k1),1) * (-0.5); % 並進速度
+        u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
+        si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 0 0];
+    else
+        u1_b1 = ones(length(k1),1) * (-0.5); % 並進速度
+        u2_b1 = ones(length(k1),1) * 0.6; % 回転角速度
+        si_b1(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 1 0];
+    end
+
+    for j = 1 : length(k1) - 1
+        
+        si_b1(j+1,3) = si_b1(j,3) + u2_b1(j+1) * dk1;
+        si_b1(j+1,1) = si_b1(j,1) + u1_b1(j+1) * cos(si_b1(j+1,3)) * dk1;
+        si_b1(j+1,2) = si_b1(j,2) + u1_b1(j+1) * sin(si_b1(j+1,3)) * dk1;
+
+        si_c1(j+1,3) = si_c1(j,3) + u2_b1(j+1) * dk1;
+        si_c1(j+1,1) = si_c1(j,1) + u1_b1(j+1) * cos(si_c1(j+1,3)) * dk1;
+        si_c1(j+1,2) = si_c1(j,2) + u1_b1(j+1) * sin(si_c1(j+1,3)) * dk1;
+
+    end
+
 
     l_now = zeros(length(k1),1);
     m_now = zeros(length(k1),1);
@@ -29,7 +73,7 @@ for i = 1 : imax
     m_real = zeros(length(k1),1);
     n_real = zeros(length(k1),1);
 
-    rho_tmp = zeros(length(k1), l_max, m_max, n_max, 3);
+    rho_tmp = zeros(length(k1), 2*l_max-1, 2*m_max-1, 2*n_max-1, 3);
     rho = zeros(length(k1),3);
 
     b_mem = zeros(length(k1)-1, 1);
@@ -41,6 +85,8 @@ for i = 1 : imax
         param_s(2,:,1,3,1) = param_s(1,:,1,3,1);
         param_s(1,:,2,3,1) = param_s(1,:,1,3,1);
         param_s(2,:,2,3,1) = param_s(1,:,1,3,1);
+        param_s(3,:,2,3,1) = param_s(3,:,1,3,1);
+        param_s(2,:,3,3,1) = param_s(1,:,3,3,1);
 
     end
 
@@ -57,7 +103,7 @@ for i = 1 : imax
     % E_all_value = zeros(iteration,1);
 
     % 格子点更新範囲の拡大
-    if rem(i,2) == 1
+    if rem(i,1) == 0
         if l_max_now < l_max
             l_max_now = l_max_now + 1;
         else
@@ -95,14 +141,18 @@ for i = 1 : imax
 
         for j = 1 : length(k1)
 
-            for a = 1 : l_max - 1
+            for a = 1 : 2 * l_max - 1
 
-                for b = 1 : m_max - 1
+                for b = 1 : 2 * m_max - 1
 
-                    for c = 1 : n_max - 1
+                    for c = 1 : 2 * n_max - 1
 
                         if break_switch == 1 
                             break;
+                        end
+
+                        if (a == l_max) || (b == m_max) || (c == n_max)
+                            continue;
                         end
             
                         if a < l_max
@@ -202,8 +252,10 @@ for i = 1 : imax
                     b_mem(j-1) = 1;
                 elseif m_now(j) == m_next(j-1) && m_now(j) ~= m_now(j-1)
                     b_mem(j-1) = 2;
-                else
+                elseif m_next(j) ~= m_now(j-1) && m_now(j) ~= m_next(j-1) && m_now(j) ~= m_now(j-1)
                     b_mem(j-1) = 3;
+                else
+                    b_mem(j-1) = 4;
                 end
             end
 
@@ -216,125 +268,149 @@ for i = 1 : imax
         DE1 = zeros(m_max,3);
         DEreg = zeros(m_max,3);
 
-        for b = 1 : m_max_now % m = 1&2 はfix
+        if i > 3
 
-            if b < 9
-                eta_s3 = 7.5 * 10 ^ (-3);
-                Ereg_coef = 1.0 * 10 ^ (-1);
-            else
-                eta_s3 = 7.5 * 10 ^ (-3);
-                Ereg_coef = 2.0 * 10 ^ (-1);
-            end
+            for b = 1 : m_max_now % m = 1&2 はfix
 
-            for j = 1 : length(k1) - 1
-              
-                % 時刻kの格子点とピッタリ一致した場合
-                if b == m_now(j)
-
-                    b_judge(b,j) = 1;
-
-                    if b_mem(j) == 1
-                        for x = 1 : 3
-                            DE1(b,x) = DE1(b,x) + De1_type1{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                        end
-                    elseif b_mem(j) == 2
-                        for x = 1 : 3
-                            DE1(b,x) = DE1(b,x) + De1_type2{j,1,1,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                        end
-                    else
-                        for x = 1 : 3
-                            DE1(b,x) = DE1(b,x) + De1_type3{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                        end
-                    end
-
-                elseif b == m_next(j) && b ~= m_now(j)
-
-                    b_judge(b,j) = 2;
-                    
-                    if b_mem(j) == 1
-                        for x = 1 : 3
-                            DE1(b,x) = DE1(b,x) + De1_type1{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                        end
-                    elseif b_mem(j) == 2
-                        for x = 1 : 3
-                            DE1(b,x) = DE1(b,x) + De1_type2{j,1,2,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                        end
-                    else
-                        for x = 1 : 3
-                            DE1(b,x) = DE1(b,x) + De1_type3{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                        end
-                    end               
-                
-                elseif b == m_now(j+1) && b ~= m_now(j) && b ~= m_next(j)
-
-                    b_judge(b,j) = 3;
-                    
-                    for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type3{j,1,3,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                    end
-                    
-                elseif b == m_next(j+1) && b ~= m_now(j) && b ~= m_next(j) && b ~= m_now(j+1)
-
-                    b_judge(b,j) = 4;
-                    
-                    if b_mem(j) == 2
-                        for x = 1 : 3
-                            DE1(b,x) = DE1(b,x) + De1_type2{j,1,3,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                        end
-                    else
-                        for x = 1 : 3
-                            DE1(b,x) = DE1(b,x) + De1_type3{j,1,4,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
-                        end
-                    end
-
+                if b < 9
+                    eta_s3 = 7.5 * 10 ^ (-3);
+                    Ereg_coef = 1.0 * 10 ^ (-1);
                 else
-                    b_judge(b,j) = 5;
+                    eta_s3 = 7.5 * 10 ^ (-3);
+                    Ereg_coef = 2.0 * 10 ^ (-1);
                 end
-                
-                if j == length(k1) - 1
 
-                    % Eregの追加
-                    if b == 1                    
-                        for x = 1 : 3
-                            DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t));
+                for j = 1 : length(k1) - 1
+                
+                    % 時刻kの格子点とピッタリ一致した場合
+                    if b == m_now(j)
+
+                        b_judge(b,j) = 1;
+
+                        if b_mem(j) == 1
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type1{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        elseif b_mem(j) == 2
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type2{j,1,1,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        elseif b_mem(j) == 3
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type3{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        else
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type4{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
                         end
-                    elseif b == m_max
-                        for x = 1 : 3
-                            DEreg(b,x) = De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t));
+
+                    elseif b == m_next(j) && b ~= m_now(j)
+
+                        b_judge(b,j) = 2;
+                        
+                        if b_mem(j) == 1
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type1{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        elseif b_mem(j) == 2
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type2{j,1,2,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        elseif b_mem(j) == 3
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type3{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        else
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type4{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        end               
+                    
+                    elseif b == m_now(j+1) && b ~= m_now(j) && b ~= m_next(j)
+
+                        b_judge(b,j) = 3;
+                        
+                        if b_mem(j) == 3
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type3{j,1,3,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        else
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type4{j,1,4,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
                         end
-                    elseif b == 2
-                        for x = 1 : 3
-                            DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t));
+
+                        
+                    elseif b == m_next(j+1) && b ~= m_now(j) && b ~= m_next(j) && b ~= m_now(j+1)
+
+                        b_judge(b,j) = 4;
+                        
+                        if b_mem(j) == 2
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type2{j,1,3,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
+                        else
+                            for x = 1 : 3
+                                DE1(b,x) = DE1(b,x) + De1_type3{j,1,4,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                            end
                         end
-                    elseif b == m_max - 1
-                        for x = 1 : 3
-                            DEreg(b,x) = De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t));
-                        end
+
                     else
-                        for x = 1 : 3
-                            DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t)) + De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t));
+                        b_judge(b,j) = 5;
+                    end
+                    
+                    if j == length(k1) - 1
+
+                        % Eregの追加
+                        if b == 1                    
+                            for x = 1 : 3
+                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t));
+                            end
+                        elseif b == m_max
+                            for x = 1 : 3
+                                DEreg(b,x) = De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t));
+                            end
+                        elseif b == 2
+                            for x = 1 : 3
+                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t));
+                            end
+                        elseif b == m_max - 1
+                            for x = 1 : 3
+                                DEreg(b,x) = De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t));
+                            end
+                        else
+                            for x = 1 : 3
+                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b:b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1:b+1,1,:,t)) + De_reg{1,3,1,x}(param_s(1,b-2:b,1,:,t));
+                            end
                         end
+
+                        % 格子点の更新
+                        param_s(1,b,1,1,t+1) = param_s(1,b,1,1,t) - eta_s1 * DE1(b,1) - Ereg_coef * DEreg(b,1);
+                        param_s(1,b,1,2,t+1) = param_s(1,b,1,2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
+                        param_s(1,b,1,3,t+1) = param_s(1,b,1,3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
+
+                        param_s(1,1,1,:,t+1) = [1 1 pi/4];
+                        param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
+                        param_s(1,2,1,:,t+1) = [1 1 pi/3];
+                        param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+
                     end
 
-                    % 格子点の更新
-                    param_s(1,b,1,1,t+1) = param_s(1,b,1,1,t) - eta_s1 * DE1(b,1) - Ereg_coef * DEreg(b,1);
-                    param_s(1,b,1,2,t+1) = param_s(1,b,1,2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
-                    param_s(1,b,1,3,t+1) = param_s(1,b,1,3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
-
-                    param_s(1,1,1,:,t+1) = [1 1 pi/4];
-                    param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
-                    param_s(1,2,1,:,t+1) = [1 1 pi/3];
-                    param_s(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
-
                 end
-
+            
             end
-           
+
+        else
+
         end
 
         param_s(2,:,1,3,t+1) = param_s(1,:,1,3,t+1);
         param_s(1,:,2,3,t+1) = param_s(1,:,1,3,t+1);
         param_s(2,:,2,3,t+1) = param_s(1,:,1,3,t+1);
+        param_s(3,:,2,3,t+1) = param_s(3,:,1,3,t+1);
+        param_s(2,:,3,3,t+1) = param_s(1,:,3,3,t+1);
+
 
         % E_all_value(t) = double(subs(E_all, (sa(:,:,:,:)),(param_s(:,:,:,:,t+1))));
 
@@ -386,11 +462,14 @@ for i = 1 : imax
     end
 
 
-    if i > imax - 3
+    if i > imax - 4
 
         param_s(2,:,1,3,iteration) = param_s(1,:,1,3,iteration);
         param_s(1,:,2,3,iteration) = param_s(1,:,1,3,iteration);
         param_s(2,:,2,3,iteration) = param_s(1,:,1,3,iteration);
+        param_s(3,:,2,3,iteration) = param_s(3,:,1,3,iteration);
+        param_s(2,:,3,3,iteration) = param_s(1,:,3,3,iteration);
+
 
         % z1,z2,z3の推定結果取得--------------------------------------
 
