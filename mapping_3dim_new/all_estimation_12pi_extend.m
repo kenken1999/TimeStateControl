@@ -7,7 +7,7 @@ tic
 
 %---格子点選択および更新-----------------------------------------------------------------
 
-imax = 4;
+imax = 8;
 
 % sa = sym('sa',[2*l_max-1 2*m_max-1 2*n_max-1 3]); % l,m,nの順
 
@@ -26,26 +26,46 @@ for i = 1 : imax
     si_b1 = zeros(length(k1),3); % 観測するセンサ変数 , s = (s1, s2, s3) = (x ,y, θ)
     si_c1 = zeros(length(k1),3); % 補正後のセンサ変数(zi,z3空間と等しい)、結果比較用
 
-    if rem(i,4) == 1
+    if rem(i,8) == 1
         u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
-        u2_b1 = ones(length(k1),1) * (0.6); % 回転角速度
+        u2_b1 = ones(length(k1),1) * 0.6; % 回転角速度
         si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
         si_c1(1,:) = [0 0 0];
-    elseif rem(i,4) == 2
+    elseif rem(i,8) == 2
         u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
         u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
         si_b1(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
         si_c1(1,:) = [0 1 0];
-    elseif rem(i,4) == 3
-        u1_b1 = ones(length(k1),1) * (-0.5); % 並進速度
+    elseif rem(i,8) == 3
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+        u2_b1 = ones(length(k1),1) * 0.6; % 回転角速度
+        si_b1(1,:) = [1-1/sqrt(2) 1-1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [-1 0 0];
+    elseif rem(i,8) == 4
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
         u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
-        si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
+        si_b1(1,:) = [1-sqrt(2) 1 pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [-1 1 0];
+    elseif rem(i,8) == 5
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+        u2_b1 = ones(length(k1),1) * 0.6; % 回転角速度
+        si_b1(1,:) = [1 1-sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [-1 -1 0];
+    elseif rem(i,8) == 6
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+        u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
+        si_b1(1,:) = [1-1/sqrt(2) 1-1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [-1 0 0];
+    elseif rem(i,8) == 7
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+        u2_b1 = ones(length(k1),1) * 0.6; % 回転角速度
+        si_b1(1,:) = [1+1/sqrt(2) 1-1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
         si_c1(1,:) = [0 0 0];
     else
-        u1_b1 = ones(length(k1),1) * (-0.5); % 並進速度
-        u2_b1 = ones(length(k1),1) * 0.6; % 回転角速度
-        si_b1(1,:) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];    % (s1, s2, s3)の初期値を設定
-        si_c1(1,:) = [0 1 0];
+        u1_b1 = ones(length(k1),1) * 0.5; % 並進速度
+        u2_b1 = ones(length(k1),1) * (-0.6); % 回転角速度
+        si_b1(1,:) = [1 1 pi/4];    % (s1, s2, s3)の初期値を設定
+        si_c1(1,:) = [0 0 0];
     end
 
     for j = 1 : length(k1) - 1
@@ -268,7 +288,7 @@ for i = 1 : imax
         DE1 = zeros(m_max,3);
         DEreg = zeros(m_max,3);
 
-        if i > 3
+        if rem(i,2) == 0
 
             for b = 1 : m_max_now % m = 1&2 はfix
 
