@@ -51,7 +51,7 @@ for a = 1 : 2 * l_max - 1
     end
 end
 
-for i = 1 : 8
+for i = 1 : 2
 
     %---サンプル収集------------------------------------------------------------------------
 
@@ -152,39 +152,39 @@ for i = 1 : 8
 
             if b == 1
                 for x = 1 : 3
-                    De1_type1{i,j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:), l_int, m_int, n_int});
+                    De1_type1{i,j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), l_int, m_int, n_int});
                     % De1_type1{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                    De1_type1{i,j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:), l_int, m_int, n_int});
+                    De1_type1{i,j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), l_int, m_int, n_int});
                     % De1_type1{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
                 end
             elseif b == 2
                 for x = 1 : 3
-                    De1_type2{i,j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:3,:,:), l_int, m_int, n_int});
+                    De1_type2{i,j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(2,2,1,:), s(1,3,1,:), s(1,2,2,:), l_int, m_int, n_int});
                     % De1_type2{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                    De1_type2{i,j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:3,:,:), l_int, m_int, n_int});
+                    De1_type2{i,j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(2,2,1,:), s(1,3,1,:), s(1,2,2,:), l_int, m_int, n_int});
                     % De1_type2{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
                     % De1_type2{j,2,2,1,x} = matlabFunction(diff(e1,s(2,2,1,x)), 'vars', {s(:,:,:,:)});
-                    De1_type2{i,j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:3,:,:), l_int, m_int, n_int});
+                    De1_type2{i,j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(2,2,1,:), s(1,3,1,:), s(1,2,2,:), l_int, m_int, n_int});
                     % De1_type2{j,1,2,2,x} = matlabFunction(diff(e1,s(1,2,2,x)), 'vars', {s(:,:,:,:)});
                 end     
             elseif b == 3
                 for x = 1 : 3
-                    De1_type3{i,j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:), l_int, m_int, n_int});
+                    De1_type3{i,j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(1,3,1,:), s(2,3,1,:), s(1,4,1,:), s(1,3,2,:), l_int, m_int, n_int});
                     % De1_type3{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                    De1_type3{i,j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:), l_int, m_int, n_int});
+                    De1_type3{i,j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(1,3,1,:), s(2,3,1,:), s(1,4,1,:), s(1,3,2,:), l_int, m_int, n_int});
                     % De1_type3{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
-                    De1_type3{i,j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:), l_int, m_int, n_int});
+                    De1_type3{i,j,1,3,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(1,3,1,:), s(2,3,1,:), s(1,4,1,:), s(1,3,2,:), l_int, m_int, n_int});
                     % De1_type3{j,2,3,1,x} = matlabFunction(diff(e1,s(2,3,1,x)), 'vars', {s(:,:,:,:)});
-                    De1_type3{i,j,1,4,1,x} = matlabFunction(diff(e1,s(1,4,1,x)), 'vars', {s(:,1:2,:,:),s(:,3:4,:,:), l_int, m_int, n_int});
+                    De1_type3{i,j,1,4,1,x} = matlabFunction(diff(e1,s(1,4,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(1,3,1,:), s(2,3,1,:), s(1,4,1,:), s(1,3,2,:), l_int, m_int, n_int});
                     % De1_type3{j,1,3,2,x} = matlabFunction(diff(e1,s(1,3,2,x)), 'vars', {s(:,:,:,:)});
                 end
             else
                 for x = 1 : 3
-                    De1_type4{i,j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(:,1:2,:,:), s(:,4,:,:), l_int, m_int, n_int});
+                    De1_type4{i,j,1,1,1,x} = matlabFunction(diff(e1,s(1,1,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(1,4,1,:), s(2,4,1,:), s(1,4,2,:), l_int, m_int, n_int});
                     % De1_type4{j,2,1,1,x} = matlabFunction(diff(e1,s(2,1,1,x)), 'vars', {s(:,:,:,:)});
-                    De1_type4{i,j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(:,1:2,:,:), s(:,4,:,:), l_int, m_int, n_int});
+                    De1_type4{i,j,1,2,1,x} = matlabFunction(diff(e1,s(1,2,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(1,4,1,:), s(2,4,1,:), s(1,4,2,:), l_int, m_int, n_int});
                     % De1_type4{j,1,1,2,x} = matlabFunction(diff(e1,s(1,1,2,x)), 'vars', {s(:,:,:,:)});
-                    De1_type4{i,j,1,4,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(:,1:2,:,:), s(:,4,:,:), l_int, m_int, n_int});
+                    De1_type4{i,j,1,4,1,x} = matlabFunction(diff(e1,s(1,3,1,x)), 'vars', {s(1,1,1,:), s(2,1,1,:), s(1,2,1,:), s(1,1,2,:), s(1,4,1,:), s(2,4,1,:), s(1,4,2,:), l_int, m_int, n_int});
                     % De1_type4{j,2,4,1,x} = matlabFunction(diff(e1,s(2,3,1,x)), 'vars', {s(:,:,:,:)});
                     % De1_type4{j,1,4,2,x} = matlabFunction(diff(e1,s(1,3,2,x)), 'vars', {s(:,:,:,:)});
                 end     
@@ -205,9 +205,9 @@ for i = 1 : 8
             - ((sr(1,2,1,1) - sr(1,1,1,1)) ^ 2 + (sr(1,2,1,2) - sr(1,1,1,2)) ^ 2 + (sr(1,2,1,3) - sr(1,1,1,3)) ^ 2) ) ^ 2;
 
     for x = 1 : 3
-        De_reg{1,1,1,x} = matlabFunction(diff(e_reg,sr(1,1,1,x)), 'vars', {sr(:,:,:,:)});
-        De_reg{1,2,1,x} = matlabFunction(diff(e_reg,sr(1,2,1,x)), 'vars', {sr(:,:,:,:)});
-        De_reg{1,3,1,x} = matlabFunction(diff(e_reg,sr(1,3,1,x)), 'vars', {sr(:,:,:,:)});
+        De_reg{1,1,1,x} = matlabFunction(diff(e_reg,sr(1,1,1,x)), 'vars', {sr(:,1,:,:), sr(:,2,:,:), sr(:,3,:,:)});
+        De_reg{1,2,1,x} = matlabFunction(diff(e_reg,sr(1,2,1,x)), 'vars', {sr(:,1,:,:), sr(:,2,:,:), sr(:,3,:,:)});
+        De_reg{1,3,1,x} = matlabFunction(diff(e_reg,sr(1,3,1,x)), 'vars', {sr(:,1,:,:), sr(:,2,:,:), sr(:,3,:,:)});
     end
 
 end

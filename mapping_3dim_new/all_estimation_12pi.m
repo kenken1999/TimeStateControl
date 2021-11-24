@@ -9,7 +9,7 @@ tic
 
 imax = 1;
 
-sa = sym('sa',[l_max m_max n_max 3]); % l,m,nの順
+% sa = sym('sa',[l_max m_max n_max 3]); % l,m,nの順
 
 l_max_now = 2;
 m_max_now = 10;
