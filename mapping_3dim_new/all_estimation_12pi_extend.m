@@ -7,7 +7,7 @@ tic
 
 %---格子点選択および更新-----------------------------------------------------------------
 
-imax = 2;
+imax = 3;
 
 % sa = sym('sa',[2*l_max-1 2*m_max-1 2*n_max-1 3]); % l,m,nの順
 
@@ -116,7 +116,7 @@ for i = 1 : imax
     eta_s2 = 0.0 * 10 ^ (-6);
     % eta_s3 = 1.0 * 10 ^ (-3);
 
-    iteration = 1000;
+    iteration = 1224;
 
     stop_switch = 0;
 
@@ -292,12 +292,24 @@ for i = 1 : imax
 
             for b = 3 : m_max_now % m = 1&2 はfix
 
-                if b < 9
-                    eta_s3 = 7.5 * 10 ^ (-3);
-                    Ereg_coef = 1.0 * 10 ^ (-1);
-                else
-                    eta_s3 = 7.5 * 10 ^ (-3);
-                    Ereg_coef = 2.0 * 10 ^ (-1);
+                if i == 1
+                    if b < 9
+                        eta_s3 = 7.5 * 10 ^ (-3);
+                        Ereg_coef = 1.0 * 10 ^ (-1);
+                    else
+                        eta_s3 = 7.5 * 10 ^ (-3);
+                        Ereg_coef = 2.0 * 10 ^ (-1);
+                    end
+                end
+
+                if i == 3
+                    if b < 9
+                        eta_s3 = 5.0 * 10 ^ (-2);
+                        Ereg_coef = 1.0 * 10 ^ (-1);
+                    else
+                        eta_s3 = 5.0 * 10 ^ (-2);
+                        Ereg_coef = 2.0 * 10 ^ (-1);
+                    end
                 end
 
                 for j = 1 : length(k1) - 1
@@ -395,30 +407,30 @@ for i = 1 : imax
                         % Eregの追加
                         if b == 1                    
                             for x = 1 : 3
-                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b,1,:,t), param_s(1,b+1,1,:,t), param_s(1,b+2,1,:,t));
+                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(l_now(j),b,n_now(j),:,t), param_s(l_now(j),b+1,n_now(j),:,t), param_s(l_now(j),b+2,n_now(j),:,t));
                             end
                         elseif b == m_max
                             for x = 1 : 3
-                                DEreg(b,x) = De_reg{1,3,1,x}(param_s(1,b-2,1,:,t), param_s(1,b-1,1,:,t), param_s(1,b,1,:,t));
+                                DEreg(b,x) = De_reg{1,3,1,x}(param_s(l_now(j),b-2,n_now(j),:,t), param_s(l_now(j),b-1,n_now(j),:,t), param_s(l_now(j),b,n_now(j),:,t));
                             end
                         elseif b == 2
                             for x = 1 : 3
-                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b,1,:,t), param_s(1,b+1,1,:,t), param_s(1,b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1,1,:,t), param_s(1,b,1,:,t), param_s(1,b+1,1,:,t));
+                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(l_now(j),b,n_now(j),:,t), param_s(l_now(j),b+1,n_now(j),:,t), param_s(l_now(j),b+2,n_now(j),:,t)) + De_reg{1,2,1,x}(param_s(l_now(j),b-1,n_now(j),:,t), param_s(l_now(j),b,n_now(j),:,t), param_s(l_now(j),b+1,n_now(j),:,t));
                             end
                         elseif b == m_max - 1
                             for x = 1 : 3
-                                DEreg(b,x) = De_reg{1,3,1,x}(param_s(1,b-2,1,:,t), param_s(1,b-1,1,:,t), param_s(1,b,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1,1,:,t), param_s(1,b,1,:,t), param_s(1,b+1,1,:,t));
+                                DEreg(b,x) = De_reg{1,3,1,x}(param_s(l_now(j),b-2,n_now(j),:,t), param_s(l_now(j),b-1,n_now(j),:,t), param_s(l_now(j),b,n_now(j),:,t)) + De_reg{1,2,1,x}(param_s(l_now(j),b-1,n_now(j),:,t), param_s(l_now(j),b,n_now(j),:,t), param_s(l_now(j),b+1,n_now(j),:,t));
                             end
                         else
                             for x = 1 : 3
-                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(1,b,1,:,t), param_s(1,b+1,1,:,t), param_s(1,b+2,1,:,t)) + De_reg{1,2,1,x}(param_s(1,b-1,1,:,t), param_s(1,b,1,:,t), param_s(1,b+1,1,:,t)) + De_reg{1,3,1,x}(param_s(1,b-2,1,:,t), param_s(1,b-1,1,:,t), param_s(1,b,1,:,t));
+                                DEreg(b,x) = De_reg{1,1,1,x}(param_s(l_now(j),b,n_now(j),:,t), param_s(l_now(j),b+1,n_now(j),:,t), param_s(l_now(j),b+2,n_now(j),:,t)) + De_reg{1,2,1,x}(param_s(l_now(j),b-1,n_now(j),:,t), param_s(l_now(j),b,n_now(j),:,t), param_s(l_now(j),b+1,n_now(j),:,t)) + De_reg{1,3,1,x}(param_s(l_now(j),b-2,n_now(j),:,t), param_s(l_now(j),b-1,n_now(j),:,t), param_s(l_now(j),b,n_now(j),:,t));
                             end
                         end
 
                         % 格子点の更新
-                        param_s(1,b,1,1,t+1) = param_s(1,b,1,1,t) - eta_s1 * DE1(b,1) - Ereg_coef * DEreg(b,1);
-                        param_s(1,b,1,2,t+1) = param_s(1,b,1,2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
-                        param_s(1,b,1,3,t+1) = param_s(1,b,1,3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
+                        param_s(l_now(j),b,n_now(j),1,t+1) = param_s(l_now(j),b,n_now(j),1,t) - eta_s1 * DE1(b,1) - Ereg_coef * DEreg(b,1);
+                        param_s(l_now(j),b,n_now(j),2,t+1) = param_s(l_now(j),b,n_now(j),2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
+                        param_s(l_now(j),b,n_now(j),3,t+1) = param_s(l_now(j),b,n_now(j),3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
 
                         param_s(1,1,1,:,t+1) = [1 1 pi/4];
                         param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
@@ -563,9 +575,9 @@ for i = 1 : imax
                         end
 
                         % 格子点の更新
-                        param_s(1,b,1,1,t+1) = param_s(1,b,1,1,t) - eta_s1 * DE1(b,1) - Ereg_coef * DEreg(b,1);
-                        param_s(1,b,1,2,t+1) = param_s(1,b,1,2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
-                        param_s(1,b,1,3,t+1) = param_s(1,b,1,3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
+                        param_s(l_now(j),b,n_now(j),1,t+1) = param_s(l_now(j),b,n_now(j),1,t) - eta_s1 * DE1(b,1) - Ereg_coef * DEreg(b,1);
+                        param_s(l_now(j),b,n_now(j),2,t+1) = param_s(l_now(j),b,n_now(j),2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
+                        param_s(l_now(j),b,n_now(j),3,t+1) = param_s(l_now(j),b,n_now(j),3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
 
                         param_s(1,1,1,:,t+1) = [1 1 pi/4];
                         param_s(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
