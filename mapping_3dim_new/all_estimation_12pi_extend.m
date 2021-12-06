@@ -7,7 +7,7 @@ tic
 
 %---格子点選択および更新-----------------------------------------------------------------
 
-imax = 3;
+imax = 2;
 
 % sa = sym('sa',[2*l_max-1 2*m_max-1 2*n_max-1 3]); % l,m,nの順
 
@@ -116,7 +116,11 @@ for i = 1 : imax
     eta_s2 = 0.0 * 10 ^ (-6);
     % eta_s3 = 1.0 * 10 ^ (-3);
 
-    iteration = 1224;
+    if i == 1
+        iteration = 1224;
+    elseif i == 2
+        iteration = 4000;
+    end
 
     stop_switch = 0;
 
@@ -455,8 +459,8 @@ for i = 1 : imax
                     eta_s3 = 7.5 * 10 ^ (-4);
                     Ereg_coef = 5.0 * 10 ^ (-6);
                 else
-                    eta_s3 = 7.5 * 10 ^ (-3);
-                    Ereg_coef = 2.5 * 10 ^ (-1);
+                    eta_s3 = 7.5 * 10 ^ (-8);
+                    Ereg_coef = 3.25 * 10 ^ (-1);
                 end
 
                 for j = 1 : length(k1) - 1

@@ -549,35 +549,22 @@ for i = 1 : imax
 
         % 推定結果のplot--------------------------------------
 
-        % if i == imax - 2 
-        %     tiledlayout(3,2);
-        % end
-
         figure;
         hold on;
         grid on;
 
-        axis([-0.1 1.2 -0.02 0.8]) % π/2 ≒ 1.57
+        axis([0 2 0.5 2.5 pi/6 pi])
 
-        plot(si_c1(:,3), si_c1(:,1), '--m', si_c1(:,3), z1_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
-        xlabel("s_3' = θ'",'fontsize',18)
-        ylabel("z_1",'fontsize',18)
-        legend(" True values： s_1'",' Estimated values','fontsize',16)
+        z = 1:1:9;
 
-        hold off;
-
-        % nexttile
-
-        figure;
-        hold on;
-        grid on;
-
-        axis([-0.1 1.2 -0.1 2.5]) % π/2 ≒ 1.57
-
-        plot(si_c1(:,3), tan(si_c1(:,3)), '--m', si_c1(:,3), z2_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
-        xlabel("s_3' = θ'",'fontsize',14)
-        ylabel("z_2",'fontsize',14)
-        legend(" True values: tan(s_3')",' Estimated values','fontsize',14)
+        plot3(param_s(1,z,1,1,iteration), param_s(1,z,1,2,iteration),param_s(1,z,1,3,iteration),'ko',...
+              param_s(2,z,1,1,iteration), param_s(2,z,1,2,iteration),param_s(2,z,1,3,iteration),'ko',...
+              param_s(1,z,2,1,iteration), param_s(1,z,2,2,iteration),param_s(1,z,2,3,iteration),'ko',...
+              param_s(2,z,2,1,iteration), param_s(2,z,2,2,iteration),param_s(2,z,2,3,iteration),'ko')
+        xlabel("x [m]",'fontsize',16)
+        ylabel("y [m]",'fontsize',16)
+        zlabel("θ [rad]",'fontsize',16)
+        % legend(" True values： s_1'",' Estimated values','fontsize',16)
 
         hold off;
 
@@ -585,26 +572,96 @@ for i = 1 : imax
         hold on;
         grid on;
 
-        axis([-0.1 1.2 -0.02 0.6]) % π/2 ≒ 1.57
+        z = 1:1:9;
 
-        plot(si_c1(:,3), si_c1(:,2), '--m', si_c1(:,3), z3_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z3 = f3(s) = s2 の答え合わせ
-        xlabel("s_3' = θ'",'fontsize',18)
-        ylabel("z_3",'fontsize',18)
-        legend(" True values： s_2'",' Estimated values','fontsize',16)
+        axis([0 2 0.5 2.5 pi/6 pi])
+
+        plot3(param_s(1,z,1,1,1), param_s(1,z,1,2,1),param_s(1,z,1,3,1),'ko',...
+              param_s(2,z,1,1,1), param_s(2,z,1,2,1),param_s(2,z,1,3,1),'ko',...
+              param_s(1,z,2,1,1), param_s(1,z,2,2,1),param_s(1,z,2,3,1),'ko',...
+              param_s(2,z,2,1,1), param_s(2,z,2,2,1),param_s(2,z,2,3,1),'ko')
+        xlabel("x [m]",'fontsize',16)
+        ylabel("y [m]",'fontsize',16)
+        zlabel("θ [rad]",'fontsize',16)
+        % legend(" True values： s_1'",' Estimated values','fontsize',16)
 
         hold off;
 
-        %---g,hの導出--------------------------------------------------------
 
-        g_b1 = zeros(length(k1)-1,1);
-        h_b1 = zeros(length(k1)-1,1);
+        % figure;
+        % hold on;
+        % grid on;
 
-        for j = 1 : length(k1) - 1
+        % z = 1:1:9;
+
+        % plot3(param_s(1,z,1,1,1), param_s(1,z,1,2,1),param_s(1,z,1,3,1),'ko',...
+        %       param_s(2,z,1,1,1), param_s(2,z,1,2,1),param_s(2,z,1,3,1),'ko',...
+        %       param_s(1,z,2,1,1), param_s(1,z,2,2,1),param_s(1,z,2,3,1),'ko',...
+        %       param_s(2,z,2,1,1), param_s(2,z,2,2,1),param_s(2,z,2,3,1),'ko',...
+        %       param_s(1,z,1,1,iteration), param_s(1,z,1,2,iteration),param_s(1,z,1,3,iteration),'ro',...
+        %       param_s(2,z,1,1,iteration), param_s(2,z,1,2,iteration),param_s(2,z,1,3,iteration),'ro',...
+        %       param_s(1,z,2,1,iteration), param_s(1,z,2,2,iteration),param_s(1,z,2,3,iteration),'ro',...
+        %       param_s(2,z,2,1,iteration), param_s(2,z,2,2,iteration),param_s(2,z,2,3,iteration),'ro')
+        % xlabel("s_3' = θ'",'fontsize',18)
+        % ylabel("z_1",'fontsize',18)
+        % zlabel("m",'fontsize',18)
+        % % legend(" True values： s_1'",' Estimated values','fontsize',16)
+
+        % hold off;
+
+
+        % figure;
+        % hold on;
+        % grid on;
+
+        % axis([-0.1 1.2 -0.02 0.8]) % π/2 ≒ 1.57
+
+        % plot(si_c1(:,3), si_c1(:,1), '--m', si_c1(:,3), z1_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
+        % xlabel("s_3' = θ'",'fontsize',18)
+        % ylabel("z_1",'fontsize',18)
+        % legend(" True values： s_1'",' Estimated values','fontsize',16)
+
+        % hold off;
+
+        % % nexttile
+
+        % figure;
+        % hold on;
+        % grid on;
+
+        % axis([-0.1 1.2 -0.1 2.5]) % π/2 ≒ 1.57
+
+        % plot(si_c1(:,3), tan(si_c1(:,3)), '--m', si_c1(:,3), z2_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
+        % xlabel("s_3' = θ'",'fontsize',14)
+        % ylabel("z_2",'fontsize',14)
+        % legend(" True values: tan(s_3')",' Estimated values','fontsize',14)
+
+        % hold off;
+
+        % figure;
+        % hold on;
+        % grid on;
+
+        % axis([-0.1 1.2 -0.02 0.6]) % π/2 ≒ 1.57
+
+        % plot(si_c1(:,3), si_c1(:,2), '--m', si_c1(:,3), z3_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z3 = f3(s) = s2 の答え合わせ
+        % xlabel("s_3' = θ'",'fontsize',18)
+        % ylabel("z_3",'fontsize',18)
+        % legend(" True values： s_2'",' Estimated values','fontsize',16)
+
+        % hold off;
+
+        % %---g,hの導出--------------------------------------------------------
+
+        % g_b1 = zeros(length(k1)-1,1);
+        % h_b1 = zeros(length(k1)-1,1);
+
+        % for j = 1 : length(k1) - 1
         
-            g_b1(j) = ((z2_b1(j+1) - z2_b1(j)) * u1_b1(j)) / ((z1_b1(j+1) - z1_b1(j)) * u2_b1(j));
-            h_b1(j) = (z1_b1(j+1) - z1_b1(j)) / (u1_b1(j) * dk1);
+        %     g_b1(j) = ((z2_b1(j+1) - z2_b1(j)) * u1_b1(j)) / ((z1_b1(j+1) - z1_b1(j)) * u2_b1(j));
+        %     h_b1(j) = (z1_b1(j+1) - z1_b1(j)) / (u1_b1(j) * dk1);
 
-        end
+        % end
 
         % g_b1(length(k1)) = 2 * g_b1(length(k1)-1) - g_b1(length(k1)-2);
         % h_b1(length(k1)) = 2 * h_b1(length(k1)-1) - h_b1(length(k1)-2);

@@ -91,16 +91,16 @@ figure;
 hold on;
 grid on;
 
-axis([-5 5 -5 5]) % π/2 ≒ 1.57
+axis([-0.1 1.2 0 12.0]) % π/2 ≒ 1.57
 
 for i = 1 : length(k1)-1
     g_ans(i) = 1 / (cos(si_c1(i,3)) * cos(si_c1(i,3)) * cos(si_c1(i,3)));
 end
 
 plot(si_c1(1:length(k1)-1,3), g_ans(:), '--m', si_c1(1:length(k1)-1,3), g_est(:), '-k', si_c1(1:length(k1)-1,3), g_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-xlabel("s3' = θ")
-ylabel('g')
-legend("真値：1/cos^3(s3')",'推定値：g')
+xlabel("s'_3 = θ'",'FontSize',14)
+ylabel('g','FontSize',14)
+legend(" True mapping： 1/cos^3(s_3')",' Estimated mapping： g',' Training data','FontSize',14)
 
 hold off;
 
@@ -109,12 +109,12 @@ figure;
 hold on;
 grid on;
 
-axis([-5 5 -5 5]) % π/2 ≒ 1.57
+axis([-0.1 1.2 0.38 1.1]) % π/2 ≒ 1.57
 
 plot(si_c1(1:length(k1)-1,3), cos(si_c1(1:length(k1)-1,3)), '--m', si_c1(1:length(k1)-1,3), h_est(:), '-k', si_c1(1:length(k1)-1,3), h_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-xlabel("s3' = θ")
-ylabel("h")
-legend("真値：cos(s3')",'推定値：h')
+xlabel("s_3' = θ'",'FontSize',14)
+ylabel("h",'FontSize',14)
+legend(" True mapping： cos(s_3')",' Estimated mapping： h',' Training data','FontSize',14)
 
 hold off;
 

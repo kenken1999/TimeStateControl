@@ -11,8 +11,9 @@ t1 = [0:dt:Tfin];
 
 si = zeros(length(t1),3);
 si(1,:) = [1.25 2 pi/2]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
-% si(1,:) = [1.2 1.95 pi/2]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
 % si(1,:) = [1.1 2 7*pi/12]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+% si(1,:) = [1.4 1.85 5*pi/12]; %(s1, s2, s3)=(x ,y, θ)の初期値を設定
+
 
 zi = zeros(length(t1),3);
 
@@ -96,24 +97,18 @@ for i = 1:length(t1)-1
 
     set(h2, 'XData', si(i,1) + 0.1 * cos(si(i,3)),'YData', si(i,2) + 0.1 * sin(si(i,3)));
 
-    set(gcf, 'Color', 'white'); % figureの背景を透明に設定
-    set(gca, 'Color', 'white'); % axisの背景を透明に設定
-
     drawnow;
 
-    xlabel("x",'FontSize',16)
-    ylabel("y",'FontSize',16)
-
     F = getframe(gcf);
-    % RGBデータをインデックス付きデータに変更
-    [X,map] = rgb2ind(F.cdata,256);
-    if i==1
-        % GIFファイルに書き出し
-        imwrite(X,map,'feedback_3dim.gif')
-    else
-        % 2回目以降は'append'でアニメーションを作成
-        imwrite(X,map,'feedback_3dim.gif','WriteMode','append')
-    end
+      % RGBデータをインデックス付きデータに変更
+      [X,map] = rgb2ind(F.cdata,256);
+      if i==1
+          % GIFファイルに書き出し
+          imwrite(X,map,'feedback_3dim.gif')
+      else
+          % 2回目以降は'append'でアニメーションを作成
+          imwrite(X,map,'feedback_3dim.gif','WriteMode','append')
+      end
 
     si(i+1,3) = si(i,3) + u2(i) * dt; %観測されるs3
     si(i+1,1) = si(i,1) + u1(i) * cos(si(i+1,3)) * dt; %観測されるs1
@@ -268,3 +263,33 @@ for i = 1:length(t1)-1
     u2(i+1) = m2(i+1) * u1(i+1) / gmap(i+1);
 
 end
+
+target = ones(length(t1),1);
+target2 = ones(length(t1),1) * (pi/4);
+
+tiledlayout(3,1);
+
+nexttile
+
+% axis([-0.2 3.2 0.95 1.3])
+
+plot(t1, target, '--k', t1, si(:,1), '-k','LineWidth', 2)
+% xlabel("time [s]",'fontsize',16)
+ylabel("x [m]",'fontsize',16)
+
+nexttile
+
+% axis([-0.2 3.2 0.95 1.8])
+
+plot(t1, target, '--k', t1, si(:,2), '-k','LineWidth', 2)
+% xlabel("time [s]",'fontsize',16)
+ylabel("y [m]",'fontsize',16)
+
+nexttile
+
+% axis([-0.2 3.2 0.95 1.8])
+
+plot(t1, target2, '--k', t1, si(:,3), '-k','LineWidth', 2)
+xlabel("time [s]",'fontsize',16)
+ylabel("θ [rad]",'fontsize',16)
+
