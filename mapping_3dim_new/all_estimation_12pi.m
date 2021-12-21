@@ -557,12 +557,12 @@ for i = 1 : imax
         hold on;
         grid on;
 
-        axis([-0.1 1.2 -0.02 0.8]) % π/2 ≒ 1.57
+        axis([-0.1 1.178 -0.02 0.8]) % π/2 ≒ 1.57
 
         plot(si_c1(:,3), si_c1(:,1), '--m', si_c1(:,3), z1_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
-        xlabel("s_3' = θ'",'fontsize',18)
+        xlabel("s_3' = θ' [rad]",'fontsize',18)
         ylabel("z_1",'fontsize',18)
-        legend(" True values： s_1'",' Estimated values','fontsize',16)
+        legend(" True values： s_1'",' Estimated values','fontsize',20)
 
         hold off;
 
@@ -572,12 +572,12 @@ for i = 1 : imax
         hold on;
         grid on;
 
-        axis([-0.1 1.2 -0.1 2.5]) % π/2 ≒ 1.57
+        axis([-0.1 1.178 -0.1 2.5]) % π/2 ≒ 1.57
 
         plot(si_c1(:,3), tan(si_c1(:,3)), '--m', si_c1(:,3), z2_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
-        xlabel("s_3' = θ'",'fontsize',14)
-        ylabel("z_2",'fontsize',14)
-        legend(" True values: tan(s_3')",' Estimated values','fontsize',14)
+        xlabel("s_3' = θ' [rad]",'fontsize',18)
+        ylabel("z_2",'fontsize',18)
+        legend(" True values: tan(s_3')",' Estimated values','fontsize',20)
 
         hold off;
 
@@ -585,12 +585,28 @@ for i = 1 : imax
         hold on;
         grid on;
 
-        axis([-0.1 1.2 -0.02 0.6]) % π/2 ≒ 1.57
+        axis([-0.1 1.178 -0.02 0.6]) % π/2 ≒ 1.57
 
         plot(si_c1(:,3), si_c1(:,2), '--m', si_c1(:,3), z3_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z3 = f3(s) = s2 の答え合わせ
-        xlabel("s_3' = θ'",'fontsize',18)
+        xlabel("s_3' = θ' [rad]",'fontsize',18)
         ylabel("z_3",'fontsize',18)
-        legend(" True values： s_2'",' Estimated values','fontsize',16)
+        legend(" True values： s_2'",' Estimated values','fontsize',20)
+
+        hold off;
+
+
+        % 2D→1Dのグラフ（3D→1Dは可視化できないため）
+        figure;
+        hold on;
+        grid on;
+
+        axis([-0.1 1.178 -0.1 1.0 0 3.0]) % π/2 ≒ 1.57
+
+        plot3(si_c1(:,3), si_c1(:,1), tan(si_c1(:,3)), '--m', si_c1(:,3), si_c1(:,1), z2_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+        xlabel("s'_3 [rad]",'fontsize',18)
+        ylabel("s'_1 [m]",'fontsize',18)
+        zlabel("z_2",'fontsize',18)
+        legend(" True values: tan(s'_3)",' Estimated values','fontsize',20)
 
         hold off;
 

@@ -555,154 +555,90 @@ for i = 1 : imax
 
         axis([0 2 0.5 2.5 pi/6 pi])
 
-        z = 1:1:9;
+        for a = 1:2
+            for b = 1:9
+                for c = 1:2
 
-        plot3(param_s(1,z,1,1,iteration), param_s(1,z,1,2,iteration),param_s(1,z,1,3,iteration),'ko',...
-              param_s(2,z,1,1,iteration), param_s(2,z,1,2,iteration),param_s(2,z,1,3,iteration),'ko',...
-              param_s(1,z,2,1,iteration), param_s(1,z,2,2,iteration),param_s(1,z,2,3,iteration),'ko',...
-              param_s(2,z,2,1,iteration), param_s(2,z,2,2,iteration),param_s(2,z,2,3,iteration),'ko')
+                    if b == 1
+                        plot3(param_s(a,1:9,c,1,1), param_s(a,1:9,c,2,1),param_s(a,1:9,c,3,1),'ko:')
+                    end
+                    if a == 1
+                        plot3(param_s(:,b,c,1,1), param_s(:,b,c,2,1),param_s(:,b,c,3,1),'k:')
+                    end
+                    
+                end
+            end
+        end
+
+        % plot3のための順番変更
+        for i = 1:2
+            for a = 1:2
+                for b = 1:9
+                    for d = 1:3
+                        tmp(i,a,b,d) = param_s(a,b,i,d,1);
+                    end
+                end
+            end
+        end
+
+        for a = 1:2
+            for b = 1:9
+                plot3(tmp(:,a,b,1),tmp(:,a,b,2),tmp(:,a,b,3),'k:');
+            end
+        end
+
         xlabel("x [m]",'fontsize',16)
         ylabel("y [m]",'fontsize',16)
         zlabel("θ [rad]",'fontsize',16)
-        % legend(" True values： s_1'",' Estimated values','fontsize',16)
 
         hold off;
+
+
 
         figure;
         hold on;
         grid on;
 
-        z = 1:1:9;
-
         axis([0 2 0.5 2.5 pi/6 pi])
 
-        plot3(param_s(1,z,1,1,1), param_s(1,z,1,2,1),param_s(1,z,1,3,1),'ko',...
-              param_s(2,z,1,1,1), param_s(2,z,1,2,1),param_s(2,z,1,3,1),'ko',...
-              param_s(1,z,2,1,1), param_s(1,z,2,2,1),param_s(1,z,2,3,1),'ko',...
-              param_s(2,z,2,1,1), param_s(2,z,2,2,1),param_s(2,z,2,3,1),'ko')
+        for a = 1:2
+            for b = 1:9
+                for c = 1:2
+
+                    if b == 1
+                        plot3(param_s(a,1:9,c,1,iteration), param_s(a,1:9,c,2,iteration),param_s(a,1:9,c,3,iteration),'ko:')
+                    end
+                    if a == 1
+                        plot3(param_s(:,b,c,1,iteration), param_s(:,b,c,2,iteration),param_s(:,b,c,3,iteration),'k:')
+                    end
+                    
+                end
+            end
+        end
+
+        % plot3のための順番変更
+        for i = 1:2
+            for a = 1:2
+                for b = 1:9
+                    for d = 1:3
+                        tmp2(i,a,b,d) = param_s(a,b,i,d,iteration);
+                    end
+                end
+            end
+        end
+
+        for a = 1:2
+            for b = 1:9
+                plot3(tmp2(:,a,b,1),tmp2(:,a,b,2),tmp2(:,a,b,3),'k:');
+            end
+        end
+
         xlabel("x [m]",'fontsize',16)
         ylabel("y [m]",'fontsize',16)
         zlabel("θ [rad]",'fontsize',16)
-        % legend(" True values： s_1'",' Estimated values','fontsize',16)
 
         hold off;
 
-
-        % figure;
-        % hold on;
-        % grid on;
-
-        % z = 1:1:9;
-
-        % plot3(param_s(1,z,1,1,1), param_s(1,z,1,2,1),param_s(1,z,1,3,1),'ko',...
-        %       param_s(2,z,1,1,1), param_s(2,z,1,2,1),param_s(2,z,1,3,1),'ko',...
-        %       param_s(1,z,2,1,1), param_s(1,z,2,2,1),param_s(1,z,2,3,1),'ko',...
-        %       param_s(2,z,2,1,1), param_s(2,z,2,2,1),param_s(2,z,2,3,1),'ko',...
-        %       param_s(1,z,1,1,iteration), param_s(1,z,1,2,iteration),param_s(1,z,1,3,iteration),'ro',...
-        %       param_s(2,z,1,1,iteration), param_s(2,z,1,2,iteration),param_s(2,z,1,3,iteration),'ro',...
-        %       param_s(1,z,2,1,iteration), param_s(1,z,2,2,iteration),param_s(1,z,2,3,iteration),'ro',...
-        %       param_s(2,z,2,1,iteration), param_s(2,z,2,2,iteration),param_s(2,z,2,3,iteration),'ro')
-        % xlabel("s_3' = θ'",'fontsize',18)
-        % ylabel("z_1",'fontsize',18)
-        % zlabel("m",'fontsize',18)
-        % % legend(" True values： s_1'",' Estimated values','fontsize',16)
-
-        % hold off;
-
-
-        % figure;
-        % hold on;
-        % grid on;
-
-        % axis([-0.1 1.2 -0.02 0.8]) % π/2 ≒ 1.57
-
-        % plot(si_c1(:,3), si_c1(:,1), '--m', si_c1(:,3), z1_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
-        % xlabel("s_3' = θ'",'fontsize',18)
-        % ylabel("z_1",'fontsize',18)
-        % legend(" True values： s_1'",' Estimated values','fontsize',16)
-
-        % hold off;
-
-        % % nexttile
-
-        % figure;
-        % hold on;
-        % grid on;
-
-        % axis([-0.1 1.2 -0.1 2.5]) % π/2 ≒ 1.57
-
-        % plot(si_c1(:,3), tan(si_c1(:,3)), '--m', si_c1(:,3), z2_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z1 = f1(s) = s1 の答え合わせ
-        % xlabel("s_3' = θ'",'fontsize',14)
-        % ylabel("z_2",'fontsize',14)
-        % legend(" True values: tan(s_3')",' Estimated values','fontsize',14)
-
-        % hold off;
-
-        % figure;
-        % hold on;
-        % grid on;
-
-        % axis([-0.1 1.2 -0.02 0.6]) % π/2 ≒ 1.57
-
-        % plot(si_c1(:,3), si_c1(:,2), '--m', si_c1(:,3), z3_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5) %z3 = f3(s) = s2 の答え合わせ
-        % xlabel("s_3' = θ'",'fontsize',18)
-        % ylabel("z_3",'fontsize',18)
-        % legend(" True values： s_2'",' Estimated values','fontsize',16)
-
-        % hold off;
-
-        % %---g,hの導出--------------------------------------------------------
-
-        % g_b1 = zeros(length(k1)-1,1);
-        % h_b1 = zeros(length(k1)-1,1);
-
-        % for j = 1 : length(k1) - 1
-        
-        %     g_b1(j) = ((z2_b1(j+1) - z2_b1(j)) * u1_b1(j)) / ((z1_b1(j+1) - z1_b1(j)) * u2_b1(j));
-        %     h_b1(j) = (z1_b1(j+1) - z1_b1(j)) / (u1_b1(j) * dk1);
-
-        % end
-
-        % g_b1(length(k1)) = 2 * g_b1(length(k1)-1) - g_b1(length(k1)-2);
-        % h_b1(length(k1)) = 2 * h_b1(length(k1)-1) - h_b1(length(k1)-2);
-
-
-        % 推定結果のplot--------------------------------------
-
-        % nexttile
-
-        % figure;
-        % hold on;
-        % grid on;
-
-        % axis([-0.1 1.2 -0.1 10]) % π/2 ≒ 1.57
-
-        % g_ans = zeros(length(k1)-1,1);
-
-        % for j = 1 : length(k1)-1
-        %     g_ans(j) = 1 / (cos(si_c1(j,3)) * cos(si_c1(j,3)) * cos(si_c1(j,3)));
-        % end
-
-        % plot(si_c1(1:length(k1)-1,3), g_ans(:), '--m', si_c1(1:length(k1)-1,3), g_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-        % xlabel("s3' = θ")
-        % ylabel('g')
-        % legend("真値：1/cos^3(s3')",'推定値：g')
-
-        % hold off;
-
-
-        % figure;
-        % hold on;
-        % grid on;
-
-        % axis([-5 5 -5 5]) % π/2 ≒ 1.57
-
-        % plot(si_c1(:,3), cos(si_c1(:,3)), '--m', si_c1(:,3), h_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-        % xlabel("s3' = θ")
-        % ylabel("h")
-        % legend("真値：cos(s3')",'推定値：h')
-
-        % hold off;
 
     end
 
