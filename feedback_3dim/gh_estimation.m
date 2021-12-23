@@ -87,20 +87,53 @@ h_est = phi_h * w_h;
 
 %---g,hのplot--------------------------------------------------------
 
+% figure;
+% hold on;
+% grid on;
+
+% axis([-0.1 1.178 0 12.0]) % π/2 ≒ 1.57
+
+% for i = 1 : length(k1)-1
+%     g_ans(i) = 1 / (cos(si_c1(i,3)) * cos(si_c1(i,3)) * cos(si_c1(i,3)));
+% end
+
+% plot(si_c1(1:length(k1)-1,3), g_ans(:), '--m', si_c1(1:length(k1)-1,3), g_est(:), '-k', si_c1(1:length(k1)-1,3), g_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+% xlabel("s_3' = θ' [rad]",'FontSize',14)
+% ylabel('g','FontSize',14)
+% legend(" True mapping： 1/cos^3(s_3')",' Estimated mapping： g',' Training data','FontSize',14)
+
+% hold off;
+
+
+% figure;
+% hold on;
+% grid on;
+
+% axis([-0.1 1.178 0.38 1.2]) % π/2 ≒ 1.57
+
+% plot(si_c1(1:length(k1)-1,3), cos(si_c1(1:length(k1)-1,3)), '--m', si_c1(1:length(k1)-1,3), h_est(:), '-k', si_c1(1:length(k1)-1,3), h_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+% xlabel("s_3' = θ' [rad]",'FontSize',14)
+% ylabel("h",'FontSize',14)
+% legend(" True mapping： cos(s_3')",' Estimated mapping： h',' Training data','FontSize',14)
+
+% hold off;
+
+
 figure;
 hold on;
 grid on;
 
-axis([-0.1 1.178 0 12.0]) % π/2 ≒ 1.57
+axis([0.75 1.96 0.95 1.4 0 15.0]) % π/2 ≒ 1.57
 
 for i = 1 : length(k1)-1
     g_ans(i) = 1 / (cos(si_c1(i,3)) * cos(si_c1(i,3)) * cos(si_c1(i,3)));
 end
 
-plot(si_c1(1:length(k1)-1,3), g_ans(:), '--m', si_c1(1:length(k1)-1,3), g_est(:), '-k', si_c1(1:length(k1)-1,3), g_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-xlabel("s_3' = θ' [rad]",'FontSize',14)
-ylabel('g','FontSize',14)
-legend(" True mapping： 1/cos^3(s_3')",' Estimated mapping： g',' Training data','FontSize',14)
+plot3(si_b1(1:length(k1)-1,3),si_b1(1:length(k1)-1,1), g_ans(:), '--m', si_b1(1:length(k1)-1,3),si_b1(1:length(k1)-1,1), g_est(:), '-k', si_b1(1:length(k1)-1,3), si_b1(1:length(k1)-1,1), g_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+xlabel("s_3 = \theta [rad]",'fontsize',18)
+ylabel("s_1 = x [m]",'fontsize',18)
+zlabel('g','FontSize',18)
+legend(" True mapping： 1/cos^3(\theta')",' Estimated mapping： g',' Training data','FontSize',18)
 
 hold off;
 
@@ -109,12 +142,13 @@ figure;
 hold on;
 grid on;
 
-axis([-0.1 1.178 0.38 1.2]) % π/2 ≒ 1.57
+axis([0.75 1.96 0.95 1.4 0.4 1.2]) % π/2 ≒ 1.57
 
-plot(si_c1(1:length(k1)-1,3), cos(si_c1(1:length(k1)-1,3)), '--m', si_c1(1:length(k1)-1,3), h_est(:), '-k', si_c1(1:length(k1)-1,3), h_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-xlabel("s_3' = θ' [rad]",'FontSize',14)
-ylabel("h",'FontSize',14)
-legend(" True mapping： cos(s_3')",' Estimated mapping： h',' Training data','FontSize',14)
+plot3(si_b1(1:length(k1)-1,3),si_b1(1:length(k1)-1,1), cos(si_c1(1:length(k1)-1,3)), '--m', si_b1(1:length(k1)-1,3), si_b1(1:length(k1)-1,1),h_est(:), '-k', si_b1(1:length(k1)-1,3),si_b1(1:length(k1)-1,1), h_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+xlabel("s_3 = \theta [rad]",'fontsize',18)
+ylabel("s_1 = x [m]",'fontsize',18)
+zlabel("h",'FontSize',18)
+legend(" True mapping： cos(\theta')",' Estimated mapping： h',' Training data','FontSize',18)
 
 hold off;
 
