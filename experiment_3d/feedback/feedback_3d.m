@@ -1,7 +1,7 @@
 clear;
 close all;
-load('../mapping_estimation/result_mat/z1z2z3_estimation.mat')
-load('../mapping_estimation/result_mat/gh_estimation.mat')
+load('../mapping_estimation/z1z2z3_estimation/z1z2z3_estimation.mat')
+load('../mapping_estimation/gh_estimation/gh_estimation.mat')
 
 %feedback_simulation------------------------------------------------------
 

@@ -1,32 +1,27 @@
 clear;
 close all;
 
-load('function/mat/z1z2z3_estimation_func.mat')
+load('function/z1z2z3_estimation_func.mat')
 
 tic
 
-%---格子点選択および更新-----------------------------------------------------------------
 
-l_max_now = 2;
-m_max_now = 10;
-n_max_now = 2;
+l_now = zeros(length(k),1);
+m_now = zeros(length(k),1);
+n_now = zeros(length(k),1);
 
-l_now = zeros(length(k1),1);
-m_now = zeros(length(k1),1);
-n_now = zeros(length(k1),1);
+l_next = zeros(length(k),1);
+m_next = zeros(length(k),1);
+n_next = zeros(length(k),1);
 
-l_next = zeros(length(k1),1);
-m_next = zeros(length(k1),1);
-n_next = zeros(length(k1),1);
+l_real = zeros(length(k),1);
+m_real = zeros(length(k),1);
+n_real = zeros(length(k),1);
 
-l_real = zeros(length(k1),1);
-m_real = zeros(length(k1),1);
-n_real = zeros(length(k1),1);
+rho_tmp = zeros(length(k), l_max, m_max, n_max, 3);
+rho = zeros(length(k),3);
 
-rho_tmp = zeros(length(k1), l_max, m_max, n_max, 3);
-rho = zeros(length(k1),3);
-
-b_mem = zeros(length(k1)-1, 1);
+b_mem = zeros(length(k)-1, 1);
 
 
 %---最急降下法による格子点更新-----------------------------------
@@ -36,34 +31,11 @@ eta_s1 = 0;
 eta_s2 = 0;
 % eta_s3 = 1.0 * 10 ^ (-3);
 
-iteration = 1224;
+iteration = 1224; % 現時点で最適
+% iteration = 2000;
 
-stop_switch = 0;
-
-% 格子点更新範囲の拡大
-if l_max_now < l_max
-    l_max_now = l_max_now + 1;
-else
-    l_max_now = l_max;
-end
-
-if m_max_now < m_max
-    m_max_now = m_max_now + 1;
-else
-    m_max_now = m_max;
-end
-
-if n_max_now < n_max
-    n_max_now = n_max_now + 1;
-else
-    n_max_now = n_max;
-end
-
-
-disp('m_max_now = ')
-disp(m_max_now)
-
-b_judge = zeros(m_max,length(k1)-1);
+E1_all_value = zeros(iteration,1);
+Ereg_all_value = zeros(iteration,1);
 
 
 for t = 1 : iteration - 1
@@ -73,7 +45,7 @@ for t = 1 : iteration - 1
     
     param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
 
-    for j = 1 : length(k1)
+    for j = 1 : length(k)
 
         for a = 1 : l_max - 1
             for b = 1 : m_max - 1
@@ -174,7 +146,7 @@ for t = 1 : iteration - 1
 
         end
 
-        % 誤差関数の偏微分後関数選択のための分類
+        % 誤差関数の偏微分後関数選択のためのパターン分け
         if j > 1
             if m_now(j) == m_now(j-1)
                 b_mem(j-1) = 1;
@@ -192,7 +164,7 @@ for t = 1 : iteration - 1
     DE1 = zeros(m_max,3);  % 誤差関数E_1の偏微分   
     DEreg = zeros(m_max,3);  % 正則化項の偏微分
 
-    for b = 1 : m_max_now  % m = 1&2 はfix
+    for b = 1 : m_max  % m = 1&2 はfix
 
         if b < 9
             eta_s3 = 7.5 * 10 ^ (-3);
@@ -202,72 +174,105 @@ for t = 1 : iteration - 1
             Ereg_coef = 2.0 * 10 ^ (-1);
         end
 
-        for j = 1 : length(k1) - 1
+        for j = 1 : length(k) - 1
             
-            % 時刻kの格子点とピッタリ一致した場合
-            if b == m_now(j)
-
-                b_judge(b,j) = 1;
+              % 時刻kの格子点とピッタリ一致した場合
+              if b == m_now(j)
 
                 if b_mem(j) == 1
+
                     for x = 1 : 3
                         DE1(b,x) = DE1(b,x) + De1_type1{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                     end
+
+                    % 誤差関数E1の作成
+                    E1_all_value(t) = E1_all_value(t) + e1_type1_func{j}(param_s(:,m_now(j):m_next(j),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                
                 elseif b_mem(j) == 2
+
                     for x = 1 : 3
                         DE1(b,x) = DE1(b,x) + De1_type2{j,1,1,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                     end
+
+                    % 誤差関数E1の作成
+                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+
                 else
+
                     for x = 1 : 3
                         DE1(b,x) = DE1(b,x) + De1_type3{j,1,1,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                     end
+
+                    % 誤差関数E1の作成
+                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+            
                 end
 
             elseif b == m_next(j) && b ~= m_now(j)
-
-                b_judge(b,j) = 2;
                 
                 if b_mem(j) == 1
+
                     for x = 1 : 3
                         DE1(b,x) = DE1(b,x) + De1_type1{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                     end
+
+                    % 誤差関数E1の作成
+                    E1_all_value(t) = E1_all_value(t) + e1_type1_func{j}(param_s(:,m_now(j):m_next(j),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+
                 elseif b_mem(j) == 2
+
                     for x = 1 : 3
                         DE1(b,x) = DE1(b,x) + De1_type2{j,1,2,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                     end
+
+                    % 誤差関数E1の作成
+                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+
                 else
+
                     for x = 1 : 3
                         DE1(b,x) = DE1(b,x) + De1_type3{j,1,2,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                     end
+
+                    % 誤差関数E1の作成
+                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+
                 end               
             
             elseif b == m_now(j+1) && b ~= m_now(j) && b ~= m_next(j)
-
-                b_judge(b,j) = 3;
                 
                 for x = 1 : 3
                     DE1(b,x) = DE1(b,x) + De1_type3{j,1,3,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                 end
+
+                % 誤差関数E1の作成
+                E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                 
             elseif b == m_next(j+1) && b ~= m_now(j) && b ~= m_next(j) && b ~= m_now(j+1)
-
-                b_judge(b,j) = 4;
                 
                 if b_mem(j) == 2
+
                     for x = 1 : 3
                         DE1(b,x) = DE1(b,x) + De1_type2{j,1,3,1,x}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                     end
+
+                    % 誤差関数E1の作成
+                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(param_s(:,m_now(j):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+
                 else
+
                     for x = 1 : 3
                         DE1(b,x) = DE1(b,x) + De1_type3{j,1,4,1,x}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
                     end
+
+                    % 誤差関数E1の作成
+                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(param_s(:,m_now(j):m_next(j),:,:,t), param_s(:,m_now(j+1):m_next(j+1),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+
                 end
 
-            else
-                b_judge(b,j) = 5;
             end
             
-            if j == length(k1) - 1
+            if j == length(k) - 1
 
                 % Eregの追加
                 if b == 1                    
@@ -312,36 +317,42 @@ for t = 1 : iteration - 1
     param_s(1,:,2,3,t+1) = param_s(1,:,1,3,t+1);
     param_s(2,:,2,3,t+1) = param_s(1,:,1,3,t+1);
 
+    % 誤差関数Eregの作成
+    for b = 2 : m_max-1
+        Ereg_all_value(t+1) = Ereg_all_value(t+1) + e_reg_func(param_s(1,b-1:b+1,1,:,t+1));
+    end
+
 end
 
+
 % 格子点の補助
-param_s(2,:,1,3,iteration) = param_s(1,:,1,3,iteration);
-param_s(1,:,2,3,iteration) = param_s(1,:,1,3,iteration);
-param_s(2,:,2,3,iteration) = param_s(1,:,1,3,iteration);
+% param_s(2,:,1,3,iteration) = param_s(1,:,1,3,iteration);
+% param_s(1,:,2,3,iteration) = param_s(1,:,1,3,iteration);
+% param_s(2,:,2,3,iteration) = param_s(1,:,1,3,iteration);
 
 % z1,z2,z3の推定結果取得--------------------------------------
 
-z1_b1 = zeros(length(k1),1);
-z2_b1 = zeros(length(k1),1);
-z3_b1 = zeros(length(k1),1);
+z1_b1 = zeros(length(k),1);
+z2_b1 = zeros(length(k),1);
+z3_b1 = zeros(length(k),1);
 
-l_now_2 = zeros(length(k1),1);
-m_now_2 = zeros(length(k1),1);
-n_now_2 = zeros(length(k1),1);
+l_now_2 = zeros(length(k),1);
+m_now_2 = zeros(length(k),1);
+n_now_2 = zeros(length(k),1);
 
-l_next_2 = zeros(length(k1),1);
-m_next_2 = zeros(length(k1),1);
-n_next_2 = zeros(length(k1),1);
+l_next_2 = zeros(length(k),1);
+m_next_2 = zeros(length(k),1);
+n_next_2 = zeros(length(k),1);
 
-l_real_2 = zeros(length(k1),1);
-m_real_2 = zeros(length(k1),1);
-n_real_2 = zeros(length(k1),1);
+l_real_2 = zeros(length(k),1);
+m_real_2 = zeros(length(k),1);
+n_real_2 = zeros(length(k),1);
 
-rho_2_tmp = zeros(length(k1), l_max, m_max, n_max, 3);
-rho_2 = zeros(length(k1),3);
+rho_2_tmp = zeros(length(k), l_max, m_max, n_max, 3);
+rho_2 = zeros(length(k),3);
 
 
-for j = 1:length(k1)
+for j = 1:length(k)
 
     for a = 1 : l_max - 1
         for b = 1 : m_max - 1
@@ -451,10 +462,25 @@ for j = 1:length(k1)
 
 end
 
+
+%---g_t, h_tの生成--------------------------------------------------------
+
+g_b1 = zeros(length(k)-1,1);
+h_b1 = zeros(length(k)-1,1);
+
+for j = 1 : length(k) - 1
+
+    g_b1(j) = ((z2_b1(j+1) - z2_b1(j)) * u1_b1(j)) / ((z1_b1(j+1) - z1_b1(j)) * u2_b1(j));
+    h_b1(j) = (z1_b1(j+1) - z1_b1(j)) / (u1_b1(j) * dk);
+
+end
+
+
 disp("####################")
 
 
-% 推定結果のplot--------------------------------------
+%--- z1, z2, z3の推定結果の描画 --------------------------------------
+
 % 2D→1Dのグラフ（3D→1Dは可視化できないため）
 figure;
 hold on;
@@ -500,53 +526,166 @@ legend(" True values: y'",' Estimated values','fontsize',20)
 
 hold off;
 
-%---g,hの導出--------------------------------------------------------
 
-g_b1 = zeros(length(k1)-1,1);
-h_b1 = zeros(length(k1)-1,1);
+%---g_t, h_tの描画--------------------------------------------------------
 
-for j = 1 : length(k1) - 1
+figure;
+hold on;
+grid on;
 
-    g_b1(j) = ((z2_b1(j+1) - z2_b1(j)) * u1_b1(j)) / ((z1_b1(j+1) - z1_b1(j)) * u2_b1(j));
-    h_b1(j) = (z1_b1(j+1) - z1_b1(j)) / (u1_b1(j) * dk1);
+axis([-0.2 1.4 -0.1 12]) % π/2 ≒ 1.57
 
+g_ans = zeros(length(k)-1,1);
+
+for j = 1 : length(k)-1
+    g_ans(j) = 1 / (cos(si_c1(j,3)) * cos(si_c1(j,3)) * cos(si_c1(j,3)));
 end
 
-% g_b1(length(k1)) = 2 * g_b1(length(k1)-1) - g_b1(length(k1)-2);
-% h_b1(length(k1)) = 2 * h_b1(length(k1)-1) - h_b1(length(k1)-2);
+plot(si_c1(1:length(k)-1,3), g_ans(:), '--m', si_c1(1:length(k)-1,3), g_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+xlabel("\theta' [rad]",'fontsize',18)
+ylabel('g_t', 'fontsize',18)
+legend("真値：1/cos^3(\theta')",'推定値：g_t')
+
+hold off;
 
 
 figure;
 hold on;
 grid on;
 
-axis([-0.1 1.2 -0.1 10]) % π/2 ≒ 1.57
+axis([-0.2 1.4 0.2 1.4]) % π/2 ≒ 1.57
 
-g_ans = zeros(length(k1)-1,1);
-
-for j = 1 : length(k1)-1
-    g_ans(j) = 1 / (cos(si_c1(j,3)) * cos(si_c1(j,3)) * cos(si_c1(j,3)));
-end
-
-plot(si_c1(1:length(k1)-1,3), g_ans(:), '--m', si_c1(1:length(k1)-1,3), g_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-xlabel("s3' = θ")
-ylabel('g')
-legend("真値：1/cos^3(s3')",'推定値：g')
+plot(si_c1(1:length(k)-1,3), cos(si_c1(1:length(k)-1,3)), '--m', si_c1(1:length(k)-1,3), h_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
+xlabel("\theta' [rad]", 'fontsize',18)
+ylabel("h_t", 'fontsize',18)
+legend("真値：cos(\theta')",'推定値：h_t')
 
 hold off;
+
+
+% %---格子点遷移の描画--------------------
+% figure;
+% hold on;
+% grid on;
+
+% axis([0 2 0.5 2.5 pi/6 pi])
+
+% for a = 1:2
+%     for b = 1:9
+%         for c = 1:2
+
+%             if b == 1
+%                 plot3(param_s(a,1:9,c,1,1), param_s(a,1:9,c,2,1),param_s(a,1:9,c,3,1),'ko:')
+%             end
+%             if a == 1
+%                 plot3(param_s(:,b,c,1,1), param_s(:,b,c,2,1),param_s(:,b,c,3,1),'k:')
+%             end
+            
+%         end
+%     end
+% end
+
+% % plot3のための順番変更
+% for i = 1:2
+%     for a = 1:2
+%         for b = 1:9
+%             for d = 1:3
+%                 tmp(i,a,b,d) = param_s(a,b,i,d,1);
+%             end
+%         end
+%     end
+% end
+
+% for a = 1:2
+%     for b = 1:9
+%         plot3(tmp(:,a,b,1),tmp(:,a,b,2),tmp(:,a,b,3),'k:');
+%     end
+% end
+
+% xlabel("x [m]",'fontsize',16)
+% ylabel("y [m]",'fontsize',16)
+% zlabel("θ [rad]",'fontsize',16)
+
+% hold off;
 
 
 % figure;
 % hold on;
 % grid on;
 
-% axis([-5 5 -5 5]) % π/2 ≒ 1.57
+% axis([0 2 0.5 2.5 pi/6 pi])
 
-% plot(si_c1(:,3), cos(si_c1(:,3)), '--m', si_c1(:,3), h_b1(:),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-% xlabel("s3' = θ")
-% ylabel("h")
-% legend("真値：cos(s3')",'推定値：h')
+% for a = 1:2
+%     for b = 1:9
+%         for c = 1:2
+
+%             if b == 1
+%                 plot3(param_s(a,1:9,c,1,iteration), param_s(a,1:9,c,2,iteration),param_s(a,1:9,c,3,iteration),'ko:')
+%             end
+%             if a == 1
+%                 plot3(param_s(:,b,c,1,iteration), param_s(:,b,c,2,iteration),param_s(:,b,c,3,iteration),'k:')
+%             end
+            
+%         end
+%     end
+% end
+
+% % plot3のための順番変更
+% for i = 1:2
+%     for a = 1:2
+%         for b = 1:9
+%             for d = 1:3
+%                 tmp2(i,a,b,d) = param_s(a,b,i,d,iteration);
+%             end
+%         end
+%     end
+% end
+
+% for a = 1:2
+%     for b = 1:9
+%         plot3(tmp2(:,a,b,1),tmp2(:,a,b,2),tmp2(:,a,b,3),'k:');
+%     end
+% end
+
+% xlabel("x [m]",'fontsize',16)
+% ylabel("y [m]",'fontsize',16)
+% zlabel("θ [rad]",'fontsize',16)
 
 % hold off;
+
+
+% %--- 誤差関数Eのグラフ --------------------------------------
+
+% figure;
+% hold on;
+% grid on;
+
+% axis([0 2000 -0.1 12]) % π/2 ≒ 1.57
+
+% plot(0:1:iteration-1, E1_all_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
+% xlabel("t")
+% ylabel('E1')
+% % legend("真値：1/cos^3(s3')",'推定値：g')
+
+% hold off;
+
+
+% figure;
+% hold on;
+% grid on;
+
+% axis([0 2000 -0.01 0.1]) % π/2 ≒ 1.57
+
+% plot(0:1:iteration-1, Ereg_all_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
+% xlabel("t")
+% ylabel('Ereg')
+% % legend("真値：1/cos^3(s3')",'推定値：g')
+
+% hold off;
+
+
+% matファイルへの保存
+save z1z2z3_estimation.mat
+
 
 toc

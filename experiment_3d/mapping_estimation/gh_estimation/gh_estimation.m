@@ -1,6 +1,6 @@
 clear;
 close all;
-load('../mat/z1z2z3_estimation.mat')
+load('../z1z2z3_estimation/z1z2z3_estimation.mat')
 
 tic
 
@@ -87,38 +87,6 @@ h_est = phi_h * w_h;
 
 %---g,hのplot--------------------------------------------------------
 
-% figure;
-% hold on;
-% grid on;
-
-% axis([-0.1 1.178 0 12.0]) % π/2 ≒ 1.57
-
-% for i = 1 : length(k1)-1
-%     g_ans(i) = 1 / (cos(si_c1(i,3)) * cos(si_c1(i,3)) * cos(si_c1(i,3)));
-% end
-
-% plot(si_c1(1:length(k1)-1,3), g_ans(:), '--m', si_c1(1:length(k1)-1,3), g_est(:), '-k', si_c1(1:length(k1)-1,3), g_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-% xlabel("s_3' = θ' [rad]",'FontSize',14)
-% ylabel('g','FontSize',14)
-% legend(" True mapping： 1/cos^3(s_3')",' Estimated mapping： g',' Training data','FontSize',14)
-
-% hold off;
-
-
-% figure;
-% hold on;
-% grid on;
-
-% axis([-0.1 1.178 0.38 1.2]) % π/2 ≒ 1.57
-
-% plot(si_c1(1:length(k1)-1,3), cos(si_c1(1:length(k1)-1,3)), '--m', si_c1(1:length(k1)-1,3), h_est(:), '-k', si_c1(1:length(k1)-1,3), h_b1(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
-% xlabel("s_3' = θ' [rad]",'FontSize',14)
-% ylabel("h",'FontSize',14)
-% legend(" True mapping： cos(s_3')",' Estimated mapping： h',' Training data','FontSize',14)
-
-% hold off;
-
-
 figure;
 hold on;
 grid on;
@@ -153,5 +121,7 @@ legend(" True mapping： cos(\theta')",' Estimated mapping： h',' Training data
 hold off;
 
 
+% matファイルへの保存
+save gh_estimation.mat
 
 toc
