@@ -11,7 +11,6 @@ l_max_now = 2;
 m_max_now = 10;
 n_max_now = 2;
 
-
 l_now = zeros(length(k1),1);
 m_now = zeros(length(k1),1);
 n_now = zeros(length(k1),1);
@@ -70,7 +69,6 @@ b_judge = zeros(m_max,length(k1)-1);
 for t = 1 : iteration - 1
 
     %---格子点の選択---------------------
-
     break_switch = 0;
     
     param_s(:,:,:,:,t+1) = param_s(:,:,:,:,t);
@@ -191,10 +189,10 @@ for t = 1 : iteration - 1
 
     end
 
-    DE1 = zeros(m_max,3);
-    DEreg = zeros(m_max,3);
+    DE1 = zeros(m_max,3);  % 誤差関数E_1の偏微分   
+    DEreg = zeros(m_max,3);  % 正則化項の偏微分
 
-    for b = 1 : m_max_now % m = 1&2 はfix
+    for b = 1 : m_max_now  % m = 1&2 はfix
 
         if b < 9
             eta_s3 = 7.5 * 10 ^ (-3);
