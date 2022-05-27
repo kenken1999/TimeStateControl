@@ -5,15 +5,17 @@ load('function/z1z2z3_estimation_func.mat')
 
 tic
 
-
+% 時刻kで選択される格子点のインデックス{l,m,n}(>=1)
 l_now = zeros(length(k),1);
 m_now = zeros(length(k),1);
 n_now = zeros(length(k),1);
 
+% 時刻kで選択される格子点のインデックス{l,m,n} + 1
 l_next = zeros(length(k),1);
 m_next = zeros(length(k),1);
 n_next = zeros(length(k),1);
 
+% 時刻kで選択される格子点のインデックス{l,m,n}の整数値
 l_real = zeros(length(k),1);
 m_real = zeros(length(k),1);
 n_real = zeros(length(k),1);
@@ -21,7 +23,8 @@ n_real = zeros(length(k),1);
 rho_tmp = zeros(length(k), l_max, m_max, n_max, 3);
 rho = zeros(length(k),3);
 
-b_mem = zeros(length(k)-1, 1);
+% 偏微分後関数選択のためのパターン分け
+b_mem = zeros(length(k)-1, 1); 
 
 
 %---最急降下法による格子点更新-----------------------------------
@@ -563,125 +566,125 @@ legend("真値：cos(\theta')",'推定値：h_t')
 hold off;
 
 
-% %---格子点遷移の描画--------------------
-% figure;
-% hold on;
-% grid on;
+%---格子点遷移の描画--------------------
+figure;
+hold on;
+grid on;
 
-% axis([0 2 0.5 2.5 pi/6 pi])
+axis([0 2 0.5 2.5 pi/6 pi])
 
-% for a = 1:2
-%     for b = 1:9
-%         for c = 1:2
+for a = 1:2
+    for b = 1:9
+        for c = 1:2
 
-%             if b == 1
-%                 plot3(param_s(a,1:9,c,1,1), param_s(a,1:9,c,2,1),param_s(a,1:9,c,3,1),'ko:')
-%             end
-%             if a == 1
-%                 plot3(param_s(:,b,c,1,1), param_s(:,b,c,2,1),param_s(:,b,c,3,1),'k:')
-%             end
+            if b == 1
+                plot3(param_s(a,1:9,c,1,1), param_s(a,1:9,c,2,1),param_s(a,1:9,c,3,1),'ko:')
+            end
+            if a == 1
+                plot3(param_s(:,b,c,1,1), param_s(:,b,c,2,1),param_s(:,b,c,3,1),'k:')
+            end
             
-%         end
-%     end
-% end
+        end
+    end
+end
 
-% % plot3のための順番変更
-% for i = 1:2
-%     for a = 1:2
-%         for b = 1:9
-%             for d = 1:3
-%                 tmp(i,a,b,d) = param_s(a,b,i,d,1);
-%             end
-%         end
-%     end
-% end
+% plot3のための順番変更
+for i = 1:2
+    for a = 1:2
+        for b = 1:9
+            for d = 1:3
+                tmp(i,a,b,d) = param_s(a,b,i,d,1);
+            end
+        end
+    end
+end
 
-% for a = 1:2
-%     for b = 1:9
-%         plot3(tmp(:,a,b,1),tmp(:,a,b,2),tmp(:,a,b,3),'k:');
-%     end
-% end
+for a = 1:2
+    for b = 1:9
+        plot3(tmp(:,a,b,1),tmp(:,a,b,2),tmp(:,a,b,3),'k:');
+    end
+end
 
-% xlabel("x [m]",'fontsize',16)
-% ylabel("y [m]",'fontsize',16)
-% zlabel("θ [rad]",'fontsize',16)
+xlabel("x [m]",'fontsize',16)
+ylabel("y [m]",'fontsize',16)
+zlabel("θ [rad]",'fontsize',16)
 
-% hold off;
+hold off;
 
 
-% figure;
-% hold on;
-% grid on;
+figure;
+hold on;
+grid on;
 
-% axis([0 2 0.5 2.5 pi/6 pi])
+axis([0 2 0.5 2.5 pi/6 pi])
 
-% for a = 1:2
-%     for b = 1:9
-%         for c = 1:2
+for a = 1:2
+    for b = 1:9
+        for c = 1:2
 
-%             if b == 1
-%                 plot3(param_s(a,1:9,c,1,iteration), param_s(a,1:9,c,2,iteration),param_s(a,1:9,c,3,iteration),'ko:')
-%             end
-%             if a == 1
-%                 plot3(param_s(:,b,c,1,iteration), param_s(:,b,c,2,iteration),param_s(:,b,c,3,iteration),'k:')
-%             end
+            if b == 1
+                plot3(param_s(a,1:9,c,1,iteration), param_s(a,1:9,c,2,iteration),param_s(a,1:9,c,3,iteration),'ko:')
+            end
+            if a == 1
+                plot3(param_s(:,b,c,1,iteration), param_s(:,b,c,2,iteration),param_s(:,b,c,3,iteration),'k:')
+            end
             
-%         end
-%     end
-% end
+        end
+    end
+end
 
-% % plot3のための順番変更
-% for i = 1:2
-%     for a = 1:2
-%         for b = 1:9
-%             for d = 1:3
-%                 tmp2(i,a,b,d) = param_s(a,b,i,d,iteration);
-%             end
-%         end
-%     end
-% end
+% plot3のための順番変更
+for i = 1:2
+    for a = 1:2
+        for b = 1:9
+            for d = 1:3
+                tmp2(i,a,b,d) = param_s(a,b,i,d,iteration);
+            end
+        end
+    end
+end
 
-% for a = 1:2
-%     for b = 1:9
-%         plot3(tmp2(:,a,b,1),tmp2(:,a,b,2),tmp2(:,a,b,3),'k:');
-%     end
-% end
+for a = 1:2
+    for b = 1:9
+        plot3(tmp2(:,a,b,1),tmp2(:,a,b,2),tmp2(:,a,b,3),'k:');
+    end
+end
 
-% xlabel("x [m]",'fontsize',16)
-% ylabel("y [m]",'fontsize',16)
-% zlabel("θ [rad]",'fontsize',16)
+xlabel("x [m]",'fontsize',16)
+ylabel("y [m]",'fontsize',16)
+zlabel("θ [rad]",'fontsize',16)
 
-% hold off;
-
-
-% %--- 誤差関数Eのグラフ --------------------------------------
-
-% figure;
-% hold on;
-% grid on;
-
-% axis([0 2000 -0.1 12]) % π/2 ≒ 1.57
-
-% plot(0:1:iteration-1, E1_all_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
-% xlabel("t")
-% ylabel('E1')
-% % legend("真値：1/cos^3(s3')",'推定値：g')
-
-% hold off;
+hold off;
 
 
-% figure;
-% hold on;
-% grid on;
+%--- 誤差関数Eのグラフ --------------------------------------
 
-% axis([0 2000 -0.01 0.1]) % π/2 ≒ 1.57
+figure;
+hold on;
+grid on;
 
-% plot(0:1:iteration-1, Ereg_all_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
-% xlabel("t")
-% ylabel('Ereg')
-% % legend("真値：1/cos^3(s3')",'推定値：g')
+axis([0 2000 -0.1 12]) % π/2 ≒ 1.57
 
-% hold off;
+plot(0:1:iteration-1, E1_all_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
+xlabel("t")
+ylabel('E1')
+% legend("真値：1/cos^3(s3')",'推定値：g')
+
+hold off;
+
+
+figure;
+hold on;
+grid on;
+
+axis([0 2000 -0.01 0.1]) % π/2 ≒ 1.57
+
+plot(0:1:iteration-1, Ereg_all_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
+xlabel("t")
+ylabel('Ereg')
+% legend("真値：1/cos^3(s3')",'推定値：g')
+
+hold off;
 
 
 % matファイルへの保存
