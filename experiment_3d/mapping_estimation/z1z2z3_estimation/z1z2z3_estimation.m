@@ -34,8 +34,8 @@ eta_s1 = 0;
 eta_s2 = 0;
 % eta_s3 = 1.0 * 10 ^ (-3);
 
-% iteration = 1223; % 現時点で最適, iteration - 1が更新回数
-iteration = 5001;
+iteration = 1223; % 現時点で最適, iteration - 1が更新回数
+% iteration = 20001;
 
 E1_all_value = zeros(iteration-1,1);
 Ereg_all_value = zeros(iteration-1,1);
@@ -175,7 +175,7 @@ for t = 1 : iteration
 
         for b = 1 : m_max  % m = 1&2 はfix
 
-            eta_s3 = 1.0 * 10 ^ (-2);
+            eta_s3 = 7.5 * 10 ^ (-3);
 
             if b < 9
                 Ereg_coef = 1.0 * 10 ^ (-1);

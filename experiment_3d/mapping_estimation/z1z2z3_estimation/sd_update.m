@@ -1,5 +1,10 @@
-function sd_update()
+function [grid_, E1_all_value, Ereg_all_value] = sd_update(grid_, t, j, k, index_max, index, index_next, index_real, m_case, E1_all_value, Ereg_all_value, De1_type1, De1_type2, De1_type3, e1_type1_func, e1_type2_func, e1_type3_func, e_reg_func, De_reg)
 
+    % 学習率
+    eta_s1 = 0; 
+    eta_s2 = 0;
+    eta_s3 = 7.5 * 10 ^ (-3);
+    
     DE1 = zeros(index_max(2),3);  % 誤差関数E_1の偏微分   
     DEreg = zeros(index_max(2),3);  % 正則化項の偏微分
 
@@ -11,10 +16,8 @@ function sd_update()
     for b = 3 : index_max(2)  % m = 1&2 はfix
 
         if b < 9
-            eta_s3 = 7.5 * 10 ^ (-3);
             Ereg_coef = 1.0 * 10 ^ (-1);
         else
-            eta_s3 = 7.5 * 10 ^ (-3);
             Ereg_coef = 2.0 * 10 ^ (-1);
         end
 
@@ -26,29 +29,29 @@ function sd_update()
                 if m_case(j) == 1
 
                     for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type1{j,1,1,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                        DE1(b,x) = DE1(b,x) + De1_type1{j,1,1,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                     end
 
                     % 誤差関数E1の作成
-                    E1_all_value(t) = E1_all_value(t) + e1_type1_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    E1_all_value(t) = E1_all_value(t) + e1_type1_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                 
                 elseif m_case(j) == 2
 
                     for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type2{j,1,1,1,x}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                        DE1(b,x) = DE1(b,x) + De1_type2{j,1,1,1,x}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                     end
 
                     % 誤差関数E1の作成
-                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
 
                 else
 
                     for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type3{j,1,1,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                        DE1(b,x) = DE1(b,x) + De1_type3{j,1,1,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                     end
 
                     % 誤差関数E1の作成
-                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
             
                 end
 
@@ -57,60 +60,60 @@ function sd_update()
                 if m_case(j) == 1
 
                     for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type1{j,1,2,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                        DE1(b,x) = DE1(b,x) + De1_type1{j,1,2,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                     end
 
                     % 誤差関数E1の作成
-                    E1_all_value(t) = E1_all_value(t) + e1_type1_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    E1_all_value(t) = E1_all_value(t) + e1_type1_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
 
                 elseif m_case(j) == 2
 
                     for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type2{j,1,2,1,x}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                        DE1(b,x) = DE1(b,x) + De1_type2{j,1,2,1,x}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                     end
 
                     % 誤差関数E1の作成
-                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
 
                 else
 
                     for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type3{j,1,2,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                        DE1(b,x) = DE1(b,x) + De1_type3{j,1,2,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                     end
 
                     % 誤差関数E1の作成
-                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
 
                 end               
             
             elseif b == index(j+1,2) && b ~= index(j,2) && b ~= index_next(j,2)
                 
                 for x = 1 : 3
-                    DE1(b,x) = DE1(b,x) + De1_type3{j,1,3,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    DE1(b,x) = DE1(b,x) + De1_type3{j,1,3,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                 end
 
                 % 誤差関数E1の作成
-                E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                 
             elseif b == index_next(j+1,2) && b ~= index(j,2) && b ~= index_next(j,2) && b ~= index(j+1,2)
                 
                 if m_case(j) == 2
 
                     for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type2{j,1,3,1,x}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                        DE1(b,x) = DE1(b,x) + De1_type2{j,1,3,1,x}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                     end
 
                     % 誤差関数E1の作成
-                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    E1_all_value(t) = E1_all_value(t) + e1_type2_func{j}(grid_(:,index(j,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
 
                 else
 
                     for x = 1 : 3
-                        DE1(b,x) = DE1(b,x) + De1_type3{j,1,4,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                        DE1(b,x) = DE1(b,x) + De1_type3{j,1,4,1,x}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
                     end
 
                     % 誤差関数E1の作成
-                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),l_real(j:j+1),m_real(j:j+1),n_real(j:j+1));
+                    E1_all_value(t) = E1_all_value(t) + e1_type3_func{j}(grid_(:,index(j,2):index_next(j,2),:,:,t), grid_(:,index(j+1,2):index_next(j+1,2),:,:,t),index_real(j:j+1,1),index_real(j:j+1,2),index_real(j:j+1,3));
 
                 end
 
@@ -146,6 +149,10 @@ function sd_update()
                 grid_(1,b,1,2,t+1) = grid_(1,b,1,2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
                 grid_(1,b,1,3,t+1) = grid_(1,b,1,3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
 
+                grid_(1,1,1,:,t+1) = [1 1 pi/4];
+                grid_(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
+                grid_(1,2,1,:,t+1) = [1 1 pi/3];
+                grid_(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 
             end
 

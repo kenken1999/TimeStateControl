@@ -1,4 +1,6 @@
-function [index, index_next, index_real, rho, rho_tmp, break_switch] = select_grid(grid_, t, j, index_max, index, index_next, index_real, rho, rho_tmp, break_switch)
+function [index, index_next, index_real, rho, break_switch] = select_grid(grid_, s, t, j, index_max, index, index_next, index_real, rho, break_switch)
+
+    rho_tmp = zeros(3,1);
 
     for a = 1 : index_max(1) - 1
         for b = 1 : index_max(2) - 1
@@ -47,13 +49,13 @@ function [index, index_next, index_real, rho, rho_tmp, break_switch] = select_gr
 
                 x = [s(j,1) - grid_(a,b,c,1,t); s(j,2) - grid_(a,b,c,2,t); s(j,3) - grid_(a,b,c,3,t)];
 
-                rho_tmp(j,a,b,c,:) = B \ x;
+                rho_tmp = B \ x;
 
-                if (0 <= rho_tmp(j,a,b,c,1)) && (rho_tmp(j,a,b,c,1) <= 1)
-                    if (0 <= rho_tmp(j,a,b,c,2)) && (rho_tmp(j,a,b,c,2) <= 1)
-                        if (0 <= rho_tmp(j,a,b,c,3)) && (rho_tmp(j,a,b,c,3) <= 1)
+                if (0 <= rho_tmp(1)) && (rho_tmp(1) <= 1)
+                    if (0 <= rho_tmp(2)) && (rho_tmp(2) <= 1)
+                        if (0 <= rho_tmp(3)) && (rho_tmp(3) <= 1)
 
-                            rho(j,:) = rho_tmp(j,a,b,c,:);
+                            rho(j,:) = rho_tmp;
     
                             index(j,1) = a;
                             index(j,2) = b;
@@ -71,4 +73,20 @@ function [index, index_next, index_real, rho, rho_tmp, break_switch] = select_gr
 
             end
         end
+    end
+
+    % 欠損時の補間
+    if (break_switch == 0 && j > 1)
+
+        index(j,:) = index(j-1,:);
+        index_next(j,:) = index_next(j-1,:);     
+        index_real(j,:) = index_real(j-1,:);
+       
+        [a,b,c] = index(j,:);
+
+        rho(j,:) = rho_tmp;
+        
+        disp(j)
+        disp("補間しました")
+
     end
