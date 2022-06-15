@@ -24,21 +24,15 @@ m_case = zeros(length(k)-1, 1);  % 偏微分後関数選択のための場合分
 iteration = 1202; % 現時点で最適, iteration - 1が更新回数
 % iteration = 2000;
 
-
 grid_ = zeros(index_max(1), index_max(2), index_max(3), 3, iteration);
 
 % 原点付近の格子点の固定
-% for t = 1 : iteration
-%     grid_(1,1,1,:,t) = [1 1 pi/4];
-%     grid_(2,1,1,:,t) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-%     grid_(1,2,1,:,t) = [1 1 pi/3];
-%     grid_(1,1,2,:,t) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
-% end
-
-grid_(1,1,1,:,1) = [1 1 pi/4];
-grid_(2,1,1,:,1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
-grid_(1,2,1,:,1) = [1 1 pi/3];
-grid_(1,1,2,:,1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+for t = 1 : iteration
+    grid_(1,1,1,:,t) = [1 1 pi/4];
+    grid_(2,1,1,:,t) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
+    grid_(1,2,1,:,t) = [1 1 pi/3];
+    grid_(1,1,2,:,t) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+end
 
 
 grid_ = init_grid(grid_, index_max); % 格子点の初期値決定

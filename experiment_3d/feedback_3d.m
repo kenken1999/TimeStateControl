@@ -3,7 +3,6 @@ close all;
 load('z_estimation.mat')
 load('gh_estimation.mat')
 
-%feedback_simulation------------------------------------------------------
 
 dt = 0.01; %%時間刻み=離散時間Tsとして使用
 Tfin = 3; %シミュレーション終了時間
@@ -53,9 +52,10 @@ axis([0 2 0.5 2.5])
 xlabel("x",'FontSize',14)
 ylabel("y",'FontSize',14)
 
+%%%- if show gif, uncomment bellow---%%%
 h = plot(z_f(1,1),z_f(1,3), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
-
 h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
+
 
 plot(1+1/4,2,'kx','MarkerSize', 10,'LineWidth',2)
 plot(1,1,'rx','MarkerSize', 10,'LineWidth',2)
@@ -78,19 +78,23 @@ for i = 1:length(t)-1
 
     break_switch = 0;
 
+
+    %%% if show the trajectory figure, uncomment bellow %%%
+    % hold on;
+    % plot(s_f(i,1),s_f(i,2), 'o', 'MarkerSize' ,3, 'MarkerFaceColor', 'b','MarkerEdgeColor', 'b');
+
+
+    %%% if show gif, uncomment bellow %%%
     set(h, 'XData', s_f(i,1),'YData', s_f(i,2));
-
     set(h2, 'XData', s_f(i,1) + 0.1 * cos(s_f(i,3)),'YData', s_f(i,2) + 0.1 * sin(s_f(i,3)));
-
     set(gcf, 'Color', 'white'); % figureの背景を透明に設定
     set(gca, 'Color', 'white'); % axisの背景を透明に設定
-
     drawnow;
-
     xlabel("x",'FontSize',16)
     ylabel("y",'FontSize',16)
 
-    %%%- if output gif, uncomment bellow---%%%
+
+    %%% if save gif, uncomment bellow %%%
     % F = getframe(gcf);
     % % RGBデータをインデックス付きデータに変更
     % [X,map] = rgb2ind(F.cdata,256);
@@ -101,6 +105,7 @@ for i = 1:length(t)-1
     %     % 2回目以降は'append'でアニメーションを作成
     %     imwrite(X,map,'feedback_3dim.gif','WriteMode','append')
     % end
+
 
     s_f(i+1,3) = s_f(i,3) + u2_f(i) * dt; %観測されるs3
     s_f(i+1,1) = s_f(i,1) + u1_f(i) * cos(s_f(i+1,3)) * dt; %観測されるs1
@@ -225,3 +230,27 @@ for i = 1:length(t)-1
     u2_f(i+1) = mu2(i+1) * u1_f(i+1) / gmap(i+1);
 
 end
+
+
+%%% if show the feedback graph of (x,y,θ), uncomment bellow %%%
+
+% target = ones(length(t),1);
+% target2 = ones(length(t),1) * (pi/4);
+
+% tiledlayout(3,1);
+
+% nexttile
+
+% plot(t, target, '--k', t, s_f(:,1), '-k','LineWidth', 2)
+% ylabel("x [m]",'fontsize',16)
+
+% nexttile
+
+% plot(t, target, '--k', t, s_f(:,2), '-k','LineWidth', 2)
+% ylabel("y [m]",'fontsize',16)
+
+% nexttile
+
+% plot(t, target2, '--k', t, s_f(:,3), '-k','LineWidth', 2)
+% xlabel("time [s]",'fontsize',16)
+% ylabel("θ [rad]",'fontsize',16)

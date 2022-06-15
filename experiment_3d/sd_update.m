@@ -149,11 +149,6 @@ function [grid_, E1_all_value, Ereg_all_value] = sd_update(grid_, t, j, k, index
                 grid_(1,b,1,2,t+1) = grid_(1,b,1,2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
                 grid_(1,b,1,3,t+1) = grid_(1,b,1,3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
 
-                grid_(1,1,1,:,t+1) = [1 1 pi/4];
-                grid_(2,1,1,:,t+1) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];   
-                grid_(1,2,1,:,t+1) = [1 1 pi/3];
-                grid_(1,1,2,:,t+1) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
-
             end
 
         end
