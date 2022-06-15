@@ -325,6 +325,6 @@ hold off;
 
 
 % % matファイルへの保存
-save main.mat
+save z_estimation.mat
 
 toc

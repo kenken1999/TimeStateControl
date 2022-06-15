@@ -1,6 +1,6 @@
 clear;
 close all;
-load('../z1z2z3_estimation/main.mat')
+load('z_estimation.mat')
 
 tic
 
