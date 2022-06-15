@@ -5,7 +5,7 @@ load('../z1z2z3_estimation/main.mat')
 tic
 
 
-imax_g = 15;
+imax_g = 5;
 imax_h = 15;
 
 mean_g = zeros(imax_g,3);

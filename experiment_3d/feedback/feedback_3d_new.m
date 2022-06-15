@@ -38,10 +38,10 @@ index_f_real = zeros(length(t),3);
 
 rho_f = zeros(length(t),3);
 
-iteration = 1224;
-
 phi_g_now = zeros(1,imax_g);
 phi_h_now = zeros(1,imax_h);
+
+rho_f_tmp = zeros(length(t), index_max(1), index_max(2), index_max(3), 3);
 
 
 hold on;
@@ -107,95 +107,84 @@ for i = 1:length(t)-1
     s_f(i+1,2) = s_f(i,2) + u1_f(i) * sin(s_f(i+1,3)) * dt; %観測されるs2
 
     % 格子点の選択
-    [index_f, index_f_next, index_f_real, rho_f, break_switch] = select_grid(grid_, s_f, iteration, i, index_max, index_f, index_f_next, index_f_real, rho_f, break_switch);
+    % [index_f, index_f_next, index_f_real, rho_f, break_switch] = select_grid(grid_, s_f, iteration, i, index_max, index_f, index_f_next, index_f_real, rho_f, break_switch);
 
-    % for a = 1 : l_max
+    for a = 1 : index_max(1) - 1
 
-    %     if break_switch == 1 
-    %         break;
-    %     end
+        for b = 1 : index_max(2) - 1
 
-    %     for b = 1 : m_max
+            for c = 1 : index_max(3) - 1
 
-    %         if break_switch == 1 
-    %             break;
-    %         end
+                if break_switch == 1 
+                    break;
+                end
 
-    %         for c = 1 : n_max
-
-    %             if break_switch == 1 
-    %                 break;
-    %             end
-
-    %             if (a == l_max) || (b == m_max) || (c == n_max)
-    %                 continue;
-    %             end
+                if a < index_max(1)
+                    a2 = a + 1;
+                    index_f_real(i+1,1) = a - 1;
+                elseif a == index_max(1) + 1
+                    a2 = 1;
+                    index_f_real(i+1,1) = -1;
+                else
+                    a2 = a - 1;
+                    index_f_real(i+1,1) = - a + l_max; 
+                end
     
-    %             if a < l_max
-    %                 a2 = a + 1;
-    %                 l_real_3(i+1) = a - 1;
-    %             elseif a == l_max + 1
-    %                 a2 = 1;
-    %                 l_real_3(i+1) = -1;
-    %             else
-    %                 a2 = a - 1;
-    %                 l_real_3(i+1) = - a + l_max; 
-    %             end
+                if b < index_max(2)
+                    b2 = b + 1;
+                    index_f_real(i+1,2) = b - 1;
+                elseif b == index_max(2) + 1
+                    b2 = 1;
+                    index_f_real(i+1,2) = -1;
+                else
+                    b2 = b - 1;
+                    index_f_real(i+1,2) = - b + m_max;
+                end
     
-    %             if b < m_max
-    %                 b2 = b + 1;
-    %                 m_real_3(i+1) = b - 1;
-    %             elseif b == m_max + 1
-    %                 b2 = 1;
-    %                 m_real_3(i+1) = -1;
-    %             else
-    %                 b2 = b - 1;
-    %                 m_real_3(i+1) = - b + m_max;
-    %             end
+                if c < index_max(3)
+                    c2 = c + 1;
+                    index_f_real(i+1,3) = c - 1;
+                elseif c == index_max(3) + 1
+                    c2 = 1;
+                    index_f_real(i+1,3) = -1;
+                else
+                    c2 = c - 1;
+                    index_f_real(i+1,3) = - c + n_max;
+                end
     
-    %             if c < n_max
-    %                 c2 = c + 1;
-    %                 n_real_3(i+1) = c - 1;
-    %             elseif c == n_max + 1
-    %                 c2 = 1;
-    %                 n_real_3(i+1) = -1;
-    %             else
-    %                 c2 = c - 1;
-    %                 n_real_3(i+1) = - c + n_max;
-    %             end
+                A = [grid_(a2,b,c,:,iteration) - grid_(a,b,c,:,iteration); grid_(a,b2,c,:,iteration) - grid_(a,b,c,:,iteration); grid_(a,b,c2,:,iteration) - grid_(a,b,c,:,iteration)];
+
+                B = transpose(reshape(A,[3,3]));
+
+                x = [s_f(i+1,1) - grid_(a,b,c,1,iteration); s_f(i+1,2) - grid_(a,b,c,2,iteration); s_f(i+1,3) - grid_(a,b,c,3,iteration)];
+
+                rho_f_tmp(i+1,a,b,c,:) = B \ x;
+
+
+                if (0 <= rho_f_tmp(i+1,a,b,c,1)) && (rho_f_tmp(i+1,a,b,c,1) <= 1)
+                    if (0 <= rho_f_tmp(i+1,a,b,c,2)) && (rho_f_tmp(i+1,a,b,c,2) <= 1)
+                        if (0 <= rho_f_tmp(i+1,a,b,c,3)) && (rho_f_tmp(i+1,a,b,c,3) <= 1)
+
+                            rho_f(i+1,:) = rho_f_tmp(i+1,a,b,c,:);
     
-    %             A = [param_s(a2,b,c,:,iteration) - param_s(a,b,c,:,iteration); param_s(a,b2,c,:,iteration) - param_s(a,b,c,:,iteration); param_s(a,b,c2,:,iteration) - param_s(a,b,c,:,iteration)];
+                            index_f(i+1,1) = a;
+                            index_f(i+1,2) = b;
+                            index_f(i+1,3) = c;
 
-    %             B = transpose(reshape(A,[3,3]));
+                            index_f_next(i+1,1) = a2;
+                            index_f_next(i+1,2) = b2;
+                            index_f_next(i+1,3) = c2;
 
-    %             x = [s_f(i+1,1) - param_s(a,b,c,1,iteration); s_f(i+1,2) - param_s(a,b,c,2,iteration); s_f(i+1,3) - param_s(a,b,c,3,iteration)];
-
-    %             rho_3_tmp(i+1,a,b,c,:) = B \ x;
-
-
-    %             if (0 <= rho_3_tmp(i+1,a,b,c,1)) && (rho_3_tmp(i+1,a,b,c,1) <= 1)
-    %                 if (0 <= rho_3_tmp(i+1,a,b,c,2)) && (rho_3_tmp(i+1,a,b,c,2) <= 1)
-    %                     if (0 <= rho_3_tmp(i+1,a,b,c,3)) && (rho_3_tmp(i+1,a,b,c,3) <= 1)
-
-    %                         rho_f(i+1,:) = rho_3_tmp(i+1,a,b,c,:);
+                            break_switch = 1;
     
-    %                         l_now_3(i+1) = a;
-    %                         m_now_3(i+1) = b;
-    %                         n_now_3(i+1) = c;
+                        end
+                    end
+                end
 
-    %                         l_next_3(i+1) = a2;
-    %                         m_next_3(i+1) = b2;
-    %                         n_next_3(i+1) = c2;
+            end
+        end
+    end
 
-    %                         break_switch = 1;
-    
-    %                     end
-    %                 end
-    %             end
-
-    %         end
-    %     end
-    % end
 
     if break_switch == 0
         disp(i)
