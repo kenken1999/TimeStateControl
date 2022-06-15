@@ -1,61 +1,47 @@
 clear;
 close all;
-load('../mapping_estimation/z1z2z3_estimation/z1z2z3_estimation.mat')
+load('../mapping_estimation/z1z2z3_estimation/main.mat')
 load('../mapping_estimation/gh_estimation/gh_estimation.mat')
 
 %feedback_simulation------------------------------------------------------
 
 dt = 0.01; %%時間刻み=離散時間Tsとして使用
 Tfin = 3; %シミュレーション終了時間
-t1 = [0:dt:Tfin];
+t = [0:dt:Tfin];
 
-si = zeros(length(t1),3);
-si(1,:) = [1.25 2 pi/2]; %(k2, k3)=(4,5)
-% si(1,:) = [1.4 1.85 5*pi/12]; %(k2, k3)=(4,5)
-% si(1,:) = [1.15 2 7*pi/12]; %(k2, k3)=(5,6)
+s_f = zeros(length(t),3);
+s_f(1,:) = [1.25 2 pi/2]; %(k2, k3)=(4,5)
+% s_f(1,:) = [1.4 1.85 5*pi/12]; %(k2, k3)=(4,5)
+% s_f(1,:) = [1.15 2 7*pi/12]; %(k2, k3)=(5,6)
 
-zi = zeros(length(t1),3);
+z_f = zeros(length(t),3);
 
-u1 = ones(1,length(t1)) * (-1);
-u2 = ones(1,length(t1)) * (1);
+u1_f = ones(1,length(t)) * (-1);
+u2_f = ones(1,length(t)) * (1);
 
-m1 = ones(1,length(t1)) * (-1); % μ1 = v1 = u1cosθ
-m2 = ones(1,length(t1)); % μ2 = v2/v1 = u2/(u1*cos^3θ)
+mu1 = ones(1,length(t)) * (-1); % μ1 = v1 = u1cosθ
+mu2 = ones(1,length(t)); % μ2 = v2/v1 = u2_f/(u1_f*cos^3θ)
 
-gmap = zeros(1,length(t1));
-hmap = zeros(1,length(t1));
+gmap = zeros(1,length(t));
+hmap = zeros(1,length(t));
 
 k2 = 4;
 k3 = 5;
 
-x = si(1,1) + 0.1 * cos(si(1,3));
-y = si(1,2) + 0.1 * sin(si(1,3));
+x = s_f(1,1) + 0.1 * cos(s_f(1,3));
+y = s_f(1,2) + 0.1 * sin(s_f(1,3));
 
 
-l_max = 2;
-m_max = 11;
-n_max = 2;
+index_f = zeros(length(t),3);
+index_f_next = zeros(length(t),3);
+index_f_real = zeros(length(t),3);
 
-l_now_3 = zeros(length(t1),1);
-m_now_3 = zeros(length(t1),1);
-n_now_3 = zeros(length(t1),1);
-
-l_next_3 = zeros(length(t1),1);
-m_next_3 = zeros(length(t1),1);
-n_next_3 = zeros(length(t1),1);
-
-l_real_3 = zeros(length(t1),1);
-m_real_3 = zeros(length(t1),1);
-n_real_3 = zeros(length(t1),1);
-
-rho_3_tmp = zeros(length(t1), l_max, m_max, n_max, 3);
-rho_3 = zeros(length(t1),3);
-
-iteration = 1224;
+rho_f = zeros(length(t),3);
 
 phi_g_now = zeros(1,imax_g);
 phi_h_now = zeros(1,imax_h);
 
+rho_f_tmp = zeros(length(t), index_max(1), index_max(2), index_max(3), 3);
 
 
 hold on;
@@ -67,7 +53,7 @@ axis([0 2 0.5 2.5])
 xlabel("x",'FontSize',14)
 ylabel("y",'FontSize',14)
 
-h = plot(zi(1,1),zi(1,3), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
+h = plot(z_f(1,1),z_f(1,3), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
 
 h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
 
@@ -88,13 +74,13 @@ for j = 0 : 2
 end
 
 
-for i = 1:length(t1)-1
+for i = 1:length(t)-1
 
     break_switch = 0;
 
-    set(h, 'XData', si(i,1),'YData', si(i,2));
+    set(h, 'XData', s_f(i,1),'YData', s_f(i,2));
 
-    set(h2, 'XData', si(i,1) + 0.1 * cos(si(i,3)),'YData', si(i,2) + 0.1 * sin(si(i,3)));
+    set(h2, 'XData', s_f(i,1) + 0.1 * cos(s_f(i,3)),'YData', s_f(i,2) + 0.1 * sin(s_f(i,3)));
 
     set(gcf, 'Color', 'white'); % figureの背景を透明に設定
     set(gca, 'Color', 'white'); % axisの背景を透明に設定
@@ -116,88 +102,78 @@ for i = 1:length(t1)-1
     %     imwrite(X,map,'feedback_3dim.gif','WriteMode','append')
     % end
 
-    si(i+1,3) = si(i,3) + u2(i) * dt; %観測されるs3
-    si(i+1,1) = si(i,1) + u1(i) * cos(si(i+1,3)) * dt; %観測されるs1
-    si(i+1,2) = si(i,2) + u1(i) * sin(si(i+1,3)) * dt; %観測されるs2
+    s_f(i+1,3) = s_f(i,3) + u2_f(i) * dt; %観測されるs3
+    s_f(i+1,1) = s_f(i,1) + u1_f(i) * cos(s_f(i+1,3)) * dt; %観測されるs1
+    s_f(i+1,2) = s_f(i,2) + u1_f(i) * sin(s_f(i+1,3)) * dt; %観測されるs2
 
+    % 格子点の選択
+    % [index_f, index_f_next, index_f_real, rho_f, break_switch] = select_grid(grid_, s_f, iteration, i, index_max, index_f, index_f_next, index_f_real, rho_f, break_switch);
 
-    for a = 1 : l_max
+    for a = 1 : index_max(1) - 1
 
-        if break_switch == 1 
-            break;
-        end
+        for b = 1 : index_max(2) - 1
 
-        for b = 1 : m_max
-
-            if break_switch == 1 
-                break;
-            end
-
-            for c = 1 : n_max
+            for c = 1 : index_max(3) - 1
 
                 if break_switch == 1 
                     break;
                 end
 
-                if (a == l_max) || (b == m_max) || (c == n_max)
-                    continue;
-                end
-    
-                if a < l_max
+                if a < index_max(1)
                     a2 = a + 1;
-                    l_real_3(i+1) = a - 1;
-                elseif a == l_max + 1
+                    index_f_real(i+1,1) = a - 1;
+                elseif a == index_max(1) + 1
                     a2 = 1;
-                    l_real_3(i+1) = -1;
+                    index_f_real(i+1,1) = -1;
                 else
                     a2 = a - 1;
-                    l_real_3(i+1) = - a + l_max; 
+                    index_f_real(i+1,1) = - a + l_max; 
                 end
     
-                if b < m_max
+                if b < index_max(2)
                     b2 = b + 1;
-                    m_real_3(i+1) = b - 1;
-                elseif b == m_max + 1
+                    index_f_real(i+1,2) = b - 1;
+                elseif b == index_max(2) + 1
                     b2 = 1;
-                    m_real_3(i+1) = -1;
+                    index_f_real(i+1,2) = -1;
                 else
                     b2 = b - 1;
-                    m_real_3(i+1) = - b + m_max;
+                    index_f_real(i+1,2) = - b + m_max;
                 end
     
-                if c < n_max
+                if c < index_max(3)
                     c2 = c + 1;
-                    n_real_3(i+1) = c - 1;
-                elseif c == n_max + 1
+                    index_f_real(i+1,3) = c - 1;
+                elseif c == index_max(3) + 1
                     c2 = 1;
-                    n_real_3(i+1) = -1;
+                    index_f_real(i+1,3) = -1;
                 else
                     c2 = c - 1;
-                    n_real_3(i+1) = - c + n_max;
+                    index_f_real(i+1,3) = - c + n_max;
                 end
     
-                A = [param_s(a2,b,c,:,iteration) - param_s(a,b,c,:,iteration); param_s(a,b2,c,:,iteration) - param_s(a,b,c,:,iteration); param_s(a,b,c2,:,iteration) - param_s(a,b,c,:,iteration)];
+                A = [grid_(a2,b,c,:,iteration) - grid_(a,b,c,:,iteration); grid_(a,b2,c,:,iteration) - grid_(a,b,c,:,iteration); grid_(a,b,c2,:,iteration) - grid_(a,b,c,:,iteration)];
 
                 B = transpose(reshape(A,[3,3]));
 
-                x = [si(i+1,1) - param_s(a,b,c,1,iteration); si(i+1,2) - param_s(a,b,c,2,iteration); si(i+1,3) - param_s(a,b,c,3,iteration)];
+                x = [s_f(i+1,1) - grid_(a,b,c,1,iteration); s_f(i+1,2) - grid_(a,b,c,2,iteration); s_f(i+1,3) - grid_(a,b,c,3,iteration)];
 
-                rho_3_tmp(i+1,a,b,c,:) = B \ x;
+                rho_f_tmp(i+1,a,b,c,:) = B \ x;
 
 
-                if (0 <= rho_3_tmp(i+1,a,b,c,1)) && (rho_3_tmp(i+1,a,b,c,1) <= 1)
-                    if (0 <= rho_3_tmp(i+1,a,b,c,2)) && (rho_3_tmp(i+1,a,b,c,2) <= 1)
-                        if (0 <= rho_3_tmp(i+1,a,b,c,3)) && (rho_3_tmp(i+1,a,b,c,3) <= 1)
+                if (0 <= rho_f_tmp(i+1,a,b,c,1)) && (rho_f_tmp(i+1,a,b,c,1) <= 1)
+                    if (0 <= rho_f_tmp(i+1,a,b,c,2)) && (rho_f_tmp(i+1,a,b,c,2) <= 1)
+                        if (0 <= rho_f_tmp(i+1,a,b,c,3)) && (rho_f_tmp(i+1,a,b,c,3) <= 1)
 
-                            rho_3(i+1,:) = rho_3_tmp(i+1,a,b,c,:);
+                            rho_f(i+1,:) = rho_f_tmp(i+1,a,b,c,:);
     
-                            l_now_3(i+1) = a;
-                            m_now_3(i+1) = b;
-                            n_now_3(i+1) = c;
+                            index_f(i+1,1) = a;
+                            index_f(i+1,2) = b;
+                            index_f(i+1,3) = c;
 
-                            l_next_3(i+1) = a2;
-                            m_next_3(i+1) = b2;
-                            n_next_3(i+1) = c2;
+                            index_f_next(i+1,1) = a2;
+                            index_f_next(i+1,2) = b2;
+                            index_f_next(i+1,3) = c2;
 
                             break_switch = 1;
     
@@ -209,66 +185,43 @@ for i = 1:length(t1)-1
         end
     end
 
+
     if break_switch == 0
-        % l_now_3(i+1) = l_now_3(i);
-        % m_now_3(i+1) = m_now_3(i);
-        % n_now_3(i+1) = n_now_3(i);
-
-        % l_next_3(i+1) = l_next_3(i);
-        % m_next_3(i+1) = m_next_3(i);
-        % n_next_3(i+1) = n_next_3(i);
-
-        % l_real_3(i+1) = l_real_3(i);
-        % m_real_3(i+1) = m_real_3(i);
-        % n_real_3(i+1) = n_real_3(i);
-
-        % a = l_now_3(i+1);
-        % b = m_now_3(i+1);
-        % c = n_now_3(i+1);
-
-        % rho_3(i+1,:) = rho_3_tmp(i,a,b,c,:);
-        
         disp(i)
         disp("補間しました")
     end
 
-    zi(i+1,1) = l_real_3(i+1) + rho_3(i+1,1);
-    zi(i+1,2) = tan(pi/12) * (m_real_3(i+1) + rho_3(i+1,2));
-    zi(i+1,3) = n_real_3(i+1) + rho_3(i+1,3);
+    z_f(i+1,1) = index_f_real(i+1,1) + rho_f(i+1,1);
+    z_f(i+1,2) = tan(pi/12) * (index_f_real(i+1,2) + rho_f(i+1,2));
+    z_f(i+1,3) = index_f_real(i+1,3) + rho_f(i+1,3);
 
 
     for p = 1 : imax_g
-        phi_g_now(p) = exp( - sqrt( (si(i+1,1) - mean_g(p,1)) ^ 2 + (si(i+1,2) - mean_g(p,2)) ^ 2 + (si(i+1,3) - mean_g(p,3)) ^ 2 ) / (2 * var_g ^ 2) );
+        phi_g_now(p) = exp( - sqrt( (s_f(i+1,1) - mean_g(p,1)) ^ 2 + (s_f(i+1,2) - mean_g(p,2)) ^ 2 + (s_f(i+1,3) - mean_g(p,3)) ^ 2 ) / (2 * var_g ^ 2) );
     end
     
     for q = 1 : imax_h
-        phi_h_now(q) = exp( - sqrt( (si(i+1,1) - mean_h(q,1)) ^ 2 + (si(i+1,2) - mean_h(q,2)) ^ 2 + (si(i+1,3) - mean_h(q,3)) ^ 2 ) / (2 * var_h ^ 2) );
+        phi_h_now(q) = exp( - sqrt( (s_f(i+1,1) - mean_h(q,1)) ^ 2 + (s_f(i+1,2) - mean_h(q,2)) ^ 2 + (s_f(i+1,3) - mean_h(q,3)) ^ 2 ) / (2 * var_h ^ 2) );
     end
-
-    % gmap(i+1) = ((zi(i+1,2) - zi(i,2)) * u1(i)) / ((zi(i+1,1) - zi(i,1)) * u2(i));
-    % hmap(i+1) = (zi(i+1,1) - zi(i,1)) / (u1(i) * dt);
-
-    % gmap(i+1) = 1 / (cos(si(i+1,3) - pi/4)) ^ 3;
-    % hmap(i+1) = cos(si(i+1,3) - pi/4);
 
     gmap(i+1) = phi_g_now * w_g;
     hmap(i+1) = phi_h_now * w_h;
 
     if i > 1
-        m1(i+1) = -2 * zi(i+1,1); %入力m1(=v1=u1cosθ), m1=-λz1で(λ>0の定数)z1を0に収束
-        %m1(i+1) = -2 * (zi(i+1,1)-0.25);
+        mu1(i+1) = -2 * z_f(i+1,1); %入力m1(=v1=u1cosθ), mu1=-λz1で(λ>0の定数)z1を0に収束
+        %mu1(i+1) = -2 * (z_f(i+1,1)-0.25);
     end
 
     %入力m2はm1正負で場合分け
-    if m1(i+1) > 0
-        m2(i+1) = -k2 * zi(i+1,2) - k3 * zi(i+1,3);
-        % m2(i+1) = -k2 * zi(i+1,2) - k3 * (zi(i+1,3)-0.5);
+    if mu1(i+1) > 0
+        mu2(i+1) = -k2 * z_f(i+1,2) - k3 * z_f(i+1,3);
+        % mu2(i+1) = -k2 * z_f(i+1,2) - k3 * (z_f(i+1,3)-0.5);
     else
-        m2(i+1) = k2 * zi(i+1,2) - k3 * zi(i+1,3); 
-        % m2(i+1) = k2 * zi(i+1,2) - k3 * (zi(i+1,3)-0.5);
+        mu2(i+1) = k2 * z_f(i+1,2) - k3 * z_f(i+1,3); 
+        % mu2(i+1) = k2 * z_f(i+1,2) - k3 * (z_f(i+1,3)-0.5);
     end
 
-    u1(i+1) = m1(i+1) / hmap(i+1);
-    u2(i+1) = m2(i+1) * u1(i+1) / gmap(i+1);
+    u1_f(i+1) = mu1(i+1) / hmap(i+1);
+    u2_f(i+1) = mu2(i+1) * u1_f(i+1) / gmap(i+1);
 
 end
