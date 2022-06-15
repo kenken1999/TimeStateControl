@@ -325,6 +325,6 @@ hold off;
 
 
 % % matファイルへの保存
-% save main.mat
+save main.mat
 
 toc

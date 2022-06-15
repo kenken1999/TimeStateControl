@@ -173,7 +173,7 @@ for t = 1 : iteration
             Ereg_all_value(t) = Ereg_all_value(t) + e_reg_func(param_s(1,b-1:b+1,1,:,t));
         end
 
-        for b = 1 : m_max  % m = 1&2 はfix
+        for b = 3 : m_max  % m = 1&2 はfix
 
             eta_s3 = 7.5 * 10 ^ (-3);
 
