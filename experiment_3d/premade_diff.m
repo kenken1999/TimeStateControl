@@ -4,8 +4,9 @@ close all;
 tic
 
 %--- サンプル収集-------------------------------------------
+
 dk = 0.1;   % サンプル刻み
-K_fin = 1.9;  % サンプリング終了時間
+K_fin = 1.8;  % サンプリング終了時間
 k = [0:dk:K_fin];
 
 u1 = ones(length(k),1) * 0.5; % 並進速度
@@ -24,9 +25,12 @@ s_corr(1,:) = [0 0 0];
 
 grid_sym = sym('grid_sym',[2 4 2 3]); % l,m,n,iの順
 
-l_sym = sym('l_sym',2); % l (k, k+1)
-m_sym = sym('m_sym',2); % m
-n_sym = sym('n_sym',2); % n
+l_sym = sym('l_sym',2); % l^k, l^(k+1)
+m_sym = sym('m_sym',2); 
+n_sym = sym('n_sym',2);
+
+sigma = [1 tan(14*pi/180) 1];
+
 
 for j = 1 : length(k) - 1
 
@@ -42,7 +46,7 @@ for j = 1 : length(k) - 1
         y_next = [s(j+1,1) - grid_sym(1,b,1,1); s(j+1,2) - grid_sym(1,b,1,2); s(j+1,3) - grid_sym(1,b,1,3)];
         rho_sym_next = H_next \ y_next;
 
-        e1 = ( tan(pi/12) * (m_sym(1) + rho_sym(2)) - ((n_sym(2) + rho_sym_next(3)) - (n_sym(1) + rho_sym(3))) / ((l_sym(2) + rho_sym_next(1)) - (l_sym(1) + rho_sym(1))) ) ^ 2;
+        e1 = ( sigma(2)*(m_sym(1)+rho_sym(2)) - (sigma(3)*(n_sym(2)+rho_sym_next(3)) - sigma(3)*(n_sym(1)+rho_sym(3))) / (sigma(1)*(l_sym(2)+rho_sym_next(1)) - sigma(1)*(l_sym(1)+rho_sym(1))) ) ^ 2;
 
         if b == 1
             for x = 1 : 3
@@ -51,7 +55,7 @@ for j = 1 : length(k) - 1
                 De1_type1{j,1,2,1,x} = matlabFunction(diff(e1,grid_sym(1,2,1,x)), 'vars', {grid_sym(:,1:2,:,:), l_sym, m_sym, n_sym});
                 % De1_type1{j,1,1,2,x} = matlabFunction(diff(e1,grid_sym(1,1,2,x)), 'vars', {grid_sym(:,:,:,:)});
 
-                %---誤差関数E計算用
+                % 誤差関数E計算用
                 e1_type1_func{j} = matlabFunction(e1, 'vars', {grid_sym(:,1:2,:,:), l_sym, m_sym, n_sym});
             end
         elseif b == 2
@@ -64,7 +68,7 @@ for j = 1 : length(k) - 1
                 De1_type2{j,1,3,1,x} = matlabFunction(diff(e1,grid_sym(1,3,1,x)), 'vars', {grid_sym(:,1:3,:,:), l_sym, m_sym, n_sym});
                 % De1_type2{j,1,2,2,x} = matlabFunction(diff(e1,grid_sym(1,2,2,x)), 'vars', {grid_sym(:,:,:,:)});
 
-                %---誤差関数E計算用
+                % 誤差関数E計算用
                 e1_type2_func{j} = matlabFunction(e1, 'vars', {grid_sym(:,1:3,:,:), l_sym, m_sym, n_sym});          
             end     
         else
@@ -78,7 +82,7 @@ for j = 1 : length(k) - 1
                 De1_type3{j,1,4,1,x} = matlabFunction(diff(e1,grid_sym(1,4,1,x)), 'vars', {grid_sym(:,1:2,:,:),grid_sym(:,3:4,:,:), l_sym, m_sym, n_sym});
                 % De1_type3{j,1,3,2,x} = matlabFunction(diff(e1,grid_sym(1,3,2,x)), 'vars', {grid_sym(:,:,:,:)});
 
-                %---誤差関数E計算用
+                % 誤差関数E計算用
                 e1_type3_func{j} = matlabFunction(e1, 'vars', {grid_sym(:,1:2,:,:),grid_sym(:,3:4,:,:), l_sym, m_sym, n_sym});
             end     
         end
@@ -94,8 +98,7 @@ disp("end")
 
 grid_reg = sym('grid_reg',[1 3 1 3]); % l,m,n,iの順
 
-e_reg = ( ((grid_reg(1,3,1,1) - grid_reg(1,2,1,1)) ^ 2 + (grid_reg(1,3,1,2) - grid_reg(1,2,1,2)) ^ 2 + (grid_reg(1,3,1,3) - grid_reg(1,2,1,3)) ^ 2)...
-         - ((grid_reg(1,2,1,1) - grid_reg(1,1,1,1)) ^ 2 + (grid_reg(1,2,1,2) - grid_reg(1,1,1,2)) ^ 2 + (grid_reg(1,2,1,3) - grid_reg(1,1,1,3)) ^ 2) ) ^ 2;
+e_reg = ( sqrt((grid_reg(1,3,1,1) - grid_reg(1,2,1,1)) ^ 2 + (grid_reg(1,3,1,2) - grid_reg(1,2,1,2)) ^ 2 + (grid_reg(1,3,1,3) - grid_reg(1,2,1,3)) ^ 2) - sqrt((grid_reg(1,2,1,1) - grid_reg(1,1,1,1)) ^ 2 + (grid_reg(1,2,1,2) - grid_reg(1,1,1,2)) ^ 2 + (grid_reg(1,2,1,3) - grid_reg(1,1,1,3)) ^ 2) ) ^ 2;
 
 e_reg_func = matlabFunction(e_reg, 'vars', {grid_reg(:,:,:,:)}); % 誤差関数Eの計算用
 

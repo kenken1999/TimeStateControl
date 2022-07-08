@@ -1,6 +1,7 @@
 function [index, index_next, index_real, rho, break_switch] = select_grid(grid_, s, t, j, index_max, index, index_next, index_real, rho, break_switch)
 
     rho_tmp = zeros(3,1);
+    index_tmp_m = index(:,2);
 
     for a = 1 : index_max(1) - 1
         for b = 1 : index_max(2) - 1
@@ -66,6 +67,11 @@ function [index, index_next, index_real, rho, break_switch] = select_grid(grid_,
                             index_next(j,3) = c2;
 
                             break_switch = 1;
+
+                            % if index(j,2) ~= index_tmp_m(j) && t > 800 && t < 1500
+                            %     disp(t)
+                            %     disp("サンプルと格子の入り方が変わりました")
+                            % end
     
                         end
                     end

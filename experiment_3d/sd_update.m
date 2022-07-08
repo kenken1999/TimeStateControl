@@ -1,9 +1,11 @@
-function [grid_, E1_all_value, Ereg_all_value] = sd_update(grid_, t, j, k, index_max, index, index_next, index_real, m_case, E1_all_value, Ereg_all_value, De1_type1, De1_type2, De1_type3, e1_type1_func, e1_type2_func, e1_type3_func, e_reg_func, De_reg)
+function [grid_, E1_all_value, Ereg_all_value, E_all_value, e_reg_value] = sd_update(grid_, t, j, k, index_max, index, index_next, index_real, m_case, E1_all_value, Ereg_all_value, E_all_value, e_reg_value, De1_type1, De1_type2, De1_type3, e1_type1_func, e1_type2_func, e1_type3_func, e_reg_func, De_reg)
 
     % 学習率
     eta_s1 = 0; 
     eta_s2 = 0;
-    eta_s3 = 7.5 * 10 ^ (-3);
+    eta_s3 = 1.0 * 10 ^ (-2);  % 現時点で最適
+
+    Ereg_coef = 3;
     
     DE1 = zeros(index_max(2),3);  % 誤差関数E_1の偏微分   
     DEreg = zeros(index_max(2),3);  % 正則化項の偏微分
@@ -11,15 +13,31 @@ function [grid_, E1_all_value, Ereg_all_value] = sd_update(grid_, t, j, k, index
     % 誤差関数Eregの作成
     for b = 2 : index_max(2)-1
         Ereg_all_value(t) = Ereg_all_value(t) + e_reg_func(grid_(1,b-1:b+1,1,:,t+1));
+
+        if b == index_max(2)-1
+            e_reg_value(t) = e_reg_func(grid_(1,b-1:b+1,1,:,t+1));          
+        end
+
     end
 
     for b = 3 : index_max(2)  % m = 1&2 はfix
 
-        if b < 9
-            Ereg_coef = 1.0 * 10 ^ (-1);
-        else
-            Ereg_coef = 2.0 * 10 ^ (-1);
-        end
+        % if b < 8
+        %     % Ereg_coef = 10;  % 現時点で最適
+        %     Ereg_coef = 10;
+        % else
+        %     % Ereg_coef = 20;  % 現時点で最適
+        %     Ereg_coef = 20;
+        % end
+
+
+        % if t < 450
+        %     Ereg_coef = 50;
+        %     eta_s3 = 3.0 * 10 ^ (-3);
+        % else
+        %     Ereg_coef = 5;
+        %     eta_s3 = 3.5 * 10 ^ (-3);
+        % end
 
         for j = 1 : length(k) - 1
             
@@ -145,9 +163,16 @@ function [grid_, E1_all_value, Ereg_all_value] = sd_update(grid_, t, j, k, index
                 end
 
                 % 格子点の更新
-                grid_(1,b,1,1,t+1) = grid_(1,b,1,1,t) - eta_s1 * DE1(b,1) - Ereg_coef * DEreg(b,1);
-                grid_(1,b,1,2,t+1) = grid_(1,b,1,2,t) - eta_s2 * DE1(b,2) - Ereg_coef * DEreg(b,2);
-                grid_(1,b,1,3,t+1) = grid_(1,b,1,3,t) - eta_s3 * DE1(b,3) - Ereg_coef * DEreg(b,3);
+                grid_(1,b,1,1,t+1) = grid_(1,b,1,1,t) - eta_s1 * (DE1(b,1) + Ereg_coef * DEreg(b,1));
+                grid_(1,b,1,2,t+1) = grid_(1,b,1,2,t) - eta_s2 * (DE1(b,2) + Ereg_coef * DEreg(b,2));
+                grid_(1,b,1,3,t+1) = grid_(1,b,1,3,t) - eta_s3 * (DE1(b,3) + Ereg_coef * DEreg(b,3));
+
+                if grid_(1,b,1,3,t+1) <= grid_(1,b-1,1,3,t+1)
+                    disp(t)
+                    disp("格子の入れ替わりが発生しました");
+                end
+
+                E_all_value(t) = E1_all_value(t) + Ereg_coef * Ereg_all_value(t);
 
             end
 

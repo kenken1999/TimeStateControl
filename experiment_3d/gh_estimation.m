@@ -5,7 +5,7 @@ load('z_estimation.mat')
 tic
 
 imax_g = 5;
-imax_h = 15;
+imax_h = 10;
 
 mean_g = zeros(imax_g,3);
 var_g = 0.5;
