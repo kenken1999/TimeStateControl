@@ -19,7 +19,7 @@ rho = zeros(length(k),3);
 
 m_case = zeros(length(k)-1, 1);  % 偏微分後関数選択のための場合分け
 
-iteration = 1000;
+iteration = 5000;
 
 grid_ = zeros(index_max(1), index_max(2), index_max(3), 3, iteration);
 
@@ -329,17 +329,17 @@ hold off;
 % hold off;
 
 
-figure;
-hold on;
-grid on;
+% figure;
+% hold on;
+% grid on;
 
-axis([0 2500 -1.0*10^(-5) 1.0*10^(-3)]) % π/2 ≒ 1.57
+% axis([0 2500 -1.0*10^(-5) 1.0*10^(-3)]) % π/2 ≒ 1.57
 
-plot(0:1:iteration-2, e_reg_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
-xlabel("t")
-ylabel('e_reg')
+% plot(0:1:iteration-2, e_reg_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
+% xlabel("t")
+% ylabel('e_reg')
 
-hold off;
+% hold off;
 
 
 % % matファイルへの保存

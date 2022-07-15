@@ -29,7 +29,7 @@ l_sym = sym('l_sym',2); % l^k, l^(k+1)
 m_sym = sym('m_sym',2); 
 n_sym = sym('n_sym',2);
 
-sigma = [1 tan(14*pi/180) 1];
+sigma = [1 tan(15*pi/180) 1];
 
 
 for j = 1 : length(k) - 1

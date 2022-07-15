@@ -5,7 +5,7 @@ function [grid_, E1_all_value, Ereg_all_value, E_all_value, e_reg_value] = sd_up
     eta_s2 = 0;
     eta_s3 = 1.0 * 10 ^ (-2);  % 現時点で最適
 
-    Ereg_coef = 3;
+    Ereg_coef = 1;
     
     DE1 = zeros(index_max(2),3);  % 誤差関数E_1の偏微分   
     DEreg = zeros(index_max(2),3);  % 正則化項の偏微分

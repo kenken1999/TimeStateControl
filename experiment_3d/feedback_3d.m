@@ -24,8 +24,8 @@ mu2 = ones(1,length(t)); % μ2 = v2/v1 = u2_f/(u1_f*cos^3θ)
 gmap = zeros(1,length(t));
 hmap = zeros(1,length(t));
 
-k2 = 5;
-k3 = 6;
+k2 = 4;
+k3 = 5;
 
 x = s_f(1,1) + 0.1 * cos(s_f(1,3));
 y = s_f(1,2) + 0.1 * sin(s_f(1,3));
@@ -196,9 +196,9 @@ for i = 1:length(t)-1
         disp("補間しました")
     end
 
-    z_f(i+1,1) = index_f_real(i+1,1) + rho_f(i+1,1);
-    z_f(i+1,2) = tan(pi/12) * (index_f_real(i+1,2) + rho_f(i+1,2));
-    z_f(i+1,3) = index_f_real(i+1,3) + rho_f(i+1,3);
+    z_f(i+1,1) = sigma(1) * (index_f_real(i+1,1) + rho_f(i+1,1));
+    z_f(i+1,2) = sigma(2) * (index_f_real(i+1,2) + rho_f(i+1,2));
+    z_f(i+1,3) = sigma(3) * (index_f_real(i+1,3) + rho_f(i+1,3));
 
 
     for p = 1 : imax_g
