@@ -1,27 +1,23 @@
 clear;
 close all;
+tic
 
 load('premade_diff.mat')
 
-tic
-
 
 index_max = [2,9,2]; % 格子点インデックス{l,m,n}の最大値
-
 index = zeros(length(k),3);  % 格子点インデックス{l,m,n}(>=1)
+index_next = zeros(length(k),3);  % 格子点インデックス{l+1,m+1,n+1}
+index_real = zeros(length(k),3);  % 格子点のインデックス{l,m,n}の実際の値
 
-index_next = zeros(length(k),3);
-
-index_real = zeros(length(k),3);  % 格子点のインデックス{l,m,n}の整数値
-
-% rho_tmp = zeros(length(k), index_max(1), index_max(2), index_max(3), 3);
 rho = zeros(length(k),3);
 
 m_case = zeros(length(k)-1, 1);  % 偏微分後関数選択のための場合分け
 
-iteration = 5000;
+iteration = 2500;
 
-grid_ = zeros(index_max(1), index_max(2), index_max(3), 3, iteration);
+% grid_ = zeros(index_max(1), index_max(2), index_max(3), 3, iteration);
+grid_ = zeros(index_max, 3, iteration);
 
 % 原点付近の格子点の固定
 for t = 1 : iteration
@@ -31,9 +27,7 @@ for t = 1 : iteration
     grid_(1,1,2,:,t) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 end
 
-
 grid_ = init_grid(grid_, index_max); % 格子点の初期値決定
-
 
 E1_all_value = zeros(iteration-1,1);
 Ereg_all_value = zeros(iteration-1,1);
@@ -46,7 +40,7 @@ break_switch = 0;
 % 最急降下法による格子点更新
 for t = 1 : iteration
     
-    grid_(:,:,:,:,t+1) = grid_(:,:,:,:,t);
+    grid_(:,:,t+1) = grid_(:,:,t);
 
     for j = 1 : length(k)
 
@@ -342,7 +336,8 @@ hold off;
 % hold off;
 
 
-% % matファイルへの保存
+%%%%% matファイルへの保存 %%%%%
 save z_estimation.mat
+
 
 toc
