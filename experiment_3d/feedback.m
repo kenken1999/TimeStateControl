@@ -1,17 +1,16 @@
 clear;
 close all;
+
 load('z_estimation.mat')
 load('gh_estimation.mat')
 
 
-dt = 0.01; %%時間刻み=離散時間Tsとして使用
-Tfin = 3; %シミュレーション終了時間
-t = [0:dt:Tfin];
+dt = 0.01; % 観測間隔
+T_fin = 3; % シミュレーション終了時間
+t = [0:dt:T_fin];
 
 s_f = zeros(length(t),3);
-% s_f(1,:) = [1.25 2 pi/2]; %(k2, k3)=(3,4)
-% s_f(1,:) = [1.4 1.85 5*pi/12]; %(k2, k3)=(3,4)
-s_f(1,:) = [1.15 2 7*pi/12]; %(k2, k3)=(4,5)
+s_f(1,:) = [1.25 2 pi/2]; % 初期位置
 
 z_f = zeros(length(t),3);
 
@@ -19,17 +18,14 @@ u1_f = ones(1,length(t)) * (-1);
 u2_f = ones(1,length(t)) * (1);
 
 mu1 = ones(1,length(t)) * (-1); % μ1 = v1 = u1cosθ
-mu2 = ones(1,length(t)); % μ2 = v2/v1 = u2_f/(u1_f*cos^3θ)
+mu2 = ones(1,length(t)); % μ2 = v2/v1 = u2/(u1*(cosθ)^3)
 
-gmap = zeros(1,length(t));
-hmap = zeros(1,length(t));
+g_map = zeros(1,length(t));
+h_map = zeros(1,length(t));
 
+% feedback係数
 k2 = 4;
 k3 = 5;
-
-x = s_f(1,1) + 0.1 * cos(s_f(1,3));
-y = s_f(1,2) + 0.1 * sin(s_f(1,3));
-
 
 index_f = zeros(length(t),3);
 index_f_next = zeros(length(t),3);
@@ -46,18 +42,17 @@ rho_f_tmp = zeros(length(t), index_max(1), index_max(2), index_max(3), 3);
 hold on;
 axis equal;
 grid on;
-
 axis([0 2 0.5 2.5])
-
 xlabel("x",'FontSize',14)
 ylabel("y",'FontSize',14)
 
-%%%- if show gif, uncomment bellow---%%%
+%%% if show gif, uncomment bellow %%%
+x = s_f(1,1) + 0.1 * cos(s_f(1,3));
+y = s_f(1,2) + 0.1 * sin(s_f(1,3));
 h = plot(z_f(1,1),z_f(1,3), 'o', 'MarkerSize' ,20, 'MarkerFaceColor', 'b');
 h2 = plot(x,y,'o', 'MarkerSize' ,8, 'MarkerFaceColor', 'r');
 
-
-plot(1+1/4,2,'kx','MarkerSize', 10,'LineWidth',2)
+plot(s_f(1,1), s_f(1,2),'kx','MarkerSize', 10,'LineWidth',2)
 plot(1,1,'rx','MarkerSize', 10,'LineWidth',2)
 
 z1_plot = 0:1:3;
@@ -209,8 +204,8 @@ for i = 1:length(t)-1
         phi_h_now(q) = exp( - sqrt( (s_f(i+1,1) - mean_h(q,1)) ^ 2 + (s_f(i+1,2) - mean_h(q,2)) ^ 2 + (s_f(i+1,3) - mean_h(q,3)) ^ 2 ) / (2 * var_h ^ 2) );
     end
 
-    gmap(i+1) = phi_g_now * w_g;
-    hmap(i+1) = phi_h_now * w_h;
+    g_map(i+1) = phi_g_now * w_g;
+    h_map(i+1) = phi_h_now * w_h;
 
     if i > 1
         mu1(i+1) = -2 * z_f(i+1,1); %入力m1(=v1=u1cosθ), mu1=-λz1で(λ>0の定数)z1を0に収束
@@ -226,8 +221,8 @@ for i = 1:length(t)-1
         % mu2(i+1) = k2 * z_f(i+1,2) - k3 * (z_f(i+1,3)-0.5);
     end
 
-    u1_f(i+1) = mu1(i+1) / hmap(i+1);
-    u2_f(i+1) = mu2(i+1) * u1_f(i+1) / gmap(i+1);
+    u1_f(i+1) = mu1(i+1) / h_map(i+1);
+    u2_f(i+1) = mu2(i+1) * u1_f(i+1) / g_map(i+1);
 
 end
 

@@ -1,11 +1,12 @@
 clear;
 close all;
-load('z_estimation.mat')
-
 tic
 
+load('z_estimation.mat')
+
+
 imax_g = 5;
-imax_h = 10;
+imax_h = 5;
 
 mean_g = zeros(imax_g,3);
 var_g = 0.5;

@@ -23,15 +23,14 @@ s_corr(1,:) = [0 0 0];
 %%%%% 各格子点に関する E_1 の偏微分 De_1 の場合分け %%%%%
 sigma = [1 tan(15*pi/180) 1];  % スケーリング係数
 
-p_sym = sym('p_sym',[2 4 2 3]); % 格子点 p^{l,m,n}, 3次元
-index_sym = sym('index_sym', [3 2]); % 格子点インデックス{l,m,n}, (k,k+1)
+p_sym = sym('p_sym',[2 4 2 3]); % 格子点 p^{l,m,n}, 3次元(s空間)
+index_sym = sym('index_sym', [2 3]); % 格子点インデックス (k,k+1), {l,m,n}
 
 for j = 1 : length(k) - 1
-
-    A = [p_sym(2,1,1,:) - p_sym(1,1,1,:); p_sym(1,2,1,:) - p_sym(1,1,1,:); p_sym(1,1,2,:) - p_sym(1,1,1,:)];
-    A = transpose(reshape(A,[3,3]));
-    x = [s(j,1) - p_sym(1,1,1,1); s(j,2) - p_sym(1,1,1,2); s(j,3) - p_sym(1,1,1,3)];
-    rho_sym = A \ x;
+    A_sym = [p_sym(2,1,1,:) - p_sym(1,1,1,:); p_sym(1,2,1,:) - p_sym(1,1,1,:); p_sym(1,1,2,:) - p_sym(1,1,1,:)];
+    A_sym = transpose(reshape(A_sym,[3,3]));
+    x_sym = [s(j,1) - p_sym(1,1,1,1); s(j,2) - p_sym(1,1,1,2); s(j,3) - p_sym(1,1,1,3)];
+    rho_sym = A_sym \ x_sym;
 
     for case_x = 1 : 3
 
@@ -40,7 +39,7 @@ for j = 1 : length(k) - 1
         x_next = [s(j+1,1) - p_sym(1,case_x,1,1); s(j+1,2) - p_sym(1,case_x,1,2); s(j+1,3) - p_sym(1,case_x,1,3)];
         rho_sym_next = A_next \ x_next;
 
-        e1 = ( sigma(2)*(index_sym(2,1)+rho_sym(2)) - sigma(3)*((index_sym(3,2)+rho_sym_next(3))-(index_sym(3,1)+rho_sym(3))) / (sigma(1)*((index_sym(1,2)+rho_sym_next(1))-(index_sym(1,1)+rho_sym(1)))) ) ^ 2;
+        e1 = ( sigma(2)*(index_sym(1,2)+rho_sym(2)) - sigma(3)*((index_sym(2,3)+rho_sym_next(3))-(index_sym(1,3)+rho_sym(3))) / (sigma(1)*((index_sym(2,1)+rho_sym_next(1))-(index_sym(1,1)+rho_sym(1)))) ) ^ 2;
 
         if case_x == 1
             for x = 1 : 3
@@ -69,7 +68,6 @@ for j = 1 : length(k) - 1
         end
 
     end
-
 end
 
 
@@ -88,7 +86,7 @@ end
 
 
 %%%%% matファイルへの保存 %%%%%
-% save premade_diff.mat
+save premade_diff.mat
 
 
 toc
