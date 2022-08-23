@@ -5,7 +5,7 @@ tic
 load('premade_diff.mat')
 
 
-index_max = [2,9,2]; % 格子点インデックス{l,m,n}の最大値
+index_max = [2,11,2]; % 格子点インデックス{l,m,n}の最大値
 index = zeros(length(k),3);  % 格子点インデックス{l,m,n}(>=1)
 index_next = zeros(length(k),3);  % 格子点インデックス{l+1,m+1,n+1}
 index_real = zeros(length(k),3);  % 格子点のインデックス{l,m,n}の実際の値
@@ -14,7 +14,7 @@ rho = zeros(length(k),3);
 
 m_case = zeros(length(k)-1, 1);  % 偏微分後関数選択のための場合分け
 
-iteration = 2000;
+iteration = 5000;
 
 grid_ = zeros(index_max(1), index_max(2), index_max(3), 3, iteration);
 
@@ -46,7 +46,7 @@ for t = 1 : iteration
         if j > 1
             if index(j,2) == index(j-1,2)
                 m_case(j-1) = 1;
-            elseif (index(j,2) == index_next(j-1,2)) && (index(j,2) ~= index(j-1,2))
+            elseif (index(j,2) == index_next(j-1,2))
                 m_case(j-1) = 2;
             else
                 m_case(j-1) = 3;
@@ -249,10 +249,10 @@ hold off;
 % xlabel("t")
 % ylabel('Ereg')
 % hold off;
+
 % figure;
 % hold on;
 % grid on;
-
 % axis([0 iteration -1.0*10^(-5) 1.0*10^(-3)]) 
 % plot(0:1:iteration-2, e_reg_value, '-k','MarkerEdgeColor','red','LineWidth', 1.5)
 % xlabel("t")
