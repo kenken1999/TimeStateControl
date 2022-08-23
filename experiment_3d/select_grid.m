@@ -10,6 +10,10 @@ function [index, index_next, index_real, rho] = select_grid(grid_, s, t, j, inde
                 if break_switch == 1 
                     break;
                 end
+                
+                if l==index_max(1) || m==index_max(2) || n==index_max(3)
+                    continue;
+                end
     
                 if l < index_max(1)
                     l_next = l + 1;
@@ -52,9 +56,9 @@ function [index, index_next, index_real, rho] = select_grid(grid_, s, t, j, inde
 
                 rho_tmp = B \ x;
 
-                if (0 <= rho_tmp(1)) && (rho_tmp(1) <= 1)
-                    if (0 <= rho_tmp(2)) && (rho_tmp(2) <= 1)
-                        if (0 <= rho_tmp(3)) && (rho_tmp(3) <= 1)
+                if (0 <= rho_tmp(1)) && (rho_tmp(1) < 1)
+                    if (0 <= rho_tmp(2)) && (rho_tmp(2) < 1)
+                        if (0 <= rho_tmp(3)) && (rho_tmp(3) < 1)
 
                             rho(j,:) = rho_tmp;
     
@@ -76,16 +80,10 @@ function [index, index_next, index_real, rho] = select_grid(grid_, s, t, j, inde
 
     % 欠損時の補間
     if (break_switch == 0 && j > 1)
-
         index(j,:) = index(j-1,:);
         index_next(j,:) = index_next(j-1,:);     
-        index_real(j,:) = index_real(j-1,:);
-       
-        [l,m,n] = index(j,:);
-
-        rho(j,:) = rho_tmp;
-        
+        index_real(j,:) = index_real(j-1,:);    
+        rho(j,:) = rho(j-1,:);   
         disp(j)
         disp("補間しました")
-
     end
