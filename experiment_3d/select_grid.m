@@ -1,92 +1,89 @@
-function [index, index_next, index_real, rho, break_switch] = select_grid(grid_, s, t, j, index_max, index, index_next, index_real, rho, break_switch)
+function [index, index_next, index_real, rho] = select_grid(grid_, s, t, j, index_max, index, index_next, index_real, rho)
 
+    break_switch = 0;
     rho_tmp = zeros(3,1);
 
-    for a = 1 : index_max(1) - 1
-        for b = 1 : index_max(2) - 1
-            for c = 1 : index_max(3) - 1
+    for l = 1 : index_max(1) - 1
+        for m = 1 : index_max(2) - 1
+            for n = 1 : index_max(3) - 1
 
                 if break_switch == 1 
                     break;
                 end
+                
+                if l==index_max(1) || m==index_max(2) || n==index_max(3)
+                    continue;
+                end
     
-                if a < index_max(1)
-                    a2 = a + 1;
-                    index_real(j,1) = a - 1;
-                elseif a == index_max(1) + 1
-                    a2 = 1;
+                if l < index_max(1)
+                    l_next = l + 1;
+                    index_real(j,1) = l - 1;
+                elseif l == index_max(1) + 1
+                    l_next = 1;
                     index_real(j,1) = -1;
                 else
-                    a2 = a - 1;
-                    index_real(j,1) = - a + index_max(1); 
+                    l_next = l - 1;
+                    index_real(j,1) = - l + index_max(1); 
                 end
     
-                if b < index_max(2)
-                    b2 = b + 1;
-                    index_real(j,2) = b - 1;
-                elseif b == index_max(2) + 1
-                    b2 = 1;
+                if m < index_max(2)
+                    m_next = m + 1;
+                    index_real(j,2) = m - 1;
+                elseif m == index_max(2) + 1
+                    m_next = 1;
                     index_real(j,2) = -1;
                 else
-                    b2 = b - 1;
-                    index_real(j,2) = - b + index_max(2);
+                    m_next = m - 1;
+                    index_real(j,2) = - m + index_max(2);
                 end
     
-                if c < index_max(3)
-                    c2 = c + 1;
-                    index_real(j,3) = c - 1;
-                elseif c == index_max(3) + 1
-                    c2 = 1;
+                if n < index_max(3)
+                    n_next = n + 1;
+                    index_real(j,3) = n - 1;
+                elseif n == index_max(3) + 1
+                    n_next = 1;
                     index_real(j,3) = -1;
                 else
-                    c2 = c - 1;
-                    index_real(j,3) = - c + index_max(3);
+                    n_next = n - 1;
+                    index_real(j,3) = - n + index_max(3);
                 end
     
-                A = [grid_(a2,b,c,:,t) - grid_(a,b,c,:,t); grid_(a,b2,c,:,t) - grid_(a,b,c,:,t); grid_(a,b,c2,:,t) - grid_(a,b,c,:,t)];
+                A = [grid_(l_next,m,n,:,t) - grid_(l,m,n,:,t); grid_(l,m_next,n,:,t) - grid_(l,m,n,:,t); grid_(l,m,n_next,:,t) - grid_(l,m,n,:,t)];
 
                 B = transpose(reshape(A,[3,3]));
 
-                x = [s(j,1) - grid_(a,b,c,1,t); s(j,2) - grid_(a,b,c,2,t); s(j,3) - grid_(a,b,c,3,t)];
+                x = [s(j,1) - grid_(l,m,n,1,t); s(j,2) - grid_(l,m,n,2,t); s(j,3) - grid_(l,m,n,3,t)];
 
                 rho_tmp = B \ x;
 
-                if (0 <= rho_tmp(1)) && (rho_tmp(1) <= 1)
-                    if (0 <= rho_tmp(2)) && (rho_tmp(2) <= 1)
-                        if (0 <= rho_tmp(3)) && (rho_tmp(3) <= 1)
+                if (0 <= rho_tmp(1)) && (rho_tmp(1) < 1)
+                    if (0 <= rho_tmp(2)) && (rho_tmp(2) < 1)
+                        if (0 <= rho_tmp(3)) && (rho_tmp(3) < 1)
 
                             rho(j,:) = rho_tmp;
     
-                            index(j,1) = a;
-                            index(j,2) = b;
-                            index(j,3) = c;
+                            index(j,1) = l;
+                            index(j,2) = m;
+                            index(j,3) = n;
 
-                            index_next(j,1) = a2;
-                            index_next(j,2) = b2;
-                            index_next(j,3) = c2;
+                            index_next(j,1) = l_next;
+                            index_next(j,2) = m_next;
+                            index_next(j,3) = n_next;
 
                             break_switch = 1;
-    
                         end
                     end
                 end
-
             end
         end
     end
 
     % 欠損時の補間
     if (break_switch == 0 && j > 1)
-
         index(j,:) = index(j-1,:);
         index_next(j,:) = index_next(j-1,:);     
-        index_real(j,:) = index_real(j-1,:);
-       
-        [a,b,c] = index(j,:);
-
-        rho(j,:) = rho_tmp;
-        
+        index_real(j,:) = index_real(j-1,:);    
+        rho(j,:) = rho(j-1,:);   
         disp(j)
         disp("補間しました")
-
     end

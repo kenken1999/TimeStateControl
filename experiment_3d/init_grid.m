@@ -1,29 +1,28 @@
 function grid_ = init_grid(grid_, index_max)
     
-    for a = 1 : index_max(1)
-        for b = 1 : index_max(2)
-            for c = 1 : index_max(3)
+    for l = 1 : index_max(1)
+        for m = 1 : index_max(2)
+            for n = 1 : index_max(3)
     
-                if a <= index_max(1)
-                    l_coef = a - 1;
+                if l <= index_max(1)
+                    l_coef = l - 1;
                 else
-                    l_coef = index_max(1) - a;
+                    l_coef = index_max(1) - l;
                 end
     
-                if b <= index_max(2)
-                    m_coef = b - 1;
+                if m <= index_max(2)
+                    m_coef = m - 1;
                 else
-                    m_coef = index_max(2) - b;
+                    m_coef = index_max(2) - m;
                 end
     
-                if c <= index_max(3)
-                    n_coef = c - 1;
+                if n <= index_max(3)
+                    n_coef = n - 1;
                 else
-                    n_coef = index_max(3) - c;
+                    n_coef = index_max(3) - n;
                 end
     
-                grid_(a,b,c,:,1) = grid_(1,1,1,:,1) + l_coef*(grid_(2,1,1,:,1)-grid_(1,1,1,:,1)) + m_coef*(grid_(1,2,1,:,1) - grid_(1,1,1,:,1)) + n_coef*(grid_(1,1,2,:,1) - grid_(1,1,1,:,1));
-        
+                grid_(l,m,n,:,1) = grid_(1,1,1,:,1) + l_coef*(grid_(2,1,1,:,1)-grid_(1,1,1,:,1)) + m_coef*(grid_(1,2,1,:,1) - grid_(1,1,1,:,1)) + n_coef*(grid_(1,1,2,:,1) - grid_(1,1,1,:,1));       
             end
         end
     end
