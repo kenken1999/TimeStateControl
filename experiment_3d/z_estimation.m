@@ -5,7 +5,7 @@ tic
 load('premade_diff.mat')
 
 
-index_max = [2,11,2]; % 格子点インデックス{l,m,n}の最大値
+index_max = [2,11,2];  % 格子点インデックス{l,m,n}の最大値
 index = zeros(length(k),3);  % 格子点インデックス{l,m,n}(>=1)
 index_next = zeros(length(k),3);  % 格子点インデックス{l+1,m+1,n+1}
 index_real = zeros(length(k),3);  % 格子点のインデックス{l,m,n}の実際の値
@@ -26,7 +26,7 @@ for t = 1 : iteration
     grid_(1,1,2,:,t) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
 end
 
-grid_ = init_grid(grid_, index_max); % 格子点の初期値決定
+grid_ = init_grid(grid_, index_max);  % 格子点の初期値決定
 
 E1_all_value = zeros(iteration-1,1);
 Ereg_all_value = zeros(iteration-1,1);
@@ -133,7 +133,7 @@ end
 plot(s(1:length(k)-1,3), g_def(:), '--m', s(1:length(k)-1,3), g_t(:),'o','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel("s_3 = \theta [rad]",'fontsize',18)
 ylabel('g_t', 'fontsize',18)
-legend("真値：1/cos^3(\theta')",'推定値：g_t')
+legend("真値: 1/cos^3(\theta')",'推定値: g_t')
 hold off;
 
 % figure;
@@ -166,8 +166,8 @@ hold off;
 % end
 
 % % plot3のための順番変更
-% for i = 1:2
-%     for l = 1:2
+% for i = 1:index_max(3)
+%     for l = 1:index_max(1)
 %         for m = 1:index_max(2)
 %             for d = 1:3
 %                 tmp(i,l,m,d) = grid_(l,m,i,d,1);
@@ -176,13 +176,13 @@ hold off;
 %     end
 % end
 
-% for l = 1:2
+% for l = 1:index_max(1)
 %     for m = 1:index_max(2)
 %         plot3(tmp(:,l,m,1),tmp(:,l,m,2),tmp(:,l,m,3),'k:');
 %     end
 % end
 
-% plot3(s(:,1),s(:,2),s(:,3),'-bo','MarkerEdgeColor','blue','MarkerFaceColor','blue','MarkerSize', 4);
+% plot3(s(:,1), s(:,2), s(:,3), '-bo', 'MarkerEdgeColor', 'blue', 'MarkerFaceColor', 'blue', 'MarkerSize', 4);
 % xlabel("x [m]",'fontsize',16)
 % ylabel("y [m]",'fontsize',16)
 % zlabel("θ [rad]",'fontsize',16)
@@ -208,8 +208,8 @@ for l = 1:index_max(1)
 end
 
 % plot3のための順番変更
-for i = 1:2
-    for l = 1:2
+for i = 1:index_max(3)
+    for l = 1:index_max(1)
         for m = 1:index_max(2)
             for d = 1:3
                 tmp2(i,l,m,d) = grid_(l,m,i,d,iteration);
@@ -218,13 +218,13 @@ for i = 1:2
     end
 end
 
-for l = 1:2
+for l = 1:index_max(1)
     for m = 1:index_max(2)
-        plot3(tmp2(:,l,m,1),tmp2(:,l,m,2),tmp2(:,l,m,3),'k:');
+        plot3(tmp2(:,l,m,1), tmp2(:,l,m,2), tmp2(:,l,m,3), 'k:');
     end
 end
 
-plot3(s(:,1),s(:,2),s(:,3),'-bo','MarkerEdgeColor','blue','MarkerFaceColor','blue','MarkerSize', 4);
+plot3(s(:,1), s(:,2), s(:,3), '-bo', 'MarkerEdgeColor', 'blue', 'MarkerFaceColor', 'blue', 'MarkerSize', 4);
 xlabel("x [m]",'fontsize',16)
 ylabel("y [m]",'fontsize',16)
 zlabel("θ [rad]",'fontsize',16)

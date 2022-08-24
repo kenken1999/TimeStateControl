@@ -8,23 +8,23 @@ dk = 0.1;   % サンプル刻み
 K_fin = 1.8;  % サンプリング終了時間
 k = [0:dk:K_fin];
 
-u1 = ones(length(k),1) * 0.5; % 並進速度
-u2 = ones(length(k),1) * (0.6); % 回転角速度
+u1 = ones(length(k),1) * 0.5;  % 並進速度
+u2 = ones(length(k),1) * (0.6);  % 回転角速度
 
-s = zeros(length(k),3); % センサ変数 s = (s1,s2,s3) = (x,x,θ)
-s(1,:) = [1 1 pi/4];    % 初期観測
+s = zeros(length(k),3);  % センサ変数 s = (s1,s2,s3) = (x,x,θ)
+s(1,:) = [1 1 pi/4];     % 初期観測
 
-s_corr = zeros(length(k),3); % 補正後のセンサ変数(z1,z3空間と等しい)、結果比較用
+s_corr = zeros(length(k),3);  % 補正後のセンサ変数(z1,z3空間と等しい)、結果比較用
 s_corr(1,:) = [0 0 0];
 
-[s,s_corr] = sampling(s, s_corr, u1, u2, k, dk); % sampling.m 呼び出し
+[s,s_corr] = sampling(s, s_corr, u1, u2, k, dk);  % sampling.m 呼び出し
 
 
 %%%%% 各格子点に関する E_1 の偏微分 De_1 の場合分け %%%%%
 sigma = [1 tan(15*pi/180) 1];  % スケーリング係数
 
-p_sym = sym('p_sym',[2 4 2 3]); % 格子点 p^{l,m,n}, 3次元(s空間)
-index_sym = sym('index_sym', [2 3]); % 格子点インデックス (k,k+1), {l,m,n}
+p_sym = sym('p_sym',[2 4 2 3]);  % 格子点 p^{l,m,n}, 3次元(s空間)
+index_sym = sym('index_sym', [2 3]);  % 格子点インデックス (k,k+1), {l,m,n}
 
 for j = 1 : length(k) - 1
     A_sym = [p_sym(2,1,1,:) - p_sym(1,1,1,:); p_sym(1,2,1,:) - p_sym(1,1,1,:); p_sym(1,1,2,:) - p_sym(1,1,1,:)];
@@ -72,7 +72,7 @@ end
 
 
 %%%%% 各格子点に関する E_reg の偏微分 De_reg の場合分け %%%%%
-p_sym_reg = sym('p_sym_reg',[1 3 1 3]); % 格子点 p^{l,m,n}, 3次元
+p_sym_reg = sym('p_sym_reg',[1 3 1 3]);  % 格子点 p^{l,m,n}, 3次元
 
 e_reg = ( sqrt((p_sym_reg(1,3,1,1) - p_sym_reg(1,2,1,1)) ^ 2 + (p_sym_reg(1,3,1,2) - p_sym_reg(1,2,1,2)) ^ 2 + (p_sym_reg(1,3,1,3) - p_sym_reg(1,2,1,3)) ^ 2) - sqrt((p_sym_reg(1,2,1,1) - p_sym_reg(1,1,1,1)) ^ 2 + (p_sym_reg(1,2,1,2) - p_sym_reg(1,1,1,2)) ^ 2 + (p_sym_reg(1,2,1,3) - p_sym_reg(1,1,1,3)) ^ 2) ) ^ 2;
 
