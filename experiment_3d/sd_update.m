@@ -103,8 +103,15 @@ function [grid_, E1_all_value, Ereg_all_value, E_all_value, e_reg_value] = sd_up
                 % 格子点の更新
                 grid_(1,m,1,1,t+1) = grid_(1,m,1,1,t) - eta_s1 * (DE_1(m,1) + alpha * DE_reg(m,1));
                 grid_(1,m,1,2,t+1) = grid_(1,m,1,2,t) - eta_s2 * (DE_1(m,2) + alpha * DE_reg(m,2));
+                check_grid_t0 = grid_(1,m,1,3,t);
+                check_DE_1 = DE_1(m,3);
+                check_DE_reg = DE_reg(m,3);
                 grid_(1,m,1,3,t+1) = grid_(1,m,1,3,t) - eta_s3 * (DE_1(m,3) + alpha * DE_reg(m,3));
+                check_grid_t1 = grid_(1,m,1,3,t+1);
 
+                if m == 8
+                    dammy = 0;
+                end
                 if grid_(1,m,1,3,t+1) <= grid_(1,m-1,1,3,t+1)
                     disp(t)
                     disp("格子の入れ替わりが発生しました");

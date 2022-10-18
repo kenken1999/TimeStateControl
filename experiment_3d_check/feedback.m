@@ -6,12 +6,16 @@ load('z_estimation.mat')
 load('gh_estimation.mat')
 
 
+%%%軌道を変更する場合初期位置と描画範囲とフィードバック係数を変更
+
+
 dt = 0.01;  % 観測間隔
-T_fin = 3;  % シミュレーション終了時間
+T_fin = 3.0;  % シミュレーション終了時間
 t = [0:dt:T_fin];
 
 s_f = zeros(length(t),3);
-s_f(1,:) = [1.25 2 pi/2];  % 初期観測（初期位置）
+% s_f(1,:) = [1.25 2 pi/2];  % 初期観測（初期位置）
+s_f(1,:) = [2 1.25 pi/4-pi/4];  % 初期観測（初期位置）
 
 z_f = zeros(length(t),3);
 
@@ -34,14 +38,16 @@ phi_h_now = zeros(1,number_h);
 
 % feedback係数
 k2 = 4;
-k3 = 5;
+% k3 = 5;
+k3 = 7;
 
 
 %%%%% 制御範囲の描画 %%%%%
 hold on;
 axis equal;
 grid on;
-axis([0 2 0.5 2.5])
+% axis([0 2 0.5 2.5])
+axis([0.5 2.5 0 2])
 xlabel("x",'FontSize',14)
 ylabel("y",'FontSize',14)
 
@@ -79,13 +85,16 @@ for i = 1:length(t)-1
     ylabel("y", 'FontSize', 16)
 
     %%% gifを保存する場合、以下を使用 %%%
-    F = getframe(gcf);
-    [X,map] = rgb2ind(F.cdata, 256);  % RGBデータをインデックス付きデータに変更
-    if i == 1
-        imwrite(X,map, 'feedback.gif')  % GIFファイルに書き出し
-    else
-        imwrite(X,map, 'feedback.gif', 'WriteMode', 'append')  % 2回目以降は'append'でアニメーションを作成
-    end
+%     F = getframe(gcf);
+%     [X,map] = rgb2ind(F.cdata, 256);  % RGBデータをインデックス付きデータに変更
+%     if i == 1
+%         imwrite(X,map, 'feedback.gif')  % GIFファイルに書き出し
+%     else
+%         imwrite(X,map, 'feedback.gif', 'WriteMode', 'append')  % 2回目以降は'append'でアニメーションを作成
+%     end
+
+    %%% 動画を保存する場合、以下を使用 %%%
+    frame(i) = getframe(gcf);
 
     %%% 車両の軌跡を表示する場合、以下を使用 %%%
     % hold on;
@@ -144,5 +153,10 @@ end
 % xlabel("time [s]",'fontsize',16)
 % ylabel("θ [rad]",'fontsize',16)
 
+%%% 動画を保存 %%%
+v = VideoWriter('test.mp4','MPEG-4');
+open(v);
+writeVideo(v, frame);
+close(v);
 
 toc
