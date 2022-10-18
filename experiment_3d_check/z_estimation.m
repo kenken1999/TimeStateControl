@@ -13,17 +13,51 @@ index_real = zeros(length(k),3);  % 格子点のインデックス{l,m,n}の実�
 rho = zeros(length(k),3);
 
 m_case = zeros(length(k)-1, 1);  % 偏微分後関数選択のための場合分け
+max_flag = ones(length(k), 3);
 
 iteration = 5000;
 
-grid_ = zeros(index_max(1), index_max(2), index_max(3), 3, iteration);
+grid_ = zeros(index_max(1)*2, index_max(2)*2, index_max(3)*2, 3, iteration);
 
 % 原点付近の格子点の固定
 for t = 1 : iteration
-    grid_(1,1,1,:,t) = [1 1 pi/4];
-    grid_(2,1,1,:,t) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];De1_case3
-    grid_(1,2,1,:,t) = [1 1 pi/4+atan(sigma(2))];
+    for m = 1:2
+        grid_(1,m,1,:,t) = [1 1 pi/4+atan(sigma(2))*(m-1)];
+        grid_(3,m,1,:,t) = [1 1 pi/4+atan(sigma(2))*(m-1)];
+        grid_(1,m,3,:,t) = [1 1 pi/4+atan(sigma(2))*(m-1)];
+        grid_(3,m,3,:,t) = [1 1 pi/4+atan(sigma(2))*(m-1)];
+    end
+    grid_(2,1,1,:,t) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
+    grid_(2,1,3,:,t) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
+
     grid_(1,1,2,:,t) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+    grid_(3,1,2,:,t) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+    
+    grid_(4,1,1,:,t) = [1-1/sqrt(2) 1-1/sqrt(2) pi/4];
+    grid_(4,1,3,:,t) = [1-1/sqrt(2) 1-1/sqrt(2) pi/4];
+    
+    grid_(3,1,4,:,t) = [1+1/sqrt(2) 1-1/sqrt(2) pi/4];
+    grid_(1,1,4,:,t) = [1+1/sqrt(2) 1-1/sqrt(2) pi/4];
+end
+
+for t = 1 : iteration
+    for m = index_max(2)+1:index_max(2)+2
+        grid_(1,m,1,:,t) = [1 1 pi/4+atan(sigma(2))*(-m + index_max(2)+1)];
+        grid_(3,m,1,:,t) = [1 1 pi/4+atan(sigma(2))*(-m + index_max(2)+1)];
+        grid_(1,m,3,:,t) = [1 1 pi/4+atan(sigma(2))*(-m + index_max(2)+1)];
+        grid_(3,m,3,:,t) = [1 1 pi/4+atan(sigma(2))*(-m + index_max(2)+1)];
+    end
+    grid_(2,index_max(2)+1,1,:,t) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
+    grid_(2,index_max(2)+1,3,:,t) = [1+1/sqrt(2) 1+1/sqrt(2) pi/4];
+
+    grid_(1,index_max(2)+1,2,:,t) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+    grid_(3,index_max(2)+1,2,:,t) = [1-1/sqrt(2) 1+1/sqrt(2) pi/4];
+    
+    grid_(4,index_max(2)+1,1,:,t) = [1-1/sqrt(2) 1-1/sqrt(2) pi/4];
+    grid_(4,index_max(2)+1,3,:,t) = [1-1/sqrt(2) 1-1/sqrt(2) pi/4];
+    
+    grid_(3,index_max(2)+1,4,:,t) = [1+1/sqrt(2) 1-1/sqrt(2) pi/4];
+    grid_(1,index_max(2)+1,4,:,t) = [1+1/sqrt(2) 1-1/sqrt(2) pi/4];
 end
 
 grid_ = init_grid(grid_, index_max);  % 格子点の初期値決定
@@ -33,6 +67,9 @@ Ereg_all_value = zeros(iteration-1,1);
 e_reg_value = zeros(iteration-1,1);
 E_all_value = zeros(iteration-1,1);
 
+check_grid_m = zeros(iteration , index_max(2)*2);
+check_DE_1 = zeros(iteration , index_max(2)*2);
+check_DE_reg = zeros(iteration , index_max(2)*2);
 
 %%%%% 最急降下法による格子点更新 %%%%%
 for t = 1 : iteration
@@ -40,7 +77,7 @@ for t = 1 : iteration
 
     for j = 1 : length(k)
         % 格子点の選択
-        [index, index_next, index_real, rho] = select_grid(grid_, s, t, j, index_max, index, index_next, index_real, rho);
+        [index, index_next, index_real, rho, max_flag] = select_grid(grid_, s, t, j, index_max, index, index_next, index_real, rho, max_flag);
 
         % 誤差関数の偏微分後関数選択のためのパターン分け
         if j > 1
@@ -56,12 +93,25 @@ for t = 1 : iteration
 
     if t < iteration
         % 最急降下法による格子点更新
-        [grid_, E1_all_value, Ereg_all_value, E_all_value, e_reg_value] = sd_update(grid_, t, j, k, index_max, index, index_next, index_real, m_case, E1_all_value, Ereg_all_value, E_all_value, e_reg_value, De1_case1, De1_case2, De1_case3, e1_case1_func, e1_case2_func, e1_case3_func, e_reg_func, De_reg);
+        [grid_, E1_all_value, Ereg_all_value, E_all_value, e_reg_value, check_grid_m, check_DE_1, check_DE_reg] = sd_update(grid_, t, j, k, index_max, index, index_next, index_real, m_case, E1_all_value, Ereg_all_value, E_all_value, e_reg_value, De1_case1, De1_case2, De1_case3, e1_case1_func, e1_case2_func, e1_case3_func, e_reg_func, De_reg, check_grid_m, check_DE_1, check_DE_reg, s, max_flag);
 
         % 格子点の補助
         grid_(2,:,1,3,t+1) = grid_(1,:,1,3,t+1);
+        grid_(2,:,3,3,t+1) = grid_(1,:,1,3,t+1);
+        
         grid_(1,:,2,3,t+1) = grid_(1,:,1,3,t+1);
+        grid_(3,:,2,3,t+1) = grid_(1,:,1,3,t+1);
+        
+        grid_(4,:,1,3,t+1) = grid_(1,:,1,3,t+1);
+        grid_(4,:,3,3,t+1) = grid_(1,:,1,3,t+1);
+
+        grid_(3,:,4,3,t+1) = grid_(1,:,1,3,t+1);
+        grid_(1,:,4,3,t+1) = grid_(1,:,1,3,t+1);
+
         grid_(2,:,2,3,t+1) = grid_(1,:,1,3,t+1);
+        grid_(2,:,4,3,t+1) = grid_(1,:,1,3,t+1);
+        grid_(4,:,2,3,t+1) = grid_(1,:,1,3,t+1);
+        grid_(4,:,4,3,t+1) = grid_(1,:,1,3,t+1);
     else
         % z1,z2,z3 の推定結果取得
         z = zeros(length(k),3);
@@ -100,13 +150,14 @@ figure;
 hold on;
 grid on;
 view([0,0])
-axis([pi/4-0.1 5*pi/8 0.95 1.4 0 3.0])
+% axis([pi/4-0.1 5*pi/8 0.95 1.4 0 3.0])
+axis([pi/4-3*pi/8 pi/4+0.1 0.95 1.75 -1.75 1])
 plot3(s(:,3), s(:,1), tan(s_corr(:,3)), '--m', s(:,3), s(:,1), z(:,2),'-bo','MarkerEdgeColor','red','MarkerFaceColor','red','LineWidth', 1.5)
 xlabel("s_3 = \theta [rad]",'fontsize',18)
 ylabel("s_1 = x [m]",'fontsize',18)
 zlabel("z_2",'fontsize',18)
-% legend("真値：tan(\theta')",'推定値')
-% legend(" True values: tan(\theta')",' Estimated values','fontsize',20)
+% legend("理想値：tan(\theta')",'推定値')
+legend(" True values: tan(\theta')",' Estimated values','fontsize',20,'Location','northeast')
 hold off;
 
 % figure;
@@ -125,7 +176,9 @@ hold off;
 figure;
 hold on;
 grid on;
-axis([pi/4-0.1 5*pi/8 -0.1 12])
+% axis([pi/4-0.1 5*pi/8 -0.1 12])
+% axis([-0.3 0.9 -0.1 12])
+axis([pi/4-3*pi/8 pi/4+0.1 -0.1 12])
 g_def = zeros(length(k)-1,1);
 for j = 1 : length(k)-1
     g_def(j) = 1 / (cos(s_corr(j,3)) * cos(s_corr(j,3)) * cos(s_corr(j,3)));
@@ -192,13 +245,13 @@ hold off;
 figure;
 hold on;
 grid on;
-view([0,0])
-axis([0 2 0.5 2.5 pi/6 pi])
-for l = 1:index_max(1)
-    for m = 1:index_max(2)
-        for n = 1:index_max(3)
+view([0,0]) %[0,0]
+axis([-0.5 2.5 -0.5 2.5 -pi 4]) %初期[0 2 0.5 2.5 -pi pi]
+for l = 1:index_max(1)*2
+    for m = 1:index_max(2)*2
+        for n = 1:index_max(3)*2
             if m == 1
-                plot3(grid_(l,1:index_max(2),n,1,iteration), grid_(l,1:index_max(2),n,2,iteration),grid_(l,1:index_max(2),n,3,iteration),'ko:')
+                plot3(grid_(l,1:index_max(2)*2,n,1,iteration), grid_(l,1:index_max(2)*2,n,2,iteration),grid_(l,1:index_max(2)*2,n,3,iteration),'ko:')
             end
             if l == 1
                 plot3(grid_(:,m,n,1,iteration), grid_(:,m,n,2,iteration),grid_(:,m,n,3,iteration),'k:')
@@ -208,9 +261,9 @@ for l = 1:index_max(1)
 end
 
 % plot3のための順番変更
-for i = 1:index_max(3)
-    for l = 1:index_max(1)
-        for m = 1:index_max(2)
+for i = 1:index_max(3)*2
+    for l = 1:index_max(1)*2
+        for m = 1:index_max(2)*2
             for d = 1:3
                 tmp2(i,l,m,d) = grid_(l,m,i,d,iteration);
             end
@@ -218,8 +271,9 @@ for i = 1:index_max(3)
     end
 end
 
-for l = 1:index_max(1)
-    for m = 1:index_max(2)
+for l = 1:index_max(1)*2
+    for m = 1:index_max(2)*2
+%     for m = 1:index_max(2)
         plot3(tmp2(:,l,m,1), tmp2(:,l,m,2), tmp2(:,l,m,3), 'k:');
     end
 end
@@ -267,7 +321,6 @@ hold off;
 % xlabel("t")
 % ylabel('E')
 % hold off;
-
 
 %%%%% matファイルへの保存 %%%%%
 save z_estimation.mat
